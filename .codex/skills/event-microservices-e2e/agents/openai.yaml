@@ -1,0 +1,4 @@
+interface:
+  display_name: "Event Microservices E2E"
+  short_description: "Plan and implement event-platform features"
+  default_prompt: "Use $event-microservices-e2e to plan or implement a feature across the event platform microservices."
