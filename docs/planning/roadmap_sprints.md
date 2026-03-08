@@ -43,3 +43,18 @@ recalibrees apres estimation equipe.
 3. Dessiner les diagrammes macro et les 3 flux critiques:
    publication, inscription, promotion de liste d'attente.
 4. Verrouiller les contrats de securite et de messages avant S1.
+
+## Repartition equipe initiale
+
+- Mourad:
+  - architecture microservices
+  - backend des services P1/P2
+  - contrats API et evenements
+  - securite, observabilite, documentation technique
+- Ibrahim:
+  - shells frontend
+  - portail public, espace participant, back-office organisateur, console admin
+  - integration frontend-backend
+  - diagrammes et coherence UX
+
+Reference detaillee: `docs/planning/team_work_split.md`.

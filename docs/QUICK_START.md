@@ -35,6 +35,7 @@ backlog de domaine.
 - Definir les conventions frontend -> `docs/workflows/Workflow_frontend.md`
 - Decouper une fonctionnalite transverse -> `docs/workflows/Workflow_backend_event_domain.md`
 - Planifier un increment -> `docs/sprints/`
+- Repartir le travail Mourad / Ibrahim -> `docs/planning/team_work_split.md`
 - Prioriser les besoins -> `docs/backlogs/` + `docs/user_stories/`
 
 ## 4. Structure cible recommandee du futur projet

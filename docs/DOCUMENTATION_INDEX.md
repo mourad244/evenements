@@ -36,6 +36,7 @@
 ## Planning et suivi
 
 - [User stories consolidees](./user_stories/user_stories_table.md)
+- [Repartition des taches Mourad / Ibrahim](./planning/team_work_split.md)
 - [Sprint 0 - Fondations architecture](./sprints/sprint_0_architecture_foundation.md)
 - [Sprint 1 - MVP publication & inscription](./sprints/sprint_1_mvp_event_publication_registration.md)
 - [Sprint 2 - Ticketing & notifications](./sprints/sprint_2_ticketing_notifications.md)

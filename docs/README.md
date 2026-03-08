@@ -56,6 +56,8 @@ Le dossier `docs/` sert de source de verite pour:
 5. Changement d'architecture ou de flux -> documenter dans
    `docs/diagrams/README.md` et `docs/workflows/`.
 6. Travail livre -> tracer dans `docs/task_history.md`.
+7. Si la repartition equipe change -> mettre a jour
+   `docs/planning/team_work_split.md`.
 
 Tant qu'il n'y a pas de stack executable ou d'environnement cible, il
 n'est pas necessaire d'alimenter `docs/deployments/` ni
@@ -87,6 +89,17 @@ n'est pas necessaire d'alimenter `docs/deployments/` ni
 - Equipe frontend: tient les conventions UI, pages et ACL a jour.
 - Equipe delivery/ops: maintient les checklists de deploiement et
   d'observabilite.
+
+## Mode equipe a 2
+
+La repartition courante de l'equipe est documentee dans
+`docs/planning/team_work_split.md`.
+
+- Mourad: lead architecture/backend/docs.
+- Ibrahim: lead frontend/UX/integration.
+
+Cette repartition sert a clarifier les owners des taches, pas a creer des
+silos rigides.
 
 ## Etat actuel du depot
 

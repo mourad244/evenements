@@ -1,4 +1,4 @@
-# Perimetre MVP Microservices - Plateforme Evenements
+pui# Perimetre MVP Microservices - Plateforme Evenements
 
 ## Resume
 
@@ -199,6 +199,6 @@ Le cadrage du 2026-03-07 retient:
 
 ## Historique des versions
 
-| Date | Version / Phase | Auteur | Description |
-| --- | --- | --- | --- |
-| 2026-03-07 | Baseline de cadrage | Codex | Structuration documentaire du projet evenements a partir du cahier des charges PDF |
+| Date       | Version / Phase     | Auteur | Description                                                                        |
+| ---------- | ------------------- | ------ | ---------------------------------------------------------------------------------- |
+| 2026-03-07 | Baseline de cadrage | Codex  | Structuration documentaire du projet evenements a partir du cahier des charges PDF |
