@@ -1,0 +1,49 @@
+%% Flux inscription, waitlist et promotion - source Mermaid
+sequenceDiagram
+  actor ParticipantA as Participant A
+  actor ParticipantB as Participant B
+  participant Front as Portail / espace participant
+  participant Gateway as API Gateway
+  participant Registration as Registration
+  participant EventMgmt as Event Management
+  participant Bus as Message Bus
+  participant Ticketing as Ticketing futur
+  participant Notification as Notification futur
+
+  ParticipantA->>Front: Clique "S'inscrire"
+  Front->>Gateway: POST /api/registrations
+  Gateway->>Registration: Route + contexte auth
+  Registration->>EventMgmt: GET /internal/events/{eventId}/registration-policy
+  EventMgmt-->>Registration: Policy evenement + acceptingRegistrations
+  Registration->>Registration: Lock EventRegistrationSnapshot
+  Registration->>Registration: Place disponible -> CONFIRMED
+  Registration-->>Gateway: 201 + status CONFIRMED
+  Gateway-->>Front: Confirmation participant
+  Registration-)Bus: registration.confirmed
+  Bus-)Ticketing: Consume registration.confirmed
+  Bus-)Notification: Consume registration.confirmed
+
+  ParticipantB->>Front: Clique "S'inscrire" sur event complet
+  Front->>Gateway: POST /api/registrations
+  Gateway->>Registration: Route + contexte auth
+  Registration->>EventMgmt: GET /internal/events/{eventId}/registration-policy
+  EventMgmt-->>Registration: Policy evenement + capacity
+  Registration->>Registration: Plus de place -> WAITLISTED
+  Registration-->>Gateway: 201 + status WAITLISTED
+  Gateway-->>Front: Position de waitlist
+  Registration-)Bus: registration.waitlisted
+  Bus-)Notification: Consume registration.waitlisted
+
+  ParticipantA->>Front: Annule son inscription
+  Front->>Gateway: POST /api/registrations/{registrationId}/cancel
+  Gateway->>Registration: Route + contexte auth
+  Registration->>Registration: CANCELLED + promotion atomique
+  Registration-->>Gateway: 200 + promotedRegistrationId
+  Gateway-->>Front: Annulation confirmee
+  Registration-)Bus: registration.promoted
+  Bus-)Ticketing: Consume registration.promoted
+  Bus-)Notification: Consume registration.promoted
+
+  EventMgmt-)Bus: event.cancelled
+  Bus-)Registration: Consume event.cancelled
+  Registration->>Registration: Annule toutes les inscriptions actives sans promotion

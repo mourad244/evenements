@@ -37,6 +37,7 @@ Le dossier `docs/` sert de source de verite pour:
 | Planification            | `docs/planning/`              | Roadmap des sprints et plan de release                                                                             |
 | User stories             | `docs/user_stories/`          | Table consolidee des besoins et criteres d'acceptation                                                             |
 | Execution par sprint     | `docs/sprints/`               | Objectifs, livrables cibles, risques et Done criteria                                                              |
+| Specs de service         | `docs/services/`              | Specs backend detaillees par microservice avant implementation                                                     |
 | Releases                 | `docs/releases/`              | Templates de release futurs, non alimentes pour l'instant                                                          |
 | Exploitation             | `docs/deployments/`           | Support ops futur, non alimente tant qu'il n'y a pas de runtime                                                    |
 | Workflows                | `docs/workflows/`             | Conventions backend/frontend et patterns de delivery                                                               |
@@ -69,6 +70,8 @@ n'est pas necessaire d'alimenter `docs/deployments/` ni
   technique vise.
 - `docs/backlogs/` = la liste durable des travaux a faire, par domaine.
 - `docs/sprints/` = la photo d'un increment temporel planifie ou livre.
+- `docs/services/` = les specs backend detaillees qui traduisent les
+  contrats en design implementable par service.
 - `docs/releases/` = un support optionnel de notes de livraison futures.
 - `docs/deployments/` = un support optionnel pour l'exploitation future.
 - `docs/ideas/README.md` = les idees non encore transformees en backlog.
@@ -110,5 +113,5 @@ de ce dossier servent donc de base de conception et d'execution.
 En consequence, les fichiers de `docs/releases/` et `docs/deployments/`
 ne sont pas a maintenir pour l'instant.
 
-**Derniere mise a jour:** 2026-03-07  
-**Version:** 0.1
+**Derniere mise a jour:** 2026-03-08  
+**Version:** 0.2

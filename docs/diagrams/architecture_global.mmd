@@ -1,0 +1,73 @@
+%% Architecture globale P1-P4 - source Mermaid
+flowchart LR
+  participant[Participant]
+  organizer[Organisateur]
+  admin[Administrateur]
+
+  gateway[API Gateway]
+
+  identity[Identity & Access]
+  profile[User Profile]
+  eventMgmt[Event Management]
+  catalog[Catalog & Search]
+  registration[Registration]
+  ticketing[Ticketing]
+  notification[Notification]
+  adminSvc[Admin & Moderation]
+  media[Media]
+  payment[Payment]
+
+  bus[(Message Bus)]
+  objectStore[(Object Storage)]
+  observability[(Logs / Metrics / Traces)]
+
+  participant --> gateway
+  organizer --> gateway
+  admin --> gateway
+
+  gateway --> identity
+  gateway --> profile
+  gateway --> eventMgmt
+  gateway --> catalog
+  gateway --> registration
+  gateway --> ticketing
+  gateway --> notification
+  gateway --> adminSvc
+  gateway --> media
+  gateway --> payment
+
+  registration --> eventMgmt
+  profile --> registration
+  eventMgmt --> media
+  ticketing --> media
+  payment --> registration
+  payment --> ticketing
+
+  eventMgmt -. event.published .-> bus
+  eventMgmt -. event.cancelled .-> bus
+  registration -. registration.confirmed .-> bus
+  registration -. registration.waitlisted .-> bus
+  registration -. registration.promoted .-> bus
+  ticketing -. ticket.generated .-> bus
+  notification -. notification.email.sent .-> bus
+  payment -. payment.completed .-> bus
+  identity -. audit.action.recorded .-> bus
+  eventMgmt -. audit.action.recorded .-> bus
+  registration -. audit.action.recorded .-> bus
+
+  bus -.-> catalog
+  bus -.-> registration
+  bus -.-> ticketing
+  bus -.-> notification
+  bus -.-> adminSvc
+  bus -.-> profile
+
+  identity -.-> observability
+  eventMgmt -.-> observability
+  catalog -.-> observability
+  registration -.-> observability
+  ticketing -.-> observability
+  notification -.-> observability
+  adminSvc -.-> observability
+  payment -.-> observability
+  gateway -.-> observability

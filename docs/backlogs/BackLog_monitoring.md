@@ -28,7 +28,7 @@ alertes et les mecanismes de reprise sur incident.
 
 | Ticket ID | Status | Priority | Owner | Support | Sprint cible | Dependances | Interfaces impactees | Sortie attendue | Critere d'acceptation | Branche suggeree |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| M01.1 | TODO | P0 | Mourad | Ibrahim | Sprint 0 | none | Contrat `/health`, `/ready` | Standard health/readiness documente | Chaque service MVP connait ses endpoints de sante et ses dependances critiquees | `docs/monitoring-health-contract` |
+| M01.1 | DONE | P0 | Mourad | Ibrahim | Sprint 0 | none | Contrat `/health`, `/ready` | Standard health/readiness documente | Chaque service MVP connait ses endpoints de sante et ses dependances critiquees | `docs/monitoring-health-contract` |
 | M01.2 | TODO | P0 | Mourad | Ibrahim | Sprint 1 | M01.1 | Services P1 | Endpoints de sante implementables | Les services `P1` exposent tous `/health` et `/ready` selon le meme format | `feature/monitoring-health-endpoints` |
 | M01.3 | TODO | P1 | Mourad | Ibrahim | Sprint 3 | M01.2 | Gateway, admin | Vue agregee de sante | La Gateway ou la console admin peut afficher l'etat consolide des services critiques | `feature/monitoring-health-aggregation` |
 
@@ -47,7 +47,7 @@ alertes et les mecanismes de reprise sur incident.
 
 | Ticket ID | Status | Priority | Owner | Support | Sprint cible | Dependances | Interfaces impactees | Sortie attendue | Critere d'acceptation | Branche suggeree |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| M02.1 | TODO | P0 | Mourad | Ibrahim | Sprint 0 | none | Correlation-id, logs JSON | Standard de logs documente | Le format de log, les champs obligatoires et la regle correlation-id sont stabilises | `docs/monitoring-log-standard` |
+| M02.1 | DONE | P0 | Mourad | Ibrahim | Sprint 0 | none | Correlation-id, logs JSON | Standard de logs documente | Le format de log, les champs obligatoires et la regle correlation-id sont stabilises | `docs/monitoring-log-standard` |
 | M02.2 | TODO | P0 | Mourad | Ibrahim | Sprint 1 | M02.1, I03.3 | Gateway + services | Propagation correlation-id implementable | Le correlation-id traverse la Gateway et les services `P1` sans etre perdu | `feature/monitoring-correlation-propagation` |
 | M02.3 | TODO | P0 | Mourad | Ibrahim | Sprint 1 | M02.2 | Flux publication, inscription | Validation logs critiques | Les flux MVP peuvent etre suivis dans les logs avec un identifiant commun | `test/monitoring-log-traceability` |
 

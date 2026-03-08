@@ -7,7 +7,7 @@ du projet evenements.
 
 - Statut global: `IN PROGRESS`
 - Date debut: `2026-03-07`
-- Derniere mise a jour: `2026-03-07`
+- Derniere mise a jour: `2026-03-08`
 - Lead: `Mourad`
 - Reviewer: `Ibrahim`
 
@@ -53,7 +53,7 @@ du projet evenements.
 
 ### D03 - Completer les diagrammes d'architecture et de flux
 
-- Status: `TODO`
+- Status: `DONE`
 - Priority: `P1` · Difficulty: `M` · Impact: `H`
 - Owner: `Ibrahim`
 - Support: `Mourad`
@@ -62,18 +62,20 @@ du projet evenements.
   - macro architecture
   - flux publication
   - flux inscription / waitlist / notification
+- Notes:
+  - sources Mermaid `Sprint 0` creees dans `docs/diagrams/`.
 
 #### Tickets prets a coder
 
 | Ticket ID | Status | Priority | Owner | Support | Sprint cible | Dependances | Interfaces impactees | Sortie attendue | Critere d'acceptation | Branche suggeree |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| D03.1 | TODO | P1 | Ibrahim | Mourad | Sprint 0 | S0-I03 | `docs/diagrams/` | Diagramme macro d'architecture | Les services, flux sync/async et composants transverses sont visibles | `docs/diagram-architecture-global` |
-| D03.2 | TODO | P1 | Ibrahim | Mourad | Sprint 0 | E03.1 | `docs/diagrams/` | Diagramme publication evenement | Le flux organisateur -> Event Management -> Catalog est documente | `docs/diagram-event-publication` |
-| D03.3 | TODO | P1 | Ibrahim | Mourad | Sprint 0 | R03.1, N02.1 | `docs/diagrams/` | Diagramme inscription/waitlist/notification | Le flux participant -> Registration -> Ticketing/Notification est explicite | `docs/diagram-registration-waitlist` |
+| D03.1 | DONE | P1 | Ibrahim | Mourad | Sprint 0 | S0-I03 | `docs/diagrams/` | Diagramme macro d'architecture | Les services, flux sync/async et composants transverses sont visibles | `docs/diagram-architecture-global` |
+| D03.2 | DONE | P1 | Ibrahim | Mourad | Sprint 0 | E03.1 | `docs/diagrams/` | Diagramme publication evenement | Le flux organisateur -> Event Management -> Catalog est documente | `docs/diagram-event-publication` |
+| D03.3 | DONE | P1 | Ibrahim | Mourad | Sprint 0 | R03.1, N02.1 | `docs/diagrams/` | Diagramme inscription/waitlist/notification | Le flux participant -> Registration -> Ticketing/Notification est explicite | `docs/diagram-registration-waitlist` |
 
 ### D04 - Produire un dictionnaire de donnees et des contrats API
 
-- Status: `TODO`
+- Status: `DONE`
 - Priority: `P1` · Difficulty: `M` · Impact: `H`
 - Owner: `Mourad`
 - Support: `Ibrahim`
@@ -86,13 +88,13 @@ du projet evenements.
 
 | Ticket ID | Status | Priority | Owner | Support | Sprint cible | Dependances | Interfaces impactees | Sortie attendue | Critere d'acceptation | Branche suggeree |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| D04.1 | TODO | P1 | Mourad | Ibrahim | Sprint 0 | I01.1, E01.1, R01.1 | Dictionnaire de donnees | Dictionnaire P1 documente | Les entites clefs auth, event et registration ont leur schema logique minimal | `docs/data-dictionary-p1` |
-| D04.2 | TODO | P1 | Mourad | Ibrahim | Sprint 0 | I02.1, E02.1, R01.1 | REST P1 | Catalogue REST MVP documente | Les endpoints `P1` ont methode, route, payload et erreurs principales | `docs/api-contracts-p1` |
-| D04.3 | TODO | P1 | Mourad | Ibrahim | Sprint 0 | E03.1, R03.1, N02.1 | Events async P1 | Catalogue d'evenements documente | Les producteurs, consommateurs et payloads minimaux des events critiques sont listes | `docs/async-events-p1` |
+| D04.1 | DONE | P1 | Mourad | Ibrahim | Sprint 0 | I01.1, E01.1, R01.1 | Dictionnaire de donnees | Dictionnaire P1 documente | Les entites clefs auth, event et registration ont leur schema logique minimal | `docs/data-dictionary-p1` |
+| D04.2 | DONE | P1 | Mourad | Ibrahim | Sprint 0 | I02.1, E02.1, R01.1 | REST P1 | Catalogue REST MVP documente | Les endpoints `P1` ont methode, route, payload et erreurs principales | `docs/api-contracts-p1` |
+| D04.3 | DONE | P1 | Mourad | Ibrahim | Sprint 0 | E03.1, R03.1, N02.1 | Events async P1 | Catalogue d'evenements documente | Les producteurs, consommateurs et payloads minimaux des events critiques sont listes | `docs/async-events-p1` |
 
 ### D05 - Rediger le plan de tests et les criteres de recette detailles
 
-- Status: `TODO`
+- Status: `DONE`
 - Priority: `P1` · Difficulty: `M` · Impact: `H`
 - Owner: `Mourad`
 - Support: `Ibrahim`
@@ -100,14 +102,17 @@ du projet evenements.
 - Livrables:
   - scenarios de recette P1/P2/P3/P4
   - smoke checks et non-regressions
+- Notes:
+  - matrice d'acceptation et plan ACL ajoutes pour fermer le lot
+    documentaire de tests.
 
 #### Tickets prets a coder
 
 | Ticket ID | Status | Priority | Owner | Support | Sprint cible | Dependances | Interfaces impactees | Sortie attendue | Critere d'acceptation | Branche suggeree |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| D05.1 | TODO | P1 | Mourad | Ibrahim | Sprint 0 | docs/user_stories/user_stories_table.md | Recette produit | Matrice de recette par phase documentee | Chaque phase `P1` a `P4` a des criteres de recette relies aux user stories | `docs/test-plan-acceptance-matrix` |
-| D05.2 | TODO | P1 | Mourad | Ibrahim | Sprint 0 | D04.2 | Smoke backend | Checklist smoke MVP documentee | Les endpoints critiques auth, event, catalog et registration ont un scenario smoke clair | `docs/test-plan-smoke-mvp` |
-| D05.3 | TODO | P1 | Mourad | Ibrahim | Sprint 1 | F04.1, A03.1 | ACL et non-regression | Scenarios de non-regression roles documentes | Les cas `401`, `403` et succes par role sont listes pour les parcours critiques | `docs/test-plan-role-regression` |
+| D05.1 | DONE | P1 | Mourad | Ibrahim | Sprint 0 | docs/user_stories/user_stories_table.md | Recette produit | Matrice de recette par phase documentee | Chaque phase `P1` a `P4` a des criteres de recette relies aux user stories | `docs/test-plan-acceptance-matrix` |
+| D05.2 | DONE | P1 | Mourad | Ibrahim | Sprint 0 | D04.2 | Smoke backend | Checklist smoke MVP documentee | Les endpoints critiques auth, event, catalog et registration ont un scenario smoke clair | `docs/test-plan-smoke-mvp` |
+| D05.3 | DONE | P1 | Mourad | Ibrahim | Sprint 1 | F04.1, A03.1 | ACL et non-regression | Scenarios de non-regression roles documentes | Les cas `401`, `403` et succes par role sont listes pour les parcours critiques | `docs/test-plan-role-regression` |
 
 ### D06 - Maintenir releases et task history au fil du delivery
 

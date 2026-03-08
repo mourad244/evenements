@@ -13,14 +13,28 @@ le cadrage fonctionnel et technique.
 - Vue des interfaces frontend:
   portail public, espace participant, back-office organisateur, console admin.
 
-## Nommage recommande
+## Sources disponibles
 
-- `architecture_global.drawio`
-- `flow_event_publication.png`
-- `flow_registration_waitlist.svg`
-- `flow_ticketing_notifications.png`
-- `modules_frontend_event_platform.drawio`
-- `security_gateway_roles.svg`
+- [architecture_global.mmd](./architecture_global.mmd)
+- [flow_event_publication.mmd](./flow_event_publication.mmd)
+- [flow_registration_waitlist.mmd](./flow_registration_waitlist.mmd)
+
+Ces sources Mermaid couvrent le minimum demande pour la sortie de
+`Sprint 0`. Des exports PNG/SVG pourront etre generes plus tard si
+necessaire pour des supports externes.
+
+## Convention de format
+
+- format source prefere ici: `.mmd` Mermaid
+- un export image peut etre ajoute ensuite sans supprimer la source
+- fleche pleine = flux synchrone
+- fleche en pointille = flux asynchrone / event bus
+
+## Nommage recommande pour les prochains diagrammes
+
+- `flow_ticketing_notifications.mmd`
+- `modules_frontend_event_platform.mmd`
+- `security_gateway_roles.mmd`
 
 ## Sources a aligner
 

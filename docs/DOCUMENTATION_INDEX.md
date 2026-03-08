@@ -1,7 +1,7 @@
 # Index de Documentation - Projet Evenements
 
 > Public cible: produit, architecte, dev backend, dev frontend, ops  
-> Derniere mise a jour: 2026-03-07
+> Derniere mise a jour: 2026-03-08
 
 ## Demarrage rapide
 
@@ -15,6 +15,19 @@
 - [README documentation](./README.md)
 - [Release plan](./planning/release_plan.md)
 - [Diagrammes attendus](./diagrams/README.md)
+- [Diagramme architecture globale](./diagrams/architecture_global.mmd)
+- [Diagramme publication evenement](./diagrams/flow_event_publication.mmd)
+- [Diagramme inscription waitlist](./diagrams/flow_registration_waitlist.mmd)
+- [Dictionnaire de donnees P1](./data-dictionary-p1.md)
+- [Catalogue REST P1](./api-contracts-p1.md)
+- [Catalogue d'evenements async P1](./async-events-p1.md)
+- [Plan de smoke tests MVP](./test-plan-smoke-mvp.md)
+- [Plan de recette par phase](./test-plan-acceptance-matrix.md)
+- [Plan de non-regression ACL](./test-plan-role-regression.md)
+- [Spec identity-access-service](./services/identity-access-service-spec.md)
+- [Spec event-management-service](./services/event-management-service-spec.md)
+- [Spec catalog-search-service](./services/catalog-search-service-spec.md)
+- [Spec registration-service](./services/registration-service-spec.md)
 - [Workflow backend](./workflows/Workflow_backend.md)
 - [Workflow frontend](./workflows/Workflow_frontend.md)
 - [Workflow backend domaine evenement](./workflows/Workflow_backend_event_domain.md)

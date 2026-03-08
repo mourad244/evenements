@@ -4,7 +4,8 @@ Sprint de preparation du projet microservices evenements.
 
 **Statut:** `READY TO START`  
 **Periode indicative:** 2026-03-09 -> 2026-03-20  
-**Equipe:** `Mourad` + `Ibrahim`
+**Equipe:** `Mourad` + `Ibrahim`  
+**Pilotage du sprint:** `Mourad` + `Ibrahim`
 
 ## But du sprint
 
@@ -38,17 +39,51 @@ developpement du MVP `P1` sans ambiguite sur:
 - payment, moderation avancee, analytics
 - releases/deploiements
 
+## Resultat attendu
+
+En fin de sprint, l'equipe doit avoir produit un cadre suffisamment
+stable pour que `Sprint 1` demarre sans re-decider:
+
+- quel service possede chaque regle metier `P1`;
+- quels endpoints et evenements creer en premier;
+- quels statuts et erreurs l'UI peut integrer sans refonte;
+- quels headers et controles la Gateway impose aux services.
+
+## Decisions structurantes a figer
+
+| Domaine | Source de verite / owner | Decision a verrouiller dans `Sprint 0` | Dependances `Sprint 1` |
+| --- | --- | --- | --- |
+| API Gateway | `api-gateway` | routes publiques/privees, validation JWT, propagation `x-user-id`, `x-user-role`, `x-correlation-id` | `S1-M01`, `S1-M06` |
+| Auth et session | `identity-access-service` | modeles `User/Role/Session`, flux `register/login/refresh/reset`, erreurs homogenes | `S1-M01` |
+| Cycle de vie evenement | `event-management-service` | statuts `DRAFT/PUBLISHED/FULL/CLOSED/ARCHIVED/CANCELLED`, ownership organisateur, publication immediate | `S1-M02`, `S1-M03` |
+| Catalogue public | `catalog-search-service` | read model derive, endpoints liste/detail publics, filtres MVP, consommation de `event.published` et `event.cancelled` | portail public `S1` |
+| Inscriptions et capacite | `registration-service` | statuts `CONFIRMED/WAITLISTED/CANCELLED/REJECTED`, unicite participant/evenement, annulation et promotion atomique | `S1-M04`, `S1-M05` |
+
+Notes de decoupage a verrouiller:
+
+- `Catalog` reste un read model derive; il ne porte ni edition
+  evenement ni decision de capacite.
+- `Registration` porte le statut d'inscription et l'occupation des
+  places; `Event Management` conserve la capacite declaree et le statut
+  de l'evenement.
+- `Ticketing`, `Notification` et `Admin` restent hors implementation
+  `Sprint 0`, mais leurs hooks async doivent deja etre reserves dans les
+  contrats.
+
 ## Livrables attendus
 
 1. Nomenclature definitive des services `P1`.
-2. Specs backend detaillees pour les 4 services coeur MVP.
+2. Specs backend detaillees pour les 4 services coeur MVP et le contrat
+   Gateway.
 3. Diagrammes:
    - architecture globale
    - publication evenement
    - inscription + waitlist
 4. Structure frontend cible et parcours principaux.
 5. Matrice des statuts metier et des permissions minimales.
-6. Liste de taches pretes a coder pour `Sprint 1`.
+6. Catalogue REST `P1`, catalogue d'evenements async et plan de smoke
+   tests.
+7. Liste de taches pretes a coder pour `Sprint 1`.
 
 ## Repartition equipe
 
@@ -75,6 +110,47 @@ developpement du MVP `P1` sans ambiguite sur:
 - arbitrage sync vs async
 - definition des branches et de la methode Git
 
+## Contrats minimums a verrouiller avant sortie
+
+### REST synchrones
+
+- `Identity & Access`: `register`, `login`, `refresh`,
+  `forgot-password`, `reset-password`.
+- `API Gateway`: mapping des routes publiques/privees, reponses
+  `401/403`, propagation du contexte utilisateur et du
+  `correlation-id`.
+- `Event Management`: create/update/list drafts, publish now, regles
+  `own-event`.
+- `Catalog & Search`: liste publique, detail public, filtres MVP
+  `theme/date/lieu`.
+- `Registration`: create registration, cancel registration, historique
+  participant, erreurs `409/422` sur doublons et regles metier.
+
+Convention attendue pour les reponses:
+
+- succes: `{ success: true, data, meta? }`
+- erreur: `{ success: false, error, code?, details? }`
+
+### Evenements async minimums
+
+| Event | Producteur | Consommateurs cibles | Usage attendu |
+| --- | --- | --- | --- |
+| `event.published` | `event-management-service` | `catalog-search-service`, futurs `notification/admin` | rendre l'evenement visible en lecture |
+| `event.cancelled` | `event-management-service` | `catalog-search-service`, `registration-service`, futurs `notification/admin` | retirer/mettre a jour les vues derivees |
+| `registration.confirmed` | `registration-service` | futurs `ticketing`, `notification`, `admin` | confirmer une place et ouvrir les traitements derives |
+| `registration.waitlisted` | `registration-service` | futurs `notification`, `admin` | tracer l'entree en attente |
+| `registration.promoted` | `registration-service` | futurs `ticketing`, `notification`, `admin` | promotion waitlist apres liberation de place |
+| `audit.action.recorded` | service source | futur `admin` | reserver le hook d'audit transverse |
+
+Payload minimal a imposer sur les events critiques:
+
+- identifiants metier (`eventId`, `registrationId`, `userId` si expose);
+- statut cible ou transition;
+- horodatage d'emission;
+- acteur ou contexte systeme;
+- `correlationId`;
+- version de schema ou metadata equivalente.
+
 ## Tickets Sprint 0
 
 ### Lot Mourad
@@ -86,7 +162,7 @@ developpement du MVP `P1` sans ambiguite sur:
 | S0-M03 | Remplir la spec `event-management-service` | Mourad | Ibrahim | `E01`, `E02`, `E03` | Spec backend completee |
 | S0-M04 | Remplir la spec `catalog-search-service` | Mourad | Ibrahim | `E03`, `F01` | Spec backend completee |
 | S0-M05 | Remplir la spec `registration-service` | Mourad | Ibrahim | `R01`, `R02`, `R03` | Spec backend completee |
-| S0-M06 | Definir la matrice auth/JWT/permissions minimale | Mourad | Ibrahim | `I03`, `I04`, `F04` | Contrat auth et permissions MVP |
+| S0-M06 | Definir le contrat Gateway, JWT et permissions minimales | Mourad | Ibrahim | `I03`, `I04`, `F04` | Contrat auth/Gateway et permissions MVP |
 | S0-M07 | Definir les evenements metier `P1` et leurs payloads minimaux | Mourad | Ibrahim | `E03`, `R03`, `D04` | Liste d'evenements async avec producteurs/consommateurs |
 
 ### Lot Ibrahim
@@ -116,7 +192,7 @@ developpement du MVP `P1` sans ambiguite sur:
 2. `S0-I01` - structure frontend
 3. `S0-M02` + `S0-M03`
 4. `S0-I03` - architecture globale
-5. `S0-M06` - auth/JWT/permissions
+5. `S0-M06` - Gateway/JWT/permissions
 
 ### Semaine 2
 
@@ -133,6 +209,9 @@ developpement du MVP `P1` sans ambiguite sur:
 - `docs/spec-event-management-service`
 - `docs/spec-catalog-search-service`
 - `docs/spec-registration-service`
+- `docs/api-contracts-p1`
+- `docs/async-events-p1`
+- `docs/test-plan-smoke-mvp`
 - `docs/frontend-target-structure`
 - `docs/diagram-architecture-global`
 - `docs/diagram-event-publication`
@@ -149,11 +228,31 @@ developpement du MVP `P1` sans ambiguite sur:
   - `docs/services/catalog-search-service-spec.md`
   - `docs/services/registration-service-spec.md`
 
+### Contrats transverses
+
+- `docs/data-dictionary-p1.md`
+- `docs/api-contracts-p1.md`
+- `docs/async-events-p1.md`
+- `docs/test-plan-smoke-mvp.md`
+- `docs/test-plan-role-regression.md`
+
 ### Documentation frontend
 
 - `docs/workflows/Workflow_frontend.md`
 - `docs/diagrams/README.md`
 - diagrammes a ajouter dans `docs/diagrams/`
+
+## Arbitrages ouverts a trancher dans `Sprint 0`
+
+- `User Profile` reste-t-il un service dedie a partir du `Sprint 1`, ou
+  bien un premier endpoint de lecture participant peut-il etre porte par
+  `Registration` pour le vertical slice initial.
+- `Registration` verifie-t-il l'ouverture a l'inscription via appel sync
+  vers `Event Management`, ou via une projection minimale locale.
+- Quel niveau de detail du catalogue public est necessaire en `P1` pour
+  ne pas melanger donnees publiques et donnees internes organisateur.
+- Quel est le niveau minimal de filtres MVP a figer pour le portail
+  public afin de ne pas bloquer `F01.2` et `F01.3`.
 
 ## Definition of Done
 
@@ -162,10 +261,15 @@ Le sprint est termine seulement si:
 - chaque user story `P1` a un service proprietaire explicite;
 - les frontieres entre `Event Management`, `Catalog` et `Registration`
   sont valides;
-- les contrats auth/JWT/permissions sont documentes;
+- les contrats auth/JWT/Gateway/permissions sont documentes;
 - les statuts `Event` et `Registration` sont stabilises;
+- les routes publiques/privees et les headers de contexte sont figes;
+- les codes `400`, `401`, `403`, `404`, `409`, `422` sont alloues aux
+  flux critiques;
 - les evenements async critiques sont listes avec leurs producteurs /
   consommateurs;
+- chaque contrat critique mentionne ACL, idempotence et observabilite
+  minimale;
 - les 3 diagrammes sont disponibles;
 - une liste de taches prêtes à coder existe pour `Sprint 1`.
 

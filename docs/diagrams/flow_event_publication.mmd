@@ -1,0 +1,29 @@
+%% Flux publication evenement - source Mermaid
+sequenceDiagram
+  actor Organizer as Organisateur
+  participant Front as Back-office organisateur
+  participant Gateway as API Gateway
+  participant EventMgmt as Event Management
+  participant Catalog as Catalog & Search
+  participant Bus as Message Bus
+  participant Audit as Admin/Audit futur
+  actor Visitor as Visiteur public
+
+  Organizer->>Front: Saisit un brouillon valide
+  Front->>Gateway: POST /api/events/drafts/{eventId}/publish
+  Gateway->>EventMgmt: Route + contexte auth
+  EventMgmt->>EventMgmt: Verifie ownership + regles metier
+  EventMgmt->>EventMgmt: Transition DRAFT -> PUBLISHED
+  EventMgmt-->>Gateway: 200 + eventId/status/publishedAt
+  Gateway-->>Front: Reponse succes
+
+  EventMgmt-)Bus: event.published
+  Bus-)Catalog: Consume event.published
+  Catalog->>Catalog: Upsert CatalogEventView
+  Catalog-->>Catalog: Projection publique disponible
+  Bus-)Audit: audit.action.recorded (reserve)
+
+  Visitor->>Gateway: GET /api/catalog/events
+  Gateway->>Catalog: Route publique
+  Catalog-->>Gateway: Liste evenement publie
+  Gateway-->>Visitor: Detail ou liste publique
