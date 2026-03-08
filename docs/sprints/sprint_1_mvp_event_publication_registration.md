@@ -76,6 +76,15 @@ Regle de sprint:
 - les diagrammes ci-dessus servent de support de revue pour la
   publication evenement, l'inscription, la waitlist et la promotion.
 
+## Suivi d'execution `Sprint 1`
+
+- Tableau d'avancement auto-maintenu:
+  [`docs/sprints/sprint_1_execution_tracker.md`](./sprint_1_execution_tracker.md)
+- Source de verite machine:
+  `.codex/progress/sprint_1_tracker.json`
+- Statuts utilises:
+  `TODO`, `IN_PROGRESS`, `PARTIAL`, `DONE`, `BLOCKED`.
+
 ## Lot principal Mourad
 
 ### Board d'execution

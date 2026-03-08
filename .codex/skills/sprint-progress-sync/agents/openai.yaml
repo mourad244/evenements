@@ -1,0 +1,5 @@
+interface:
+  display_name: "Sprint Progress Sync"
+  short_description: "Auto-update sprint task statuses from prompts"
+  default_prompt: "Use $sprint-progress-sync to keep Sprint 1 tracker statuses updated while implementing tasks."
+

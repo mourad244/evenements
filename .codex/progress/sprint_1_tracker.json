@@ -1,0 +1,140 @@
+{
+  "meta": {
+    "sprint_id": "S1",
+    "name": "Sprint 1 - MVP publication & inscription",
+    "source": "docs/sprints/sprint_1_mvp_event_publication_registration.md",
+    "last_updated": "2026-03-08T13:26:25.288Z"
+  },
+  "tasks": [
+    {
+      "id": "S1-T01",
+      "title": "Replace in-memory auth/session/reset stores with Postgres-backed repositories.",
+      "status": "DONE",
+      "priority": "P0",
+      "refs": [
+        "S1-M01",
+        "I02.3"
+      ],
+      "aliases": [
+        "postgres auth repository",
+        "replace in-memory auth store",
+        "postgres-backed repositories"
+      ],
+      "updated_at": "2026-03-08T13:30:00Z",
+      "notes": [
+        {
+          "date": "2026-03-08T13:30:00Z",
+          "status": "DONE",
+          "text": "Identity auth/session/reset persistence migrated to Postgres with schema + repository + smoke validation."
+        }
+      ]
+    },
+    {
+      "id": "S1-T02",
+      "title": "Add gateway proxies + ACL matrix for next Sprint 1 routes (/api/events/*, /api/registrations/*).",
+      "status": "TODO",
+      "priority": "P0",
+      "refs": [
+        "S1-M02",
+        "S1-M04",
+        "I04.2"
+      ],
+      "aliases": [
+        "gateway proxies events registrations",
+        "acl matrix events routes",
+        "api/events api/registrations in gateway"
+      ],
+      "updated_at": "2026-03-08T13:30:00Z",
+      "notes": []
+    },
+    {
+      "id": "S1-T03",
+      "title": "Add docker-compose and CI job to run test:s1-m01 automatically.",
+      "status": "TODO",
+      "priority": "P1",
+      "refs": [
+        "S1-M01",
+        "M01.2",
+        "M02.3"
+      ],
+      "aliases": [
+        "docker compose",
+        "ci test s1-m01",
+        "automation smoke s1-m01"
+      ],
+      "updated_at": "2026-03-08T13:30:00Z",
+      "notes": []
+    },
+    {
+      "id": "S1-T04",
+      "title": "S1-M06 hardening on current services: structured logs + guaranteed x-correlation-id tracing on every auth path (Gateway + Identity), plus smoke assertions.",
+      "status": "PARTIAL",
+      "priority": "P1",
+      "refs": [
+        "S1-M06",
+        "M02.2",
+        "M02.3"
+      ],
+      "aliases": [
+        "s1-m06 hardening",
+        "structured logs",
+        "correlation id tracing auth path"
+      ],
+      "updated_at": "2026-03-08T13:30:00Z",
+      "notes": [
+        {
+          "date": "2026-03-08T13:30:00Z",
+          "status": "PARTIAL",
+          "text": "Gateway propagates x-correlation-id and smoke validates one auth flow; structured log format is not implemented yet."
+        }
+      ]
+    },
+    {
+      "id": "S1-T05",
+      "title": "S1-M02 implementation start: scaffold event-management-service with Postgres and implement POST/GET/PATCH/DELETE /api/events/drafts* + ownership rules.",
+      "status": "DONE",
+      "priority": "P0",
+      "refs": [
+        "S1-M02",
+        "E02.2",
+        "E02.3",
+        "I04.2"
+      ],
+      "aliases": [
+        "event-management-service scaffold",
+        "events drafts crud",
+        "ownership rules for event drafts"
+      ],
+      "updated_at": "2026-03-08T13:26:25.287Z",
+      "notes": [
+        {
+          "date": "2026-03-08T13:22:39.682Z",
+          "status": "IN_PROGRESS",
+          "text": "Started implementation: event-management-service scaffold + drafts CRUD + ownership rules."
+        },
+        {
+          "date": "2026-03-08T13:26:25.288Z",
+          "status": "DONE",
+          "text": "Implemented event-management-service draft CRUD with Postgres, ownership guards, and passing S1-T05 smoke + S1-M01 regression."
+        }
+      ]
+    },
+    {
+      "id": "S1-T06",
+      "title": "Wire Gateway routes for events and extend role guards (ORGANIZER, ADMIN) with the same contract style as S1-M01.",
+      "status": "TODO",
+      "priority": "P0",
+      "refs": [
+        "S1-M02",
+        "I04.2"
+      ],
+      "aliases": [
+        "gateway role guards organizer admin",
+        "wire gateway routes events",
+        "contract style s1-m01"
+      ],
+      "updated_at": "2026-03-08T13:30:00Z",
+      "notes": []
+    }
+  ]
+}
