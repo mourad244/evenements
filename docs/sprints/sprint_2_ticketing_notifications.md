@@ -2,7 +2,7 @@
 
 Sprint de completion du parcours post-inscription.
 
-**Statut:** `PLANNED`  
+**Statut:** `IN_PROGRESS`  
 **Periode indicative:** 2026-04-13 -> 2026-05-01
 
 ## Objectifs

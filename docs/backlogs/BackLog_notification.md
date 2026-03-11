@@ -33,7 +33,7 @@ les retries et la journalisation des envois.
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | N01.1 | TODO | P0 | Mourad | Ibrahim | Sprint 0 | R01.1, R03.1 | Catalogue de templates | Liste des templates transactionnels documentee | Chaque evenement metier critique a un template email et un set de variables associees | `docs/notification-template-catalog` |
 | N01.2 | TODO | P0 | Mourad | Ibrahim | Sprint 2 | N01.1 | Templates email | Templates implementables | Les templates confirmation, attente, promotion, rappel et annulation sont redigeables sans question ouverte | `feature/notification-email-templates` |
-| N01.3 | TODO | P1 | Ibrahim | Mourad | Sprint 2 | N01.1 | Copywriting et fallback UI | Regles de contenu documentees | Les templates definissent objet, corps, ton, placeholders et fallback en cas de donnees manquantes | `docs/notification-template-copy-rules` |
+| N01.3 | DONE | P1 | Ibrahim | Mourad | Sprint 2 | N01.1 | Copywriting et fallback UI | Regles de contenu documentees | Les templates definissent objet, corps, ton, placeholders et fallback en cas de donnees manquantes | `docs/notification-template-copy-rules` |
 
 ### N02 - Construire le pipeline asynchrone d'envoi
 
@@ -72,7 +72,7 @@ les retries et la journalisation des envois.
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | N03.1 | TODO | P1 | Mourad | Ibrahim | Sprint 2 | N01.1 | Payload SMS simule | Contrat SMS simulation documente | Les champs utiles, le canal et les cas d'usage rappels/confirmations sont definis | `docs/notification-sms-sim-contract` |
 | N03.2 | TODO | P1 | Mourad | Ibrahim | Sprint 2 | N03.1 | Service notification | Simulation SMS implementable | Une demande SMS n'envoie rien au monde exterieur mais genere un log exploitable | `feature/notification-sms-simulator` |
-| N03.3 | TODO | P1 | Ibrahim | Mourad | Sprint 2 | N03.2 | Lecture d'etat UI/admin | Traces SMS visibles | Le statut `SIMULATED` est affichable ou filtrable dans les vues admin prevues | `feature/notification-sms-status-ui` |
+| N03.3 | PARTIAL | P1 | Ibrahim | Mourad | Sprint 2 | N03.2 | Lecture d'etat UI/admin | Traces SMS visibles | Le statut `SIMULATED` est affichable ou filtrable dans les vues admin prevues | `feature/notification-sms-status-ui` |
 
 ### N04 - Gerer retries, dead-letter et reprise manuelle
 
