@@ -856,6 +856,173 @@ Journal synthetique des livrables majeurs et des baselines de cadrage.
   dans `docs/backlogs/BackLog_monitoring.md`.
 - Ajout de la reference dans `docs/DOCUMENTATION_INDEX.md`.
 
+## 2026-03-14 - Contrat ticketing documente (`R04.1`)
+
+- Creation du contrat ticketing dans
+  `docs/workflows/Workflow_ticketing_contract.md`.
+- Stabilisation du modele canonique `Ticket`, de la reference billet et
+  du payload `ticket.generated`.
+- Alignement explicite avec l'exposition participant
+  `canDownloadTicket` et le download protege `F06.1`.
+- Mise a jour du ticket `R04.1` en `DONE` et passage de `R04` en
+  `PARTIAL` dans `docs/backlogs/BackLog_registration_ticketing.md`.
+- Ajout de la reference dans `docs/DOCUMENTATION_INDEX.md`.
+
+## 2026-03-14 - Generation billet PDF/PNG (`R04.2`)
+
+- Implementation du module partage ticketing dans
+  `services/shared/ticketArtifactGeneration.js`.
+- Couverture des regles critiques:
+  confirmation obligatoire, reference billet stable, artefact `PDF/PNG`,
+  reuse idempotent et payload `ticket.generated`.
+- Ajout des tests unitaires dans
+  `tests/s2-t09.ticket-artifact-generation.unit.test.js`.
+- Ajout du script npm `test:s2-t09` dans `package.json`.
+- Verification executee:
+  `npm run test:s2-t09` -> `10 passed`, `0 failed`.
+- Mise a jour du ticket `R04.2` en `DONE` dans
+  `docs/backlogs/BackLog_registration_ticketing.md`.
+
+## 2026-03-14 - QR code billet opaque (`R04.3`)
+
+- Extension du module partage ticketing dans
+  `services/shared/ticketArtifactGeneration.js`.
+- Ajout d'un payload QR opaque pour verification sans exposition de
+  donnees sensibles brutes.
+- Integration du QR dans le ticket emis et dans le payload
+  `ticket.generated` sous forme reduite (`format`, `path`).
+- Ajout des tests unitaires dans
+  `tests/s2-t10.ticket-qr-code.unit.test.js`.
+- Ajout du script npm `test:s2-t10` dans `package.json`.
+- Verification executee:
+  `npm run test:s2-t10` -> `5 passed`, `0 failed`.
+- Mise a jour du ticket `R04.3` en `DONE` et passage de `R04` en `DONE`
+  dans `docs/backlogs/BackLog_registration_ticketing.md`.
+
+## 2026-03-14 - Endpoint historique participant (`R05.2`)
+
+- Implementation du module partage participant history dans
+  `services/shared/participantHistoryApi.js`.
+- Couverture des regles critiques:
+  filtrage strict par participant authentifie, filtre de statut, pagination
+  et exposition coherente des champs billet.
+- Ajout des tests unitaires dans
+  `tests/s2-t11.participant-history-api.unit.test.js`.
+- Ajout du script npm `test:s2-t11` dans `package.json`.
+- Verification executee:
+  `npm run test:s2-t11` -> `8 passed`, `0 failed`.
+- Mise a jour du ticket `R05.2` en `DONE` et passage de `R05` en
+  `PARTIAL` dans `docs/backlogs/BackLog_registration_ticketing.md`.
+
+## 2026-03-14 - Integration vue participant billet (`R05.3`)
+
+- Implementation du module d'integration participant dans
+  `services/shared/participantParticipationsView.js`.
+- Composition des briques existantes:
+  historique participant (`R05.2`), CTA billet (`participantTicketUi`) et
+  download UX protege (`F06.2` / `F06.3`).
+- Ajout des tests unitaires dans
+  `tests/s2-t13.participant-participations-view.unit.test.js`.
+- Ajout du script npm `test:s2-t13` dans `package.json`.
+- Verification executee:
+  `npm run test:s2-t13` -> `4 passed`, `0 failed`.
+- Mise a jour du ticket `R05.3` en `DONE` dans
+  `docs/backlogs/BackLog_registration_ticketing.md`.
+
+## 2026-03-14 - Contrat export organisateur (`R06.1`)
+
+- Creation du contrat export organisateur dans
+  `docs/workflows/Workflow_organizer_export_contract.md`.
+- Stabilisation du format `CSV`, des colonnes obligatoires et du payload
+  d'etat (`status`, `exportUrl`) attendu cote UI.
+- Mise a jour du ticket `R06.1` en `DONE` dans
+  `docs/backlogs/BackLog_registration_ticketing.md`.
+- Ajout de la reference dans `docs/DOCUMENTATION_INDEX.md`.
+
+## 2026-03-14 - Endpoint export inscrits organisateur (`R06.2`)
+
+- Implementation du module partage export organisateur dans
+  `services/shared/organizerRegistrantsExportApi.js`.
+- Couverture des regles critiques:
+  scope organisateur, format `CSV` uniquement, lignes exportees
+  normalisees et payload d'etat compatible avec `R06.3`.
+- Ajout des tests unitaires dans
+  `tests/s2-t12.organizer-registrants-export-api.unit.test.js`.
+- Ajout du script npm `test:s2-t12` dans `package.json`.
+- Verification executee:
+  `npm run test:s2-t12` -> `8 passed`, `0 failed`.
+- Mise a jour du ticket `R06.2` en `DONE` et passage de `R06` en
+  `PARTIAL` dans `docs/backlogs/BackLog_registration_ticketing.md`.
+
+## 2026-03-14 - Integration vue organisateur export (`R06.3`)
+
+- Implementation du module d'integration organisateur dans
+  `services/shared/organizerRegistrationsView.js`.
+- Composition des briques existantes:
+  mapping lignes organisateur (`organizerExportUi`) et etat export
+  backend (`R06.2`) pour fournir un view model UI-ready.
+- Ajout des tests unitaires dans
+  `tests/s2-t14.organizer-registrations-view.unit.test.js`.
+- Ajout du script npm `test:s2-t14` dans `package.json`.
+- Verification executee:
+  `npm run test:s2-t14` -> `4 passed`, `0 failed`.
+- Mise a jour du ticket `R06.3` en `DONE` et passage de `R06` en `DONE`
+  dans `docs/backlogs/BackLog_registration_ticketing.md`.
+
+## 2026-03-14 - Catalogue templates notification (`N01.1`)
+
+- Creation du catalogue templates notification dans
+  `docs/workflows/Workflow_notification_template_catalog.md`.
+- Stabilisation des templates MVP email, de leurs triggers et des
+  variables de contexte minimales.
+- Mise a jour du ticket `N01.1` en `DONE` et passage de `N01` en
+  `PARTIAL` dans `docs/backlogs/BackLog_notification.md`.
+- Ajout de la reference dans `docs/DOCUMENTATION_INDEX.md`.
+
+## 2026-03-14 - Contrat consumer async notification (`N02.1`)
+
+- Creation du contrat consumer async notification dans
+  `docs/workflows/Workflow_notification_consumer_contract.md`.
+- Definition des evenements sources, du mapping `event -> templateId`,
+  du contrat `NotificationDispatchRequest` et des statuts
+  `PENDING/SENT/FAILED`.
+- Formalisation des regles de deduplication par `messageId` et de
+  l'ecriture minimale `NotificationLog`.
+- Mise a jour du ticket `N02.1` en `DONE` et passage de `N02` en
+  `PARTIAL` dans `docs/backlogs/BackLog_notification.md`.
+- Ajout de la reference dans `docs/DOCUMENTATION_INDEX.md`.
+
+## 2026-03-14 - Worker email notification (`N02.2`)
+
+- Implementation du module partage notification dans
+  `services/shared/notificationEmailWorker.js`.
+- Couverture des regles critiques:
+  mapping `event -> template`, canonicalisation des dispatch requests,
+  deduplication par `messageId`, rendu template, envoi provider et
+  emission des metriques notification.
+- Ajout des tests unitaires dans
+  `tests/s2-t15.notification-email-worker.unit.test.js`.
+- Ajout du script npm `test:s2-t15` dans `package.json`.
+- Verification executee:
+  `npm run test:s2-t15` -> `8 passed`, `0 failed`.
+- Mise a jour du ticket `N02.2` en `DONE` dans
+  `docs/backlogs/BackLog_notification.md`.
+
+## 2026-03-15 - Journal notification delivery (`N02.3`)
+
+- Implementation du module partage `NotificationLog` dans
+  `services/shared/notificationDeliveryLog.js`.
+- Couverture des regles critiques:
+  normalisation des entrees, append depuis le worker, filtres
+  `status/channel`, pagination et conservation des motifs d'erreur.
+- Ajout des tests unitaires dans
+  `tests/s2-t16.notification-delivery-log.unit.test.js`.
+- Ajout du script npm `test:s2-t16` dans `package.json`.
+- Verification executee:
+  `npm run test:s2-t16` -> `6 passed`, `0 failed`.
+- Mise a jour du ticket `N02.3` en `DONE` dans
+  `docs/backlogs/BackLog_notification.md`.
+
 ## 2026-03-11 - Initialisation Sprint 6
 
 - Creation du cadrage sprint dans
