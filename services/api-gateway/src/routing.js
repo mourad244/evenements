@@ -48,6 +48,28 @@ export function buildRouteTable(config) {
       targetPath: "/auth/me"
     },
     {
+      method: "GET",
+      path: "/api/admin/users",
+      public: false,
+      allowedRoles: ["ADMIN"],
+      targetBaseUrl: config.identityServiceUrl,
+      targetPath: "/admin/users"
+    },
+    {
+      method: "GET",
+      path: "/api/catalog/events",
+      public: true,
+      targetBaseUrl: config.eventManagementServiceUrl,
+      targetPath: "/catalog/events"
+    },
+    {
+      method: "GET",
+      path: "/api/catalog/events/:eventId",
+      public: true,
+      targetBaseUrl: config.eventManagementServiceUrl,
+      targetPath: "/catalog/events/:eventId"
+    },
+    {
       method: "POST",
       path: "/api/events/drafts",
       public: false,
@@ -110,6 +132,14 @@ export function buildRouteTable(config) {
       allowedRoles: organizerOrAdmin,
       targetBaseUrl: config.eventManagementServiceUrl,
       targetPath: "/events/me"
+    },
+    {
+      method: "GET",
+      path: "/api/organizer/events/:eventId/registrations",
+      public: false,
+      allowedRoles: organizerOrAdmin,
+      targetBaseUrl: config.registrationServiceUrl,
+      targetPath: "/organizer/events/:eventId/registrations"
     },
     {
       method: "POST",

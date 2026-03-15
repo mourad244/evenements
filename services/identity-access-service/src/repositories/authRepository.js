@@ -102,6 +102,26 @@ export function createAuthRepository(pool) {
       return mapUser(rows[0]);
     },
 
+    async listUsers() {
+      const { rows } = await pool.query(
+        `
+          SELECT
+            user_id,
+            email,
+            password_hash,
+            display_name,
+            role,
+            account_status,
+            created_at,
+            updated_at,
+            last_login_at
+          FROM auth_users
+          ORDER BY created_at DESC
+        `
+      );
+      return rows.map(mapUser);
+    },
+
     async createUser(user) {
       const { rows } = await pool.query(
         `
@@ -345,4 +365,3 @@ export function createAuthRepository(pool) {
     withTransaction
   };
 }
-

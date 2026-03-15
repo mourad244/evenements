@@ -474,6 +474,29 @@ app.get("/auth/me", async (req, res) => {
   );
 });
 
+app.get("/admin/users", async (req, res) => {
+  const role = String(req.header("x-user-role") || "").trim().toUpperCase();
+  const sessionId = String(req.header("x-session-id") || "").trim();
+  const userId = String(req.header("x-user-id") || "").trim();
+
+  if (!userId || !role || !sessionId) {
+    return res
+      .status(401)
+      .json(error("Missing auth context", "MISSING_AUTH_CONTEXT"));
+  }
+
+  if (role !== "ADMIN") {
+    return res.status(403).json(error("Forbidden", "FORBIDDEN"));
+  }
+
+  const users = await repository.listUsers();
+  return res.status(200).json(
+    success({
+      items: users.map(toUserView)
+    })
+  );
+});
+
 app.use((_req, res) => {
   res.status(404).json(error("Route not found", "NOT_FOUND"));
 });
