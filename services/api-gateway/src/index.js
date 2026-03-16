@@ -1,56 +1,38 @@
-import { randomUUID } from "node:crypto";
-
 import express from "express";
 import jwt from "jsonwebtoken";
+import {
+  createCorrelationIdMiddleware,
+  createJsonLogger,
+  createRequestCompletionLogger
+} from "../../shared/observability.js";
+import {
+  gatewayAuthLogFields,
+  isGatewayAuthPath
+} from "./observabilityConfig.js";
+import {
+  buildRouteTable,
+  compileRoutes,
+  interpolatePath,
+  matchRoute
+} from "./routing.js";
 
 const config = {
   serviceName: "api-gateway",
   port: Number(process.env.PORT || 4000),
   identityServiceUrl: process.env.IDENTITY_SERVICE_URL || "http://127.0.0.1:4001",
+  eventManagementServiceUrl:
+    process.env.EVENT_MANAGEMENT_SERVICE_URL || "http://127.0.0.1:4002",
+  registrationServiceUrl:
+    process.env.REGISTRATION_SERVICE_URL || "http://127.0.0.1:4003",
   jwtAccessSecret: process.env.JWT_ACCESS_SECRET || "dev-access-secret"
 };
+const log = createJsonLogger(config.serviceName);
 
 const app = express();
 app.use(express.json());
 
 const routeTable = [
-  {
-    method: "POST",
-    path: "/api/auth/register",
-    public: true,
-    targetPath: "/auth/register"
-  },
-  {
-    method: "POST",
-    path: "/api/auth/login",
-    public: true,
-    targetPath: "/auth/login"
-  },
-  {
-    method: "POST",
-    path: "/api/auth/refresh",
-    public: true,
-    targetPath: "/auth/refresh"
-  },
-  {
-    method: "POST",
-    path: "/api/auth/forgot-password",
-    public: true,
-    targetPath: "/auth/forgot-password"
-  },
-  {
-    method: "POST",
-    path: "/api/auth/reset-password",
-    public: true,
-    targetPath: "/auth/reset-password"
-  },
-  {
-    method: "GET",
-    path: "/api/auth/me",
-    public: false,
-    allowedRoles: ["PARTICIPANT", "ORGANIZER", "ADMIN"],
-    targetPath: "/auth/me"
-  },
+  ...buildRouteTable(config),
   {
     method: "GET",
     path: "/api/organizer/ping",
@@ -67,12 +49,7 @@ const routeTable = [
   }
 ];
 
-const routesByKey = new Map(routeTable.map((route) => [routeKey(route.method, route.path), route]));
-
-function routeKey(method, path) {
-  const normalizedPath = path.length > 1 ? path.replace(/\/+$/, "") : path;
-  return `${method.toUpperCase()} ${normalizedPath}`;
-}
+const compiledRoutes = compileRoutes(routeTable);
 
 function success(data, meta) {
   if (meta) return { success: true, data, meta };
@@ -87,7 +64,7 @@ function error(errorMessage, code, details) {
 }
 
 function getRoute(req) {
-  return routesByKey.get(routeKey(req.method, req.path));
+  return matchRoute(compiledRoutes, req.method, req.path);
 }
 
 function parseBearerToken(authorizationHeader) {
@@ -97,12 +74,15 @@ function parseBearerToken(authorizationHeader) {
   return token;
 }
 
-app.use((req, res, next) => {
-  const incoming = String(req.header("x-correlation-id") || "").trim();
-  req.correlationId = incoming || randomUUID();
-  res.setHeader("x-correlation-id", req.correlationId);
-  next();
-});
+app.use(createCorrelationIdMiddleware());
+app.use(
+  createRequestCompletionLogger({
+    log,
+    eventName: "gateway.auth.request.completed",
+    isObserved: isGatewayAuthPath,
+    buildFields: gatewayAuthLogFields
+  })
+);
 
 app.get("/health", (_req, res) => {
   res.status(200).json(
@@ -123,12 +103,14 @@ app.get("/ready", (_req, res) => {
 });
 
 app.use((req, res, next) => {
-  const route = getRoute(req);
-  if (!route) {
+  const matched = getRoute(req);
+  if (!matched) {
     return res.status(404).json(error("Route not found", "NOT_FOUND"));
   }
 
-  req.matchedRoute = route;
+  req.matchedRoute = matched.route;
+  req.matchedRouteParams = matched.params;
+  const route = req.matchedRoute;
   if (route.public) return next();
 
   const token = parseBearerToken(req.header("authorization"));
@@ -173,7 +155,9 @@ app.use(async (req, res) => {
   }
 
   const incomingUrl = new URL(req.originalUrl, "http://gateway.local");
-  const targetUrl = new URL(route.targetPath, config.identityServiceUrl);
+  const targetPath = interpolatePath(route.targetPath, req.matchedRouteParams);
+  const targetBaseUrl = route.targetBaseUrl || config.identityServiceUrl;
+  const targetUrl = new URL(targetPath, targetBaseUrl);
   targetUrl.search = incomingUrl.search;
 
   const headers = {
@@ -222,9 +206,7 @@ app.use(async (req, res) => {
 });
 
 app.listen(config.port, () => {
-  // eslint-disable-next-line no-console
-  console.log(
-    `[${config.serviceName}] listening on port ${config.port}`
-  );
+  log("info", "service.started", {
+    port: config.port
+  });
 });
-

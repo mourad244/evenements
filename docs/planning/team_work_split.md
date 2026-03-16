@@ -106,6 +106,15 @@ Repartition initiale de travail pour une equipe de 2 personnes.
 3. L'autre personne relit avant merge.
 4. Fusionner dans `main` uniquement via PR.
 
+## Rituel documentation sprint
+
+- Reference:
+  `docs/workflows/Workflow_documentation_review_cadence.md`.
+- Cadence minimale:
+  revue docs de kickoff + revue docs de cloture a chaque sprint.
+- Objectif:
+  garder backlogs, sprints, index et `task_history` alignes.
+
 ## Priorite immediate
 
 1. Mourad: specs des 4 services P1.

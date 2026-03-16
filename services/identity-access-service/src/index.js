@@ -6,8 +6,17 @@ import bcrypt from "bcryptjs";
 import express from "express";
 import jwt from "jsonwebtoken";
 import pg from "pg";
+import {
+  createCorrelationIdMiddleware,
+  createJsonLogger,
+  createRequestCompletionLogger
+} from "../../shared/observability.js";
 
 import { ensureSchema } from "./db/schema.js";
+import {
+  identityAuthLogFields,
+  isIdentityAuthPath
+} from "./observabilityConfig.js";
 import { createAuthRepository } from "./repositories/authRepository.js";
 
 const { Pool } = pg;
@@ -27,6 +36,7 @@ const config = {
   bcryptSaltRounds: Number(process.env.BCRYPT_SALT_ROUNDS || 10),
   exposeDebugResetToken: process.env.DEBUG_EXPOSE_RESET_TOKEN === "true"
 };
+const log = createJsonLogger(config.serviceName);
 
 const allowedSelfServiceRoles = new Set(["PARTICIPANT", "ORGANIZER"]);
 const activeAccountStatuses = new Set(["ACTIVE"]);
@@ -103,6 +113,16 @@ function tokenDigest(token) {
 function hasExpired(value) {
   return Date.now() >= new Date(value).getTime();
 }
+
+app.use(createCorrelationIdMiddleware());
+app.use(
+  createRequestCompletionLogger({
+    log,
+    eventName: "identity.auth.request.completed",
+    isObserved: isIdentityAuthPath,
+    buildFields: identityAuthLogFields
+  })
+);
 
 app.get("/health", (_req, res) => {
   res.status(200).json(
@@ -428,7 +448,7 @@ app.get("/auth/me", async (req, res) => {
   const userId = req.header("x-user-id");
   const role = req.header("x-user-role");
   const sessionId = req.header("x-session-id");
-  const correlationId = req.header("x-correlation-id");
+  const correlationId = req.correlationId || null;
 
   if (!userId || !role || !sessionId) {
     return res
@@ -450,6 +470,29 @@ app.get("/auth/me", async (req, res) => {
         sessionId,
         correlationId: correlationId || null
       }
+    })
+  );
+});
+
+app.get("/admin/users", async (req, res) => {
+  const role = String(req.header("x-user-role") || "").trim().toUpperCase();
+  const sessionId = String(req.header("x-session-id") || "").trim();
+  const userId = String(req.header("x-user-id") || "").trim();
+
+  if (!userId || !role || !sessionId) {
+    return res
+      .status(401)
+      .json(error("Missing auth context", "MISSING_AUTH_CONTEXT"));
+  }
+
+  if (role !== "ADMIN") {
+    return res.status(403).json(error("Forbidden", "FORBIDDEN"));
+  }
+
+  const users = await repository.listUsers();
+  return res.status(200).json(
+    success({
+      items: users.map(toUserView)
     })
   );
 });
@@ -477,14 +520,16 @@ async function boot() {
   }
 
   app.listen(config.port, () => {
-    // eslint-disable-next-line no-console
-    console.log(`[${config.serviceName}] listening on port ${config.port}`);
+    log("info", "service.started", {
+      port: config.port
+    });
   });
 }
 
 boot().catch((err) => {
-  // eslint-disable-next-line no-console
-  console.error(`[${config.serviceName}] failed to boot`, err);
+  log("error", "service.boot.failed", {
+    message: err.message
+  });
   process.exit(1);
 });
 
