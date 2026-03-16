@@ -66,7 +66,7 @@ export function Navbar() {
                 key={item.href}
                 href={item.href}
                 className={cn(
-                  "rounded-full px-4 py-2 text-sm font-medium transition",
+                  "rounded-full px-4 py-2 text-sm font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-300",
                   active
                     ? "bg-ink text-white"
                     : "text-slate-600 hover:bg-white hover:text-ink"
@@ -92,12 +92,12 @@ export function Navbar() {
             </>
           ) : (
             <>
-              <Link
-                href={ROUTES.register}
-                className="text-sm font-medium text-slate-600 transition hover:text-ink"
-              >
-                Create account
-              </Link>
+          <Link
+            href={ROUTES.register}
+            className="text-sm font-medium text-slate-600 transition hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-300"
+          >
+            Create account
+          </Link>
               <Link href={ROUTES.login}>
                 <Button>Sign in</Button>
               </Link>
@@ -107,17 +107,21 @@ export function Navbar() {
 
         <button
           type="button"
-          className="inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-line bg-white text-ink lg:hidden"
+          className="inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-line bg-white text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-300 lg:hidden"
           onClick={() => setOpen((value) => !value)}
           aria-label={open ? "Close navigation" : "Open navigation"}
           aria-expanded={open}
+          aria-controls="mobile-navigation"
         >
           {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
         </button>
       </div>
 
       {open ? (
-        <div className="border-t border-white/70 bg-white/95 px-4 py-4 shadow-lg shadow-slate-900/5 lg:hidden">
+        <div
+          id="mobile-navigation"
+          className="border-t border-white/70 bg-white/95 px-4 py-4 shadow-lg shadow-slate-900/5 lg:hidden"
+        >
           <div className="mx-auto grid max-w-7xl gap-2 sm:px-2">
             {navItems.map((item) => {
               const active = pathname === item.href || pathname.startsWith(`${item.href}/`);
@@ -127,7 +131,7 @@ export function Navbar() {
                   href={item.href}
                   onClick={() => setOpen(false)}
                   className={cn(
-                    "rounded-2xl px-4 py-3 text-sm font-medium transition",
+                    "rounded-2xl px-4 py-3 text-sm font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-300",
                     active
                       ? "bg-ink text-white"
                       : "bg-slate-50 text-slate-700 hover:bg-slate-100"
@@ -154,7 +158,7 @@ export function Navbar() {
                   <Link
                     href={ROUTES.register}
                     onClick={() => setOpen(false)}
-                    className="rounded-2xl px-4 py-3 text-sm font-medium text-slate-700 hover:bg-slate-50"
+                    className="rounded-2xl px-4 py-3 text-sm font-medium text-slate-700 hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-300"
                   >
                     Create account
                   </Link>

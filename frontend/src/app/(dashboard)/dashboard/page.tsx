@@ -1,12 +1,15 @@
 "use client";
 
 import Link from "next/link";
+import { useState } from "react";
 
+import { EmptyState } from "@/components/ui/empty-state";
+import { ErrorState } from "@/components/ui/error-state";
+import { LoadingState } from "@/components/ui/loading-state";
 import { PageTitle } from "@/components/shared/page-title";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Spinner } from "@/components/ui/spinner";
 import { useCurrentUser } from "@/features/auth/hooks/use-current-user";
 import type { EventItem } from "@/features/events/types/event.types";
 import { useOrganizerEventsQuery } from "@/features/events/hooks/use-organizer-events-query";
@@ -28,43 +31,10 @@ function SummaryCard({
   description: string;
 }) {
   return (
-    <Card className="grid gap-2">
-      <p className="text-sm text-slate-500">{label}</p>
-      <h2 className="text-3xl font-semibold text-ink">{value}</h2>
-      <p className="text-sm text-slate-600">{description}</p>
-    </Card>
-  );
-}
-
-function ErrorCard({ title, message }: { title: string; message: string }) {
-  return (
-    <Card className="grid gap-2">
-      <h2 className="text-xl font-semibold text-ink">{title}</h2>
-      <p className="text-sm text-slate-600">{message}</p>
-    </Card>
-  );
-}
-
-function EmptyCard({
-  title,
-  description,
-  href,
-  cta
-}: {
-  title: string;
-  description: string;
-  href?: string;
-  cta?: string;
-}) {
-  return (
     <Card className="grid gap-3">
-      <h2 className="text-xl font-semibold text-ink">{title}</h2>
-      <p className="text-sm text-slate-600">{description}</p>
-      {href && cta ? (
-        <Link href={href}>
-          <Button variant="ghost">{cta}</Button>
-        </Link>
-      ) : null}
+      <p className="text-sm text-slate-500">{label}</p>
+      <h2 className="text-2xl font-semibold text-ink sm:text-3xl">{value}</h2>
+      <p className="text-sm leading-6 text-slate-600">{description}</p>
     </Card>
   );
 }
@@ -77,18 +47,23 @@ function getParticipantAction(registrations: RegistrationItem[]) {
 
   if (!activeRegistration) {
     return {
-      title: "Discover your next event",
-      description: "You do not have an active participation yet.",
+      title: "Find your next event",
+      description: "You do not have an active participation yet, so the best next step is to browse upcoming events.",
       href: ROUTES.events,
-      cta: "Browse events"
+      cta: "Browse events",
+      secondaryHref: ROUTES.myRegistrations,
+      secondaryCta: "Open history"
     };
   }
 
   const statusMessageMap: Record<RegistrationStatus, string> = {
     CONFIRMED: activeRegistration.canDownloadTicket
-      ? "Your registration is confirmed and the ticket is ready to review."
-      : "Your registration is confirmed. Keep an eye on ticket availability and event details.",
-    WAITLISTED: "You are on the waitlist. Check back for status updates from the organizer.",
+      ? "Your place is confirmed and ticket details are already visible in your registrations."
+      : "Your place is confirmed. Keep an eye on your registrations for ticket readiness and event details.",
+    WAITLISTED:
+      activeRegistration.waitlistPosition
+        ? `You are currently number ${activeRegistration.waitlistPosition} on the waitlist.`
+        : "You are still on the waitlist. Check the event details and your registrations for updates.",
     CANCELLED: "This registration is no longer active.",
     REJECTED: "This registration was not accepted for participation."
   };
@@ -103,7 +78,15 @@ function getParticipantAction(registrations: RegistrationItem[]) {
     cta:
       activeRegistration.status === "CONFIRMED"
         ? "Open my registrations"
-        : "Open event details"
+        : "Open event details",
+    secondaryHref:
+      activeRegistration.status === "CONFIRMED"
+        ? `/events/${activeRegistration.eventId}`
+        : ROUTES.myRegistrations,
+    secondaryCta:
+      activeRegistration.status === "CONFIRMED"
+        ? "Review event"
+        : "Open history"
   };
 }
 
@@ -111,6 +94,15 @@ function sortRegistrationsByDate(registrations: RegistrationItem[]) {
   return [...registrations].sort(
     (left, right) => Date.parse(left.eventDate) - Date.parse(right.eventDate)
   );
+}
+
+function sortRegistrationsByRecentActivity(registrations: RegistrationItem[]) {
+  return [...registrations].sort((left, right) => {
+    const leftDate = left.updatedAt || left.eventDate;
+    const rightDate = right.updatedAt || right.eventDate;
+
+    return Date.parse(rightDate) - Date.parse(leftDate);
+  });
 }
 
 function sortEventsByStart(events: EventItem[]) {
@@ -128,81 +120,96 @@ function ParticipantDashboard({
   isError: boolean;
   errorMessage?: string;
 }) {
+  const [currentTime] = useState(() => Date.now());
+
   if (isLoading) {
-    return (
-      <div className="flex min-h-[240px] items-center justify-center">
-        <Spinner />
-      </div>
-    );
+    return <LoadingState label="Loading your dashboard..." />;
   }
 
   if (isError) {
     return (
-      <ErrorCard
+      <ErrorState
         title="Could not load your dashboard"
-        message={errorMessage || "The registrations service is not responding right now."}
+        description={errorMessage || "The registrations service is not responding right now."}
       />
     );
   }
 
   const chronologicalRegistrations = sortRegistrationsByDate(registrations);
-  const recentParticipations = [...chronologicalRegistrations].reverse().slice(0, 3);
+  const recentParticipations = sortRegistrationsByRecentActivity(registrations).slice(0, 3);
   const upcomingRegistration = chronologicalRegistrations.find(
     (registration) =>
-      registration.status !== "CANCELLED" && Date.parse(registration.eventDate) >= Date.now()
+      registration.status !== "CANCELLED" && Date.parse(registration.eventDate) >= currentTime
   );
   const nextAction = getParticipantAction(
     upcomingRegistration ? [upcomingRegistration, ...chronologicalRegistrations] : chronologicalRegistrations
   );
+  const activeRegistrations = registrations.filter(
+    (registration) =>
+      registration.status === "CONFIRMED" || registration.status === "WAITLISTED"
+  );
 
   return (
     <div className="grid gap-6">
-      <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+      <div className="grid gap-4 sm:gap-6 xl:grid-cols-[minmax(0,1.3fr)_repeat(2,minmax(0,1fr))]">
+        <Card className="grid gap-4">
+          <div className="grid gap-1">
+            <p className="text-sm text-slate-500">What to focus on now</p>
+            <h2 className="text-2xl font-semibold text-ink">{nextAction.title}</h2>
+            <p className="text-sm leading-6 text-slate-600">{nextAction.description}</p>
+          </div>
+          <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+            <Link href={nextAction.href} className="w-full sm:w-auto">
+              <Button className="w-full sm:w-auto">{nextAction.cta}</Button>
+            </Link>
+            <Link href={nextAction.secondaryHref} className="w-full sm:w-auto">
+              <Button variant="ghost" className="w-full sm:w-auto">
+                {nextAction.secondaryCta}
+              </Button>
+            </Link>
+          </div>
+        </Card>
         <SummaryCard
           label="Upcoming participation"
           value={upcomingRegistration ? formatDate(upcomingRegistration.eventDate) : "None yet"}
           description={
             upcomingRegistration
-              ? upcomingRegistration.eventTitle
-              : "Your next confirmed or waitlisted event will show up here."
+              ? `${upcomingRegistration.eventTitle}${upcomingRegistration.eventCity ? ` in ${upcomingRegistration.eventCity}` : ""}`
+              : "Your next confirmed or waitlisted event will show up here once you have one."
           }
         />
         <SummaryCard
-          label="Confirmed registrations"
-          value={String(
-            registrations.filter((registration) => registration.status === "CONFIRMED").length
-          )}
-          description="Live confirmed participations pulled from the registration service."
+          label="Active registrations"
+          value={String(activeRegistrations.length)}
+          description="Confirmed and waitlisted registrations that still need your attention."
         />
-        <Card className="grid gap-3">
-          <p className="text-sm text-slate-500">Next relevant action</p>
-          <h2 className="text-xl font-semibold text-ink">{nextAction.title}</h2>
-          <p className="text-sm text-slate-600">{nextAction.description}</p>
-          <Link href={nextAction.href}>
-            <Button variant="ghost">{nextAction.cta}</Button>
-          </Link>
-        </Card>
       </div>
 
-      <Card className="grid gap-4">
+      <Card className="grid gap-4.5">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="grid gap-1">
-            <h2 className="text-xl font-semibold text-ink">Recent participations</h2>
+            <h2 className="text-xl font-semibold text-ink">Recent activity</h2>
             <p className="text-sm text-slate-600">
-              Your latest registration activity and the current backend status for each event.
+              Your latest registration changes and the current status for each event.
             </p>
           </div>
-          <Link href={ROUTES.myRegistrations}>
-            <Button variant="ghost">View all</Button>
+          <Link href={ROUTES.myRegistrations} className="w-full sm:w-auto">
+            <Button variant="ghost" className="w-full sm:w-auto">
+              Open my registrations
+            </Button>
           </Link>
         </div>
 
         {recentParticipations.length === 0 ? (
-          <EmptyCard
-            title="No participations yet"
-            description="Register for an event to build your participant history and ticket access."
-            href={ROUTES.events}
-            cta="Browse events"
+          <EmptyState
+            title="No activity yet"
+            description="Register for an event to start building your participation history and track future ticket readiness."
+            action={
+              <Link href={ROUTES.events}>
+                <Button>Browse events</Button>
+              </Link>
+            }
+            align="left"
           />
         ) : (
           <div className="grid gap-4">
@@ -213,12 +220,27 @@ function ParticipantDashboard({
               >
                 <div className="grid gap-1">
                   <h3 className="font-semibold text-ink">{registration.eventTitle}</h3>
-                  <p className="text-sm text-slate-600">{formatDate(registration.eventDate)}</p>
+                  <p className="text-sm text-slate-600">
+                    {formatDate(registration.eventDate)}
+                    {registration.eventCity ? ` | ${registration.eventCity}` : ""}
+                  </p>
+                  <p className="text-sm text-slate-500">
+                    {registration.updatedAt
+                      ? `Updated ${formatDate(registration.updatedAt)}`
+                      : "Waiting for the next update"}
+                  </p>
                 </div>
                 <div className="flex flex-wrap items-center gap-3">
                   <StatusBadge status={registration.status} />
-                  <Link href={`/events/${registration.eventId}`}>
-                    <Button variant="ghost">Open event</Button>
+                  <Link href={ROUTES.myRegistrations} className="w-full sm:w-auto">
+                    <Button variant="ghost" className="w-full sm:w-auto">
+                      Open history
+                    </Button>
+                  </Link>
+                  <Link href={`/events/${registration.eventId}`} className="w-full sm:w-auto">
+                    <Button variant="ghost" className="w-full sm:w-auto">
+                      Open event
+                    </Button>
                   </Link>
                 </div>
               </div>
@@ -241,19 +263,17 @@ function OrganizerDashboard({
   isError: boolean;
   errorMessage?: string;
 }) {
+  const [currentTime] = useState(() => Date.now());
+
   if (isLoading) {
-    return (
-      <div className="flex min-h-[240px] items-center justify-center">
-        <Spinner />
-      </div>
-    );
+    return <LoadingState label="Loading organizer summary..." />;
   }
 
   if (isError) {
     return (
-      <ErrorCard
+      <ErrorState
         title="Could not load organizer summary"
-        message={errorMessage || "The events service is not responding right now."}
+        description={errorMessage || "The events service is not responding right now."}
       />
     );
   }
@@ -261,14 +281,14 @@ function OrganizerDashboard({
   const drafts = events.filter((event) => event.status === "DRAFT");
   const published = events.filter((event) => event.status === "PUBLISHED");
   const nextUpcomingEvent = sortEventsByStart(events).find(
-    (event) => Date.parse(event.startAt) >= Date.now()
+    (event) => Date.parse(event.startAt) >= currentTime
   );
   const recentEvents = [...sortEventsByStart(events)].reverse().slice(0, 3);
   const shortcutEvent = published[0] || nextUpcomingEvent || drafts[0] || events[0] || null;
 
   return (
     <div className="grid gap-6">
-      <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+      <div className="grid gap-4 sm:gap-6 md:grid-cols-2 xl:grid-cols-3">
         <SummaryCard
           label="Draft events"
           value={String(drafts.length)}
@@ -279,7 +299,7 @@ function OrganizerDashboard({
           value={String(published.length)}
           description="Events currently exposed to the public catalog."
         />
-        <Card className="grid gap-3">
+        <Card className="grid gap-3.5">
           <p className="text-sm text-slate-500">Registration shortcut</p>
           {shortcutEvent ? (
             <>
@@ -287,8 +307,13 @@ function OrganizerDashboard({
               <p className="text-sm text-slate-600">
                 Jump into registrations for a live or upcoming managed event.
               </p>
-              <Link href={`/organizer/events/${shortcutEvent.id}/registrations`}>
-                <Button variant="ghost">View registrations</Button>
+              <Link
+                href={`/organizer/events/${shortcutEvent.id}/registrations`}
+                className="w-full sm:w-auto"
+              >
+                <Button variant="ghost" className="w-full sm:w-auto">
+                  View registrations
+                </Button>
               </Link>
             </>
           ) : (
@@ -297,15 +322,17 @@ function OrganizerDashboard({
               <p className="text-sm text-slate-600">
                 Start with a draft to unlock publishing and registration workflows.
               </p>
-              <Link href={ROUTES.organizerNewEvent}>
-                <Button variant="ghost">Create event</Button>
+              <Link href={ROUTES.organizerNewEvent} className="w-full sm:w-auto">
+                <Button variant="ghost" className="w-full sm:w-auto">
+                  Create event
+                </Button>
               </Link>
             </>
           )}
         </Card>
       </div>
 
-      <Card className="grid gap-4">
+      <Card className="grid gap-4.5">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="grid gap-1">
             <h2 className="text-xl font-semibold text-ink">Managed events</h2>
@@ -313,22 +340,28 @@ function OrganizerDashboard({
               Your latest drafts and published events with direct organizer actions.
             </p>
           </div>
-          <div className="flex flex-wrap gap-3">
-            <Link href={ROUTES.organizerEvents}>
-              <Button variant="ghost">Open workspace</Button>
+          <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+            <Link href={ROUTES.organizerNewEvent} className="w-full sm:w-auto">
+              <Button className="w-full sm:w-auto">Create event</Button>
             </Link>
-            <Link href={ROUTES.organizerNewEvent}>
-              <Button>Create event</Button>
+            <Link href={ROUTES.organizerEvents} className="w-full sm:w-auto">
+              <Button variant="ghost" className="w-full sm:w-auto">
+                Open workspace
+              </Button>
             </Link>
           </div>
         </div>
 
         {recentEvents.length === 0 ? (
-          <EmptyCard
+          <EmptyState
             title="No managed events yet"
             description="Create your first draft to start publishing and registration monitoring."
-            href={ROUTES.organizerNewEvent}
-            cta="Create event"
+            action={
+                <Link href={ROUTES.organizerNewEvent} className="w-full sm:w-auto">
+                  <Button className="w-full sm:w-auto">Create event</Button>
+                </Link>
+            }
+            align="left"
           />
         ) : (
           <div className="grid gap-4">
@@ -345,11 +378,18 @@ function OrganizerDashboard({
                 </div>
                 <div className="flex flex-wrap items-center gap-3">
                   <StatusBadge status={event.status} />
-                  <Link href={`/organizer/events/${event.id}`}>
-                    <Button variant="ghost">Edit</Button>
+                  <Link href={`/organizer/events/${event.id}`} className="w-full sm:w-auto">
+                    <Button variant="ghost" className="w-full sm:w-auto">
+                      Edit
+                    </Button>
                   </Link>
-                  <Link href={`/organizer/events/${event.id}/registrations`}>
-                    <Button variant="ghost">Registrations</Button>
+                  <Link
+                    href={`/organizer/events/${event.id}/registrations`}
+                    className="w-full sm:w-auto"
+                  >
+                    <Button variant="ghost" className="w-full sm:w-auto">
+                      Registrations
+                    </Button>
                   </Link>
                 </div>
               </div>
@@ -363,28 +403,32 @@ function OrganizerDashboard({
 
 function AdminDashboard() {
   return (
-    <div className="grid gap-6 md:grid-cols-3">
-      <Card className="grid gap-2">
+    <div className="grid gap-4 sm:gap-6 md:grid-cols-3">
+      <Card className="grid gap-2.5">
         <p className="text-sm text-slate-500">Admin events</p>
         <h2 className="text-xl font-semibold text-ink">Temporary overview</h2>
         <p className="text-sm text-slate-600">
           A dedicated admin metrics contract is not available yet, so this page avoids invented KPIs.
         </p>
-        <Link href={ROUTES.adminEvents}>
-          <Button variant="ghost">Open admin events</Button>
+        <Link href={ROUTES.adminEvents} className="w-full sm:w-auto">
+          <Button variant="ghost" className="w-full sm:w-auto">
+            Open admin events
+          </Button>
         </Link>
       </Card>
-      <Card className="grid gap-2">
+      <Card className="grid gap-2.5">
         <p className="text-sm text-slate-500">Admin users</p>
         <h2 className="text-xl font-semibold text-ink">User oversight</h2>
         <p className="text-sm text-slate-600">
           Review the live admin user list while the metrics surface is still pending.
         </p>
-        <Link href={ROUTES.adminUsers}>
-          <Button variant="ghost">Open admin users</Button>
+        <Link href={ROUTES.adminUsers} className="w-full sm:w-auto">
+          <Button variant="ghost" className="w-full sm:w-auto">
+            Open admin users
+          </Button>
         </Link>
       </Card>
-      <Card className="grid gap-2">
+      <Card className="grid gap-2.5">
         <p className="text-sm text-slate-500">Metrics readiness</p>
         <h2 className="text-xl font-semibold text-ink">Awaiting backend support</h2>
         <p className="text-sm text-slate-600">
@@ -405,11 +449,7 @@ export default function DashboardPage() {
   const organizerEventsQuery = useOrganizerEventsQuery(isOrganizer);
 
   if (isUserLoading) {
-    return (
-      <div className="flex min-h-[240px] items-center justify-center">
-        <Spinner />
-      </div>
-    );
+    return <LoadingState label="Loading dashboard..." />;
   }
 
   const title = user ? `Welcome back, ${user.fullName}.` : "Welcome back.";

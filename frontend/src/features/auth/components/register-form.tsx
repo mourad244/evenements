@@ -49,6 +49,7 @@ export function RegisterForm() {
           placeholder="Your full name"
           {...form.register("fullName")}
           error={form.formState.errors.fullName?.message}
+          disabled={mutation.isPending}
         />
         <Input
           id="register-email"
@@ -58,6 +59,7 @@ export function RegisterForm() {
           placeholder="you@example.com"
           {...form.register("email")}
           error={form.formState.errors.email?.message}
+          disabled={mutation.isPending}
         />
         <PasswordField
           id="register-password"
@@ -66,6 +68,7 @@ export function RegisterForm() {
           placeholder="Choose a strong password"
           {...form.register("password")}
           error={form.formState.errors.password?.message}
+          disabled={mutation.isPending}
         />
         <PasswordField
           id="register-confirm-password"
@@ -74,19 +77,26 @@ export function RegisterForm() {
           placeholder="Repeat your password"
           {...form.register("confirmPassword")}
           error={form.formState.errors.confirmPassword?.message}
+          disabled={mutation.isPending}
         />
         <label className="grid gap-2 text-sm text-slate-700">
           <span className="font-medium">Role</span>
           <select
-            className="h-11 rounded-2xl border border-line bg-white px-4 text-sm text-ink outline-none transition focus:border-brand-400 focus:ring-2 focus:ring-brand-100"
+            className="h-11 rounded-2xl border border-line bg-white px-4 text-sm text-ink outline-none transition focus-visible:border-brand-400 focus-visible:ring-2 focus-visible:ring-brand-100"
             {...form.register("role")}
+            disabled={mutation.isPending}
           >
             <option value="PARTICIPANT">Participant</option>
             <option value="ORGANIZER">Organizer</option>
           </select>
         </label>
+        {mutation.isPending ? (
+          <p role="status" className="text-sm text-slate-600">
+            Creating your account. You will be redirected to sign in next.
+          </p>
+        ) : null}
         {mutation.error ? (
-          <p className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+          <p role="alert" className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
             {mutation.error.message}
           </p>
         ) : null}

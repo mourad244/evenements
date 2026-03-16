@@ -7,10 +7,10 @@ type ButtonProps = PropsWithChildren<ButtonHTMLAttributes<HTMLButtonElement>> & 
 };
 
 const variants: Record<NonNullable<ButtonProps["variant"]>, string> = {
-  primary: "bg-brand-600 text-white hover:bg-brand-700",
-  secondary: "bg-ink text-white hover:bg-slate-800",
+  primary: "bg-brand-600 text-white shadow-sm shadow-brand-900/10 hover:bg-brand-700",
+  secondary: "bg-ink text-white shadow-sm shadow-slate-900/10 hover:bg-slate-800",
   ghost: "bg-white/70 text-ink ring-1 ring-line hover:bg-white",
-  danger: "bg-red-600 text-white hover:bg-red-700"
+  danger: "bg-red-600 text-white shadow-sm shadow-red-900/10 hover:bg-red-700"
 };
 
 export function Button({
@@ -24,7 +24,7 @@ export function Button({
     <button
       type={type}
       className={cn(
-        "inline-flex items-center justify-center rounded-full px-4 py-2.5 text-sm font-semibold transition focus:outline-none focus:ring-2 focus:ring-brand-300 disabled:cursor-not-allowed disabled:opacity-60",
+        "inline-flex min-h-11 items-center justify-center rounded-full px-4 py-2.5 text-sm font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-300 disabled:cursor-not-allowed disabled:opacity-60",
         variants[variant],
         className
       )}

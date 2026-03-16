@@ -1,5 +1,6 @@
 ﻿import Image from "next/image";
 
+import { StatusBadge } from "@/components/shared/status-badge";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { formatDate } from "@/lib/utils/format-date";
@@ -23,10 +24,10 @@ export function EventDetails({ event }: EventDetailsProps) {
             className="object-cover"
           />
         </div>
-        <div className="grid gap-5 p-8">
+        <div className="grid gap-5 p-5 sm:p-8">
           <Badge>{event.theme}</Badge>
           <div className="grid gap-3">
-            <h1 className="text-4xl font-semibold tracking-tight text-ink">
+            <h1 className="text-3xl font-semibold tracking-tight text-ink sm:text-4xl">
               {event.title}
             </h1>
             <p className="text-base text-slate-600">{event.description}</p>
@@ -53,7 +54,9 @@ export function EventDetails({ event }: EventDetailsProps) {
           </div>
           <div className="flex items-center justify-between gap-4">
             <dt>Status</dt>
-            <dd>{event.status}</dd>
+            <dd>
+              <StatusBadge status={event.status} />
+            </dd>
           </div>
         </dl>
       </Card>

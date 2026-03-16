@@ -2,18 +2,21 @@
 
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
+import { ErrorState } from "@/components/ui/error-state";
+import { LoadingState } from "@/components/ui/loading-state";
 import { RoleGuard } from "@/components/guards/role-guard";
 import { PageTitle } from "@/components/shared/page-title";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Spinner } from "@/components/ui/spinner";
 import { useCurrentUser } from "@/features/auth/hooks/use-current-user";
 import { RegistrationList } from "@/features/registrations/components/registration-list";
 import { useMyRegistrationsQuery } from "@/features/registrations/hooks/use-my-registrations-query";
 import type {
   ParticipantHistoryQuery,
+  RegistrationItem,
   RegistrationStatusFilter
 } from "@/features/registrations/types/registration.types";
+import { formatDate } from "@/lib/utils/format-date";
 
 const STATUS_OPTIONS: RegistrationStatusFilter[] = [
   "ALL",
@@ -33,6 +36,25 @@ function normalizePositiveInt(value: string | null, fallback: number) {
 function normalizeStatus(value: string | null): RegistrationStatusFilter {
   const candidate = String(value || "ALL").toUpperCase() as RegistrationStatusFilter;
   return STATUS_OPTIONS.includes(candidate) ? candidate : "ALL";
+}
+
+function getPageSummary(registrations: RegistrationItem[]) {
+  const confirmed = registrations.filter((registration) => registration.status === "CONFIRMED").length;
+  const waitlisted = registrations.filter((registration) => registration.status === "WAITLISTED").length;
+  const ticketReady = registrations.filter(
+    (registration) => registration.canDownloadTicket && registration.ticketId
+  ).length;
+  const latestUpdate = registrations
+    .map((registration) => registration.updatedAt)
+    .filter((value): value is string => Boolean(value))
+    .sort((left, right) => Date.parse(right) - Date.parse(left))[0];
+
+  return {
+    confirmed,
+    waitlisted,
+    ticketReady,
+    latestUpdate
+  };
 }
 
 export default function MyRegistrationsPage() {
@@ -78,6 +100,7 @@ export default function MyRegistrationsPage() {
     total: 0,
     totalPages: 1
   };
+  const pageSummary = getPageSummary(data?.items || []);
 
   return (
     <RoleGuard user={user} allowedRoles={["PARTICIPANT"]}>
@@ -102,13 +125,15 @@ export default function MyRegistrationsPage() {
           </div>
 
           <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_220px]">
-            <div className="flex flex-wrap gap-2">
+            <fieldset className="flex flex-wrap gap-2">
+              <legend className="sr-only">Filter registrations by status</legend>
               {STATUS_OPTIONS.map((option) => (
                 <button
                   key={option}
                   type="button"
                   onClick={() => updateSearchParams({ status: option, page: "1" })}
-                  className={`rounded-full px-4 py-2 text-sm font-semibold transition ${
+                  aria-pressed={option === status}
+                  className={`min-h-11 rounded-full px-4 py-2 text-sm font-semibold transition ${
                     option === status
                       ? "bg-brand-600 text-white"
                       : "bg-white/70 text-ink ring-1 ring-line hover:bg-white"
@@ -117,16 +142,20 @@ export default function MyRegistrationsPage() {
                   {option === "ALL" ? "All statuses" : option}
                 </button>
               ))}
-            </div>
+            </fieldset>
 
-            <label className="grid gap-2 text-sm text-slate-600">
+            <label
+              className="grid gap-2 text-sm text-slate-600 sm:max-w-[220px] lg:max-w-none"
+              htmlFor="registrations-page-size"
+            >
               Page size
               <select
+                id="registrations-page-size"
                 value={String(pageSize)}
                 onChange={(event) =>
                   updateSearchParams({ pageSize: event.target.value, page: "1" })
                 }
-                className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-ink outline-none focus:border-brand-400"
+                className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-ink outline-none focus-visible:border-brand-400 focus-visible:ring-2 focus-visible:ring-brand-100"
               >
                 {PAGE_SIZE_OPTIONS.map((option) => (
                   <option key={option} value={option}>
@@ -139,16 +168,44 @@ export default function MyRegistrationsPage() {
         </Card>
 
         {isLoading ? (
-          <div className="flex min-h-[240px] items-center justify-center">
-            <Spinner />
-          </div>
+          <LoadingState label="Loading registrations..." />
         ) : isError ? (
-          <Card className="grid gap-2">
-            <h2 className="text-lg font-semibold text-ink">Could not load registrations</h2>
-            <p className="text-sm text-slate-600">{error.message}</p>
-          </Card>
+          <ErrorState title="Could not load registrations" description={error.message} />
         ) : (
           <>
+            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+              <Card className="grid gap-2.5">
+                <p className="text-sm text-slate-500">Confirmed on this page</p>
+                <h2 className="text-2xl font-semibold text-ink">{pageSummary.confirmed}</h2>
+                <p className="text-sm text-slate-600">
+                  Registrations that already hold a confirmed place.
+                </p>
+              </Card>
+              <Card className="grid gap-2.5">
+                <p className="text-sm text-slate-500">Waitlisted on this page</p>
+                <h2 className="text-2xl font-semibold text-ink">{pageSummary.waitlisted}</h2>
+                <p className="text-sm text-slate-600">
+                  Registrations still waiting for movement from the organizer.
+                </p>
+              </Card>
+              <Card className="grid gap-2.5">
+                <p className="text-sm text-slate-500">Ticket-ready on this page</p>
+                <h2 className="text-2xl font-semibold text-ink">{pageSummary.ticketReady}</h2>
+                <p className="text-sm text-slate-600">
+                  Confirmed registrations that already expose ticket details.
+                </p>
+              </Card>
+              <Card className="grid gap-2.5">
+                <p className="text-sm text-slate-500">Latest update on this page</p>
+                <h2 className="text-xl font-semibold text-ink">
+                  {pageSummary.latestUpdate ? formatDate(pageSummary.latestUpdate) : "No updates yet"}
+                </h2>
+                <p className="text-sm text-slate-600">
+                  The most recent registration change visible in your current results.
+                </p>
+              </Card>
+            </div>
+
             <Card className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div className="grid gap-1">
                 <h2 className="text-xl font-semibold text-ink">Participant history</h2>
@@ -171,14 +228,7 @@ export default function MyRegistrationsPage() {
                   Showing up to {pagination.pageSize} registrations per page.
                 </p>
               </div>
-              <div className="flex gap-3">
-                <Button
-                  variant="ghost"
-                  onClick={() => updateSearchParams({ page: String(Math.max(1, pagination.page - 1)) })}
-                  disabled={pagination.page <= 1}
-                >
-                  Previous
-                </Button>
+              <div className="flex flex-col gap-3 sm:flex-row">
                 <Button
                   onClick={() =>
                     updateSearchParams({
@@ -186,8 +236,17 @@ export default function MyRegistrationsPage() {
                     })
                   }
                   disabled={pagination.page >= pagination.totalPages}
+                  className="w-full sm:w-auto"
                 >
                   Next
+                </Button>
+                <Button
+                  variant="ghost"
+                  onClick={() => updateSearchParams({ page: String(Math.max(1, pagination.page - 1)) })}
+                  disabled={pagination.page <= 1}
+                  className="w-full sm:w-auto"
+                >
+                  Previous
                 </Button>
               </div>
             </Card>

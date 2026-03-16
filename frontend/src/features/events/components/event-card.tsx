@@ -2,6 +2,7 @@
 import Link from "next/link";
 
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { ROUTES } from "@/lib/constants/routes";
 import { formatDate } from "@/lib/utils/format-date";
@@ -24,7 +25,7 @@ export function EventCard({ event }: EventCardProps) {
           className="object-cover"
         />
       </div>
-      <div className="grid gap-4 p-6">
+      <div className="grid gap-4 p-5 sm:p-6">
         <div className="flex items-start justify-between gap-4">
           <Badge>{event.theme}</Badge>
           <span className="text-sm font-semibold text-brand-700">
@@ -41,11 +42,10 @@ export function EventCard({ event }: EventCardProps) {
           </p>
           <p>{formatDate(event.startAt)}</p>
         </div>
-        <Link
-          href={`${ROUTES.events}/${event.id}`}
-          className="text-sm font-semibold text-brand-700 transition hover:text-brand-800"
-        >
-          View details
+        <Link href={`${ROUTES.events}/${event.id}`} className="w-full sm:w-auto">
+          <Button variant="ghost" className="w-full sm:w-auto">
+            View details
+          </Button>
         </Link>
       </div>
     </Card>

@@ -45,19 +45,29 @@ export function ForgotPasswordForm() {
           placeholder="you@example.com"
           {...form.register("email")}
           error={form.formState.errors.email?.message}
+          disabled={mutation.isPending || mutation.isSuccess}
         />
+        {mutation.isPending ? (
+          <p role="status" className="text-sm text-slate-600">
+            Sending reset instructions...
+          </p>
+        ) : null}
         {mutation.isSuccess ? (
-          <p className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
+          <p role="status" className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
             If the account exists, reset instructions have been sent.
           </p>
         ) : null}
         {mutation.error ? (
-          <p className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+          <p role="alert" className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
             {mutation.error.message}
           </p>
         ) : null}
-        <Button type="submit" disabled={mutation.isPending}>
-          {mutation.isPending ? "Sending..." : "Send reset instructions"}
+        <Button type="submit" disabled={mutation.isPending || mutation.isSuccess}>
+          {mutation.isPending
+            ? "Sending..."
+            : mutation.isSuccess
+              ? "Instructions sent"
+              : "Send reset instructions"}
         </Button>
       </form>
       <p className="text-sm text-slate-600">

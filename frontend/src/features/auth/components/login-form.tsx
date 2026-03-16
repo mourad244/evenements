@@ -55,6 +55,7 @@ export function LoginForm() {
           placeholder="you@example.com"
           {...form.register("email")}
           error={form.formState.errors.email?.message}
+          disabled={mutation.isPending}
         />
         <PasswordField
           id="login-password"
@@ -63,9 +64,15 @@ export function LoginForm() {
           placeholder="Enter your password"
           {...form.register("password")}
           error={form.formState.errors.password?.message}
+          disabled={mutation.isPending}
         />
+        {mutation.isPending ? (
+          <p role="status" className="text-sm text-slate-600">
+            Signing you in and opening your workspace...
+          </p>
+        ) : null}
         {mutation.error ? (
-          <p className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+          <p role="alert" className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
             {mutation.error.message}
           </p>
         ) : null}
