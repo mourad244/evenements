@@ -12,6 +12,7 @@ Plan directeur des versions. Les dates cibles ci-dessous sont proposees au
 | v0.4-admin | Moderation, audit, tableaux de bord, recherche globale admin | 2026-05-22 | Console admin operationnelle, traces d'audit consultables, incidents retraçables | Admin & Moderation, Observabilite |
 | v1.0-payment | Paiement des evenements payants, webhooks, statuts de transaction, controles de coherence | 2026-06-12 | Paiement confirme avant emission si requis, erreurs gerees, reprise et reconciliation documentees | Payment, Registration, Ticketing |
 | v1.1-prod-ready | Observabilite avancee, CI/CD, durcissement securite, runbooks | 2026-07-03 | Dashboards, alertes, traces distribuees, politique de rollback et de sauvegarde | Monitoring, Infra, Security |
+| v1.2-experience-closure | Integration UI finale participant/organisateur/admin, fermeture des tickets `PARTIAL`, panels ops relies aux metriques existantes | 2026-07-24 | Telechargement billet et export branches dans les vues, statuts notification visibles, panels ops/admin exploitables, passe a11y minimale executee | Frontend, Admin, Monitoring, Registration, Notification |
 
 ## Rappels
 

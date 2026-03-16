@@ -137,6 +137,21 @@ export function createEventRepository(pool) {
       return mapEvent(rows[0]);
     },
 
+    async findPublicById(eventId) {
+      const { rows } = await pool.query(
+        `
+          ${BASE_SELECT}
+          WHERE event_id = $1
+            AND deleted_at IS NULL
+            AND status = 'PUBLISHED'
+            AND visibility = 'PUBLIC'
+          LIMIT 1
+        `,
+        [eventId]
+      );
+      return mapEvent(rows[0]);
+    },
+
     async listDrafts({ organizerId, isAdmin, page, pageSize }) {
       const offset = (page - 1) * pageSize;
       const params = [];
@@ -157,6 +172,97 @@ export function createEventRepository(pool) {
         ${BASE_SELECT}
         WHERE ${whereSql}
         ORDER BY created_at DESC
+        LIMIT $${params.length - 1}
+        OFFSET $${params.length}
+      `;
+      const { rows } = await pool.query(listSql, params);
+      return {
+        items: rows.map(mapEvent),
+        total
+      };
+    },
+
+    async listManagedEvents({ organizerId, isAdmin, page, pageSize }) {
+      const offset = (page - 1) * pageSize;
+      const params = [];
+      const whereClauses = ["deleted_at IS NULL"];
+      if (!isAdmin) {
+        params.push(organizerId);
+        whereClauses.push(`organizer_id = $${params.length}`);
+      }
+
+      const whereSql = whereClauses.join(" AND ");
+      const countSql = `SELECT COUNT(*)::int AS total FROM events WHERE ${whereSql}`;
+      const countResult = await pool.query(countSql, params);
+      const total = countResult.rows[0]?.total || 0;
+
+      params.push(pageSize);
+      params.push(offset);
+      const listSql = `
+        ${BASE_SELECT}
+        WHERE ${whereSql}
+        ORDER BY created_at DESC
+        LIMIT $${params.length - 1}
+        OFFSET $${params.length}
+      `;
+      const { rows } = await pool.query(listSql, params);
+      return {
+        items: rows.map(mapEvent),
+        total
+      };
+    },
+
+    async listPublicEvents({
+      q,
+      theme,
+      city,
+      from,
+      to,
+      page,
+      pageSize
+    }) {
+      const offset = (page - 1) * pageSize;
+      const params = [];
+      const whereClauses = [
+        "deleted_at IS NULL",
+        "status = 'PUBLISHED'",
+        "visibility = 'PUBLIC'"
+      ];
+
+      if (q) {
+        params.push(`%${q.toLowerCase()}%`);
+        whereClauses.push(
+          `(LOWER(title) LIKE $${params.length} OR LOWER(description) LIKE $${params.length})`
+        );
+      }
+      if (theme) {
+        params.push(theme);
+        whereClauses.push(`theme = $${params.length}`);
+      }
+      if (city) {
+        params.push(city);
+        whereClauses.push(`city = $${params.length}`);
+      }
+      if (from) {
+        params.push(from);
+        whereClauses.push(`start_at >= $${params.length}`);
+      }
+      if (to) {
+        params.push(to);
+        whereClauses.push(`start_at <= $${params.length}`);
+      }
+
+      const whereSql = whereClauses.join(" AND ");
+      const countSql = `SELECT COUNT(*)::int AS total FROM events WHERE ${whereSql}`;
+      const countResult = await pool.query(countSql, params);
+      const total = countResult.rows[0]?.total || 0;
+
+      params.push(pageSize);
+      params.push(offset);
+      const listSql = `
+        ${BASE_SELECT}
+        WHERE ${whereSql}
+        ORDER BY start_at ASC, created_at DESC
         LIMIT $${params.length - 1}
         OFFSET $${params.length}
       `;
@@ -261,7 +367,39 @@ export function createEventRepository(pool) {
         [eventId, deletedAt]
       );
       return mapEvent(rows[0]);
+    },
+
+    async publishDraft(eventId, publishedAt, updatedAt) {
+      const { rows } = await pool.query(
+        `
+          UPDATE events
+          SET status = 'PUBLISHED', published_at = $2, updated_at = $3
+          WHERE event_id = $1
+            AND deleted_at IS NULL
+          RETURNING
+            event_id,
+            organizer_id,
+            title,
+            description,
+            theme,
+            venue_name,
+            city,
+            start_at,
+            end_at,
+            timezone,
+            capacity,
+            visibility,
+            pricing_type,
+            status,
+            cover_image_ref,
+            published_at,
+            created_at,
+            updated_at,
+            deleted_at
+        `,
+        [eventId, publishedAt, updatedAt]
+      );
+      return mapEvent(rows[0]);
     }
   };
 }
-
