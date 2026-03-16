@@ -65,6 +65,16 @@ export default function AdminEventsPage() {
         />
       ) : (
         <>
+          <Card className="grid gap-2.5 border-[rgba(243,154,99,0.18)] bg-[radial-gradient(circle_at_top_right,rgba(243,154,99,0.1),transparent_28%),linear-gradient(180deg,rgba(25,20,17,0.94),rgba(11,16,28,0.98))]">
+            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[var(--accent-warm)]">
+              Limited overview guide
+            </p>
+            <h2 className="text-lg font-semibold text-[var(--text-primary)]">Counts and rows stay intentionally narrow</h2>
+            <p className="text-sm leading-6 text-[var(--text-secondary)]">
+              The summary cards below reflect only the visible rows in this limited table. Use them for quick lifecycle context, then scan the directory for identity, location, and schedule.
+            </p>
+          </Card>
+
           <div className="grid gap-4 md:grid-cols-3">
             <Card className="grid gap-2.5 border-[rgba(243,154,99,0.18)] bg-[radial-gradient(circle_at_top_right,rgba(243,154,99,0.1),transparent_30%),linear-gradient(180deg,rgba(18,28,46,0.92),rgba(10,17,30,0.98))] shadow-[0_22px_50px_rgba(0,0,0,0.26)]">
               <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--text-muted)]">Visible events</p>
@@ -93,7 +103,7 @@ export default function AdminEventsPage() {
             <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[var(--accent-warm)]">Admin events</p>
             <h2 className="text-lg font-semibold text-[var(--text-primary)]">Limited event directory</h2>
             <p className="text-sm leading-6 text-[var(--text-secondary)]">
-              Use this table for quick event identity and lifecycle review only.
+              Use this table for quick event identity and lifecycle review only. It is intentionally narrow and not a full event-management workspace.
             </p>
           </Card>
 

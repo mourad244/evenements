@@ -19,7 +19,7 @@ function resolveStatusState(registration: RegistrationItem) {
       description: registration.canDownloadTicket
         ? "Your place is secured and the ticket record is already available."
         : "Your place is secured. Ticket details will appear here as soon as they are ready.",
-      tone: "text-emerald-700"
+      tone: "text-[var(--status-success)]"
     };
   }
 
@@ -29,7 +29,7 @@ function resolveStatusState(registration: RegistrationItem) {
       description: registration.waitlistPosition
         ? `You are currently number ${registration.waitlistPosition} on the waitlist for this event.`
         : "You are still on the waitlist for this event and should check back for movement.",
-      tone: "text-amber-700"
+      tone: "text-[var(--status-warning)]"
     };
   }
 
@@ -37,14 +37,14 @@ function resolveStatusState(registration: RegistrationItem) {
     return {
       title: "Registration not accepted",
       description: "This request did not move forward, so participation and ticket access are unavailable.",
-      tone: "text-rose-700"
+      tone: "text-[var(--status-danger)]"
     };
   }
 
   return {
     title: "Registration cancelled",
     description: "This registration is no longer active. You can still review the event details or browse something else.",
-    tone: "text-slate-700"
+    tone: "text-[var(--text-primary)]"
   };
 }
 
@@ -53,7 +53,7 @@ function resolveTicketState(registration: RegistrationItem) {
     return {
       title: `${registration.ticketFormat || "Ticket"} available`,
       description: "Your ticket record is ready. Download will appear here once it becomes available in the app.",
-      tone: "text-emerald-700"
+      tone: "text-[var(--status-success)]"
     };
   }
 
@@ -61,7 +61,7 @@ function resolveTicketState(registration: RegistrationItem) {
     return {
       title: "Ticket unavailable while waitlisted",
       description: "Ticket access will only become available if your registration is confirmed.",
-      tone: "text-amber-700"
+      tone: "text-[var(--status-warning)]"
     };
   }
 
@@ -69,14 +69,46 @@ function resolveTicketState(registration: RegistrationItem) {
     return {
       title: "Ticket unavailable",
       description: "Cancelled or rejected registrations do not expose ticket access.",
-      tone: "text-rose-700"
+      tone: "text-[var(--status-danger)]"
     };
   }
 
   return {
     title: "Ticket pending issuance",
     description: "Your registration is active, but ticket details are not ready to use in the app yet.",
-    tone: "text-slate-700"
+    tone: "text-[var(--text-primary)]"
+  };
+}
+
+function resolveNextStep(registration: RegistrationItem) {
+  if (registration.status === "CONFIRMED") {
+    return {
+      title: registration.canDownloadTicket ? "Everything is in place" : "Check back for ticket readiness",
+      description: registration.canDownloadTicket
+        ? "You can review the event details any time, and your full participant history will keep this record visible."
+        : "Your place is secured. Keep this history view nearby so you can spot the ticket update as soon as it appears."
+    };
+  }
+
+  if (registration.status === "WAITLISTED") {
+    return {
+      title: "Watch for movement",
+      description: registration.waitlistPosition
+        ? `You are still waitlisted at position ${registration.waitlistPosition}. Return here for the clearest view of any movement.`
+        : "You are still waitlisted. Return here or open the event again for the latest context."
+    };
+  }
+
+  if (registration.status === "REJECTED") {
+    return {
+      title: "Browse something else",
+      description: "This request is closed, so the next useful step is to review the event or discover another one."
+    };
+  }
+
+  return {
+    title: "Use this as a record",
+    description: "This registration is no longer active, but it remains in your history so you can keep a clear record of what changed."
   };
 }
 
@@ -93,7 +125,7 @@ export function RegistrationList({ registrations }: { registrations: Registratio
     return (
       <EmptyState
         title="No registrations yet"
-        description="Your participant history will appear here once you register for an event."
+        description="Your participant history will appear here once you register for an event, and this page will become the clearest place to track status changes and ticket readiness."
         action={
           <Link href={ROUTES.events}>
             <Button variant="ghost">Browse events</Button>
@@ -124,6 +156,7 @@ export function RegistrationList({ registrations }: { registrations: Registratio
       {sortedRegistrations.map((registration) => {
         const statusState = resolveStatusState(registration);
         const ticketState = resolveTicketState(registration);
+        const nextStep = resolveNextStep(registration);
         const isCancellingThis =
           mutation.isPending && mutation.variables === registration.id;
 
@@ -176,10 +209,16 @@ export function RegistrationList({ registrations }: { registrations: Registratio
               ) : null}
             </div>
 
-            <div className="flex flex-col gap-3 sm:flex-row xl:flex-col xl:items-stretch xl:justify-start">
-              <Link href={`/events/${registration.eventId}`} className="w-full sm:w-auto">
-                <Button variant="ghost" className="w-full sm:w-auto">Open event</Button>
-              </Link>
+            <div className="grid gap-4">
+              <div className="grid gap-2 rounded-[24px] border border-[var(--line-soft)] bg-[rgba(12,20,35,0.68)] p-4">
+                <p className="text-sm font-semibold text-[var(--text-primary)]">What to do next</p>
+                <p className="text-sm font-medium text-[var(--text-primary)]">{nextStep.title}</p>
+                <p className="text-sm leading-6 text-[var(--text-secondary)]">{nextStep.description}</p>
+              </div>
+              <div className="flex flex-col gap-3 sm:flex-row xl:flex-col xl:items-stretch xl:justify-start">
+                <Link href={`/events/${registration.eventId}`} className="w-full sm:w-auto">
+                  <Button variant="ghost" className="w-full sm:w-auto">Review event</Button>
+                </Link>
               <Button
                 variant="danger"
                 onClick={() => mutation.mutate(registration.id)}
@@ -192,6 +231,7 @@ export function RegistrationList({ registrations }: { registrations: Registratio
               >
                 {isCancellingThis ? "Cancelling..." : "Cancel"}
               </Button>
+              </div>
             </div>
           </Card>
         );

@@ -44,6 +44,33 @@ function getStateSummary(status: "DRAFT" | "PUBLISHED" | "CANCELLED") {
   };
 }
 
+function getWorkflowSummary(status: "DRAFT" | "PUBLISHED" | "CANCELLED") {
+  if (status === "DRAFT") {
+    return {
+      title: "Best next step: finish the draft",
+      description:
+        "Stay on this page to refine details, then publish when the event is ready to move into participant-facing review.",
+      tone: "text-[var(--status-warning)]"
+    };
+  }
+
+  if (status === "PUBLISHED") {
+    return {
+      title: "Best next step: keep details current, then review registrations",
+      description:
+        "Use this page for event accuracy and the registrations view for the fastest participant-status check.",
+      tone: "text-[var(--status-success)]"
+    };
+  }
+
+  return {
+    title: "Best next step: review only",
+    description:
+      "This event is outside the active workflow, so use this page for context and return to the organizer workspace when you are ready.",
+    tone: "text-[var(--text-primary)]"
+  };
+}
+
 export default function OrganizerEventDetailsPage() {
   const router = useRouter();
   const params = useParams<{ eventId: string }>();
@@ -146,6 +173,14 @@ export default function OrganizerEventDetailsPage() {
                   <h2 className="text-xl font-semibold text-[var(--text-primary)]">{getStateSummary(data.status).title}</h2>
                   <p className="text-sm leading-6 text-[var(--text-secondary)]">{getStateSummary(data.status).description}</p>
                 </div>
+                <div className="grid gap-1 rounded-[24px] border border-[var(--line-soft)] bg-[rgba(12,20,35,0.72)] px-4 py-3">
+                  <p className={`text-sm font-medium ${getWorkflowSummary(data.status).tone}`}>
+                    {getWorkflowSummary(data.status).title}
+                  </p>
+                  <p className="text-sm leading-6 text-[var(--text-secondary)]">
+                    {getWorkflowSummary(data.status).description}
+                  </p>
+                </div>
                 <div className="flex flex-wrap gap-x-4 gap-y-2 rounded-[24px] border border-[var(--line-soft)] bg-[rgba(12,20,35,0.72)] px-4 py-3 text-sm text-[var(--text-muted)]">
                   <p>{data.city}</p>
                   <p>{data.venue}</p>
@@ -194,6 +229,9 @@ export default function OrganizerEventDetailsPage() {
           {publishMutation.isPending || deleteMutation.isPending || mutation.isPending || actionFeedback ? (
             <Card className="grid gap-3 border-[var(--line-soft)] bg-[linear-gradient(180deg,rgba(16,26,45,0.94),rgba(9,15,26,0.98))]">
               <p className="text-sm font-medium text-[var(--text-primary)]">Organizer updates</p>
+              <p className="text-sm text-[var(--text-secondary)]">
+                Keep edits and state changes here, then move into registrations when you need participant review.
+              </p>
               {mutation.isPending ? (
                 <p role="status" className="text-sm text-[var(--text-secondary)]">
                   Saving your event changes...
