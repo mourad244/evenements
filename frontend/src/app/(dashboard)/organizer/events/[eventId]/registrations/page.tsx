@@ -21,19 +21,22 @@ export default function OrganizerEventRegistrationsPage() {
   );
 
   return (
-    <div className="grid gap-8">
+    <div className="grid gap-10">
       <PageTitle
         eyebrow="Organizer"
         title="Event registrations"
         description="Review the participant list, registration states, and ticket-reference readiness for a specific managed event."
       />
 
-      <Card className="flex flex-wrap items-center justify-between gap-3">
+      <Card className="flex flex-wrap items-center justify-between gap-3 border-[rgba(88,116,255,0.18)] bg-[radial-gradient(circle_at_top_right,rgba(88,116,255,0.14),transparent_28%),linear-gradient(180deg,rgba(18,28,46,0.96),rgba(9,15,26,0.98))] shadow-[0_28px_64px_rgba(14,24,54,0.3)]">
         <div className="grid gap-1">
-          <p className="text-sm font-medium text-ink">
+          <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[var(--accent-primary-strong)]">
+            Managed event
+          </p>
+          <p className="text-base font-medium text-[var(--text-primary)]">
             {data?.eventTitle || "Selected event"}
           </p>
-          <p className="text-sm text-slate-600">
+          <p className="text-sm leading-6 text-[var(--text-secondary)]">
             Keep track of who is confirmed, who is waiting, and which tickets are already issued.
           </p>
         </div>
@@ -52,7 +55,7 @@ export default function OrganizerEventRegistrationsPage() {
       </Card>
 
       {isLoading ? (
-        <LoadingState label="Loading event registrations..." />
+        <LoadingState label="Loading event registrations..." variant="table" />
       ) : isError ? (
         <ErrorState
           title="Could not load event registrations"

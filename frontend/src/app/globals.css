@@ -3,11 +3,34 @@
 @tailwind utilities;
 
 :root {
-  color-scheme: light;
-  --app-bg: #f6f3ee;
-  --card-line: rgba(255, 255, 255, 0.72);
-  --ink: #172033;
-  --brand: #f26a2e;
+  color-scheme: dark;
+  --surface-0: #05070d;
+  --surface-1: #0b1220;
+  --surface-2: #101a2d;
+  --surface-3: #15233a;
+  --surface-veil: rgba(9, 15, 26, 0.8);
+  --text-primary: #f3f6ff;
+  --text-secondary: #a8b7d3;
+  --text-muted: #7d8aa3;
+  --line-soft: rgba(133, 154, 194, 0.14);
+  --line-strong: rgba(133, 154, 194, 0.24);
+  --ring-brand: rgba(65, 93, 255, 0.42);
+  --accent-primary: #415dff;
+  --accent-primary-strong: #5874ff;
+  --accent-primary-soft: rgba(65, 93, 255, 0.16);
+  --accent-warm: #f39a63;
+  --accent-warm-soft: rgba(243, 154, 99, 0.16);
+  --status-success: #34d399;
+  --status-warning: #f5c35f;
+  --status-danger: #fb7185;
+  --shadow-surface: 0 22px 60px rgba(0, 0, 0, 0.42);
+  --shadow-floating: 0 28px 80px rgba(0, 0, 0, 0.52);
+  --radius-surface: 28px;
+  --radius-control: 999px;
+  --app-bg: var(--surface-0);
+  --card-line: var(--line-soft);
+  --ink: var(--text-primary);
+  --brand: var(--accent-warm);
 }
 
 html {
@@ -18,8 +41,11 @@ body {
   margin: 0;
   min-width: 320px;
   background:
-    radial-gradient(circle at top left, rgba(242, 106, 46, 0.08), transparent 28%),
-    linear-gradient(180deg, #fbf8f2 0%, #f3efe8 100%);
+    radial-gradient(circle at top left, rgba(65, 93, 255, 0.2), transparent 24%),
+    radial-gradient(circle at 85% 12%, rgba(243, 154, 99, 0.12), transparent 18%),
+    linear-gradient(180deg, #05070d 0%, #09111c 48%, #0a1422 100%);
+  color: var(--text-primary);
+  font-feature-settings: "rlig" 1, "calt" 1;
 }
 
 a {
@@ -31,10 +57,24 @@ a {
   box-sizing: border-box;
 }
 
+::selection {
+  background: rgba(65, 93, 255, 0.32);
+  color: var(--text-primary);
+}
+
 @layer utilities {
   .bg-app {
     background:
-      radial-gradient(circle at top left, rgba(242, 106, 46, 0.08), transparent 28%),
-      linear-gradient(180deg, #fbf8f2 0%, #f3efe8 100%);
+      radial-gradient(circle at top left, rgba(65, 93, 255, 0.2), transparent 24%),
+      radial-gradient(circle at 85% 12%, rgba(243, 154, 99, 0.12), transparent 18%),
+      linear-gradient(180deg, #05070d 0%, #09111c 48%, #0a1422 100%);
+  }
+
+  .surface-premium {
+    background:
+      linear-gradient(180deg, rgba(18, 28, 46, 0.92), rgba(11, 18, 32, 0.96)),
+      rgba(11, 18, 32, 0.92);
+    border-color: var(--line-soft);
+    box-shadow: var(--shadow-surface);
   }
 }

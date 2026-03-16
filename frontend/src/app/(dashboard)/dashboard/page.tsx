@@ -3,41 +3,25 @@
 import Link from "next/link";
 import { useState } from "react";
 
+import { PageTitle } from "@/components/shared/page-title";
+import { SectionPanel } from "@/components/shared/section-panel";
+import { StatusBadge } from "@/components/shared/status-badge";
+import { SummaryCard } from "@/components/shared/summary-card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { ErrorState } from "@/components/ui/error-state";
 import { LoadingState } from "@/components/ui/loading-state";
-import { PageTitle } from "@/components/shared/page-title";
-import { StatusBadge } from "@/components/shared/status-badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { useCurrentUser } from "@/features/auth/hooks/use-current-user";
-import type { EventItem } from "@/features/events/types/event.types";
 import { useOrganizerEventsQuery } from "@/features/events/hooks/use-organizer-events-query";
+import type { EventItem } from "@/features/events/types/event.types";
+import { useMyRegistrationsQuery } from "@/features/registrations/hooks/use-my-registrations-query";
 import {
   type RegistrationItem,
   type RegistrationStatus
 } from "@/features/registrations/types/registration.types";
-import { useMyRegistrationsQuery } from "@/features/registrations/hooks/use-my-registrations-query";
 import { ROUTES } from "@/lib/constants/routes";
 import { formatDate } from "@/lib/utils/format-date";
-
-function SummaryCard({
-  label,
-  value,
-  description
-}: {
-  label: string;
-  value: string;
-  description: string;
-}) {
-  return (
-    <Card className="grid gap-3">
-      <p className="text-sm text-slate-500">{label}</p>
-      <h2 className="text-2xl font-semibold text-ink sm:text-3xl">{value}</h2>
-      <p className="text-sm leading-6 text-slate-600">{description}</p>
-    </Card>
-  );
-}
 
 function getParticipantAction(registrations: RegistrationItem[]) {
   const activeRegistration = registrations.find(
@@ -48,7 +32,8 @@ function getParticipantAction(registrations: RegistrationItem[]) {
   if (!activeRegistration) {
     return {
       title: "Find your next event",
-      description: "You do not have an active participation yet, so the best next step is to browse upcoming events.",
+      description:
+        "You do not have an active participation yet, so the best next step is to browse upcoming events.",
       href: ROUTES.events,
       cta: "Browse events",
       secondaryHref: ROUTES.myRegistrations,
@@ -60,10 +45,9 @@ function getParticipantAction(registrations: RegistrationItem[]) {
     CONFIRMED: activeRegistration.canDownloadTicket
       ? "Your place is confirmed and ticket details are already visible in your registrations."
       : "Your place is confirmed. Keep an eye on your registrations for ticket readiness and event details.",
-    WAITLISTED:
-      activeRegistration.waitlistPosition
-        ? `You are currently number ${activeRegistration.waitlistPosition} on the waitlist.`
-        : "You are still on the waitlist. Check the event details and your registrations for updates.",
+    WAITLISTED: activeRegistration.waitlistPosition
+      ? `You are currently number ${activeRegistration.waitlistPosition} on the waitlist.`
+      : "You are still on the waitlist. Check the event details and your registrations for updates.",
     CANCELLED: "This registration is no longer active.",
     REJECTED: "This registration was not accepted for participation."
   };
@@ -84,9 +68,7 @@ function getParticipantAction(registrations: RegistrationItem[]) {
         ? `/events/${activeRegistration.eventId}`
         : ROUTES.myRegistrations,
     secondaryCta:
-      activeRegistration.status === "CONFIRMED"
-        ? "Review event"
-        : "Open history"
+      activeRegistration.status === "CONFIRMED" ? "Review event" : "Open history"
   };
 }
 
@@ -123,7 +105,7 @@ function ParticipantDashboard({
   const [currentTime] = useState(() => Date.now());
 
   if (isLoading) {
-    return <LoadingState label="Loading your dashboard..." />;
+    return <LoadingState label="Loading your dashboard..." variant="dashboard" />;
   }
 
   if (isError) {
@@ -150,56 +132,81 @@ function ParticipantDashboard({
   );
 
   return (
-    <div className="grid gap-6">
-      <div className="grid gap-4 sm:gap-6 xl:grid-cols-[minmax(0,1.3fr)_repeat(2,minmax(0,1fr))]">
-        <Card className="grid gap-4">
-          <div className="grid gap-1">
-            <p className="text-sm text-slate-500">What to focus on now</p>
-            <h2 className="text-2xl font-semibold text-ink">{nextAction.title}</h2>
-            <p className="text-sm leading-6 text-slate-600">{nextAction.description}</p>
-          </div>
-          <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
-            <Link href={nextAction.href} className="w-full sm:w-auto">
-              <Button className="w-full sm:w-auto">{nextAction.cta}</Button>
-            </Link>
-            <Link href={nextAction.secondaryHref} className="w-full sm:w-auto">
+    <div className="grid gap-8">
+      <SectionPanel
+        eyebrow="Participant focus"
+        title="What needs your attention now"
+        description="Stay on top of your next event, your active registrations, and the fastest path back into your participant history."
+        className="grid gap-6 border-[rgba(88,116,255,0.2)] bg-[radial-gradient(circle_at_top_right,rgba(88,116,255,0.18),transparent_32%),linear-gradient(180deg,rgba(18,28,46,0.96),rgba(10,17,30,0.98))] shadow-[0_30px_70px_rgba(18,29,68,0.28)]"
+        action={
+          <>
+            <Link href={ROUTES.myRegistrations} className="w-full sm:w-auto">
               <Button variant="ghost" className="w-full sm:w-auto">
-                {nextAction.secondaryCta}
+                Open my registrations
               </Button>
             </Link>
-          </div>
-        </Card>
-        <SummaryCard
-          label="Upcoming participation"
-          value={upcomingRegistration ? formatDate(upcomingRegistration.eventDate) : "None yet"}
-          description={
-            upcomingRegistration
-              ? `${upcomingRegistration.eventTitle}${upcomingRegistration.eventCity ? ` in ${upcomingRegistration.eventCity}` : ""}`
-              : "Your next confirmed or waitlisted event will show up here once you have one."
-          }
-        />
-        <SummaryCard
-          label="Active registrations"
-          value={String(activeRegistrations.length)}
-          description="Confirmed and waitlisted registrations that still need your attention."
-        />
-      </div>
+            <Link href={ROUTES.events} className="w-full sm:w-auto">
+              <Button className="w-full sm:w-auto">Browse events</Button>
+            </Link>
+          </>
+        }
+      >
+        <div className="grid gap-4 sm:gap-6 xl:grid-cols-[minmax(0,1.3fr)_repeat(2,minmax(0,1fr))]">
+          <Card className="relative grid gap-5 overflow-hidden border-[rgba(88,116,255,0.24)] bg-[radial-gradient(circle_at_top_right,rgba(88,116,255,0.22),transparent_30%),linear-gradient(180deg,rgba(22,34,58,0.98),rgba(10,17,30,0.98))] shadow-[0_26px_58px_rgba(24,40,98,0.3)]">
+            <div className="absolute inset-x-0 top-0 h-px bg-[linear-gradient(90deg,transparent,rgba(255,255,255,0.22),transparent)]" />
+            <div className="grid gap-1.5">
+              <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[var(--accent-primary-strong)]">
+                What to focus on now
+              </p>
+              <h2 className="text-3xl font-semibold tracking-tight text-[var(--text-primary)]">
+                {nextAction.title}
+              </h2>
+              <p className="max-w-[42ch] text-sm leading-6 text-[var(--text-secondary)]">
+                {nextAction.description}
+              </p>
+            </div>
+            <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+              <Link href={nextAction.href} className="w-full sm:w-auto">
+                <Button className="w-full sm:w-auto">{nextAction.cta}</Button>
+              </Link>
+              <Link href={nextAction.secondaryHref} className="w-full sm:w-auto">
+                <Button variant="ghost" className="w-full sm:w-auto">
+                  {nextAction.secondaryCta}
+                </Button>
+              </Link>
+            </div>
+          </Card>
+          <SummaryCard
+            label="Upcoming participation"
+            value={upcomingRegistration ? formatDate(upcomingRegistration.eventDate) : "None yet"}
+            description={
+              upcomingRegistration
+                ? `${upcomingRegistration.eventTitle}${upcomingRegistration.eventCity ? ` in ${upcomingRegistration.eventCity}` : ""}`
+                : "Your next confirmed or waitlisted event will show up here once you have one."
+            }
+            accent="highlight"
+          />
+          <SummaryCard
+            label="Active registrations"
+            value={String(activeRegistrations.length)}
+            description="Confirmed and waitlisted registrations that still need your attention."
+          />
+        </div>
+      </SectionPanel>
 
-      <Card className="grid gap-4.5">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div className="grid gap-1">
-            <h2 className="text-xl font-semibold text-ink">Recent activity</h2>
-            <p className="text-sm text-slate-600">
-              Your latest registration changes and the current status for each event.
-            </p>
-          </div>
+      <SectionPanel
+        eyebrow="Participant activity"
+        title="Recent activity"
+        description="Review the latest changes in your registration history and jump back into the event or your full participant view."
+        className="grid gap-6 border-[var(--line-soft)] bg-[linear-gradient(180deg,rgba(15,24,40,0.94),rgba(8,14,24,0.98))]"
+        action={
           <Link href={ROUTES.myRegistrations} className="w-full sm:w-auto">
             <Button variant="ghost" className="w-full sm:w-auto">
               Open my registrations
             </Button>
           </Link>
-        </div>
-
+        }
+      >
         {recentParticipations.length === 0 ? (
           <EmptyState
             title="No activity yet"
@@ -216,15 +223,15 @@ function ParticipantDashboard({
             {recentParticipations.map((registration) => (
               <div
                 key={registration.id}
-                className="flex flex-col gap-3 rounded-3xl border border-slate-100 bg-slate-50/70 p-4 sm:flex-row sm:items-center sm:justify-between"
+                className="flex flex-col gap-3 rounded-[28px] border border-[var(--line-soft)] bg-[linear-gradient(180deg,rgba(18,28,46,0.78),rgba(10,17,30,0.9))] p-4 shadow-[0_18px_40px_rgba(0,0,0,0.2)] sm:flex-row sm:items-center sm:justify-between"
               >
                 <div className="grid gap-1">
-                  <h3 className="font-semibold text-ink">{registration.eventTitle}</h3>
-                  <p className="text-sm text-slate-600">
+                  <h3 className="font-semibold text-[var(--text-primary)]">{registration.eventTitle}</h3>
+                  <p className="text-sm text-[var(--text-secondary)]">
                     {formatDate(registration.eventDate)}
                     {registration.eventCity ? ` | ${registration.eventCity}` : ""}
                   </p>
-                  <p className="text-sm text-slate-500">
+                  <p className="text-sm text-[var(--text-muted)]">
                     {registration.updatedAt
                       ? `Updated ${formatDate(registration.updatedAt)}`
                       : "Waiting for the next update"}
@@ -247,7 +254,7 @@ function ParticipantDashboard({
             ))}
           </div>
         )}
-      </Card>
+      </SectionPanel>
     </div>
   );
 }
@@ -266,7 +273,7 @@ function OrganizerDashboard({
   const [currentTime] = useState(() => Date.now());
 
   if (isLoading) {
-    return <LoadingState label="Loading organizer summary..." />;
+    return <LoadingState label="Loading organizer summary..." variant="dashboard" />;
   }
 
   if (isError) {
@@ -287,79 +294,95 @@ function OrganizerDashboard({
   const shortcutEvent = published[0] || nextUpcomingEvent || drafts[0] || events[0] || null;
 
   return (
-    <div className="grid gap-6">
-      <div className="grid gap-4 sm:gap-6 md:grid-cols-2 xl:grid-cols-3">
-        <SummaryCard
-          label="Draft events"
-          value={String(drafts.length)}
-          description="Drafts that still need review, completion, or publishing."
-        />
-        <SummaryCard
-          label="Published events"
-          value={String(published.length)}
-          description="Events currently exposed to the public catalog."
-        />
-        <Card className="grid gap-3.5">
-          <p className="text-sm text-slate-500">Registration shortcut</p>
-          {shortcutEvent ? (
-            <>
-              <h2 className="text-xl font-semibold text-ink">{shortcutEvent.title}</h2>
-              <p className="text-sm text-slate-600">
-                Jump into registrations for a live or upcoming managed event.
-              </p>
-              <Link
-                href={`/organizer/events/${shortcutEvent.id}/registrations`}
-                className="w-full sm:w-auto"
-              >
-                <Button variant="ghost" className="w-full sm:w-auto">
-                  View registrations
-                </Button>
-              </Link>
-            </>
-          ) : (
-            <>
-              <h2 className="text-xl font-semibold text-ink">Create your first event</h2>
-              <p className="text-sm text-slate-600">
-                Start with a draft to unlock publishing and registration workflows.
-              </p>
-              <Link href={ROUTES.organizerNewEvent} className="w-full sm:w-auto">
-                <Button variant="ghost" className="w-full sm:w-auto">
-                  Create event
-                </Button>
-              </Link>
-            </>
-          )}
-        </Card>
-      </div>
-
-      <Card className="grid gap-4.5">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div className="grid gap-1">
-            <h2 className="text-xl font-semibold text-ink">Managed events</h2>
-            <p className="text-sm text-slate-600">
-              Your latest drafts and published events with direct organizer actions.
-            </p>
-          </div>
-          <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
-            <Link href={ROUTES.organizerNewEvent} className="w-full sm:w-auto">
-              <Button className="w-full sm:w-auto">Create event</Button>
-            </Link>
+    <div className="grid gap-8">
+      <SectionPanel
+        eyebrow="Organizer overview"
+        title="What needs attention in your event workspace"
+        description="Track draft progress, keep live events in view, and move quickly into registrations or event editing."
+        className="grid gap-6 border-[rgba(88,116,255,0.18)] bg-[radial-gradient(circle_at_top_right,rgba(88,116,255,0.16),transparent_32%),linear-gradient(180deg,rgba(17,27,46,0.96),rgba(9,15,26,0.98))] shadow-[0_30px_70px_rgba(18,29,68,0.24)]"
+        action={
+          <>
             <Link href={ROUTES.organizerEvents} className="w-full sm:w-auto">
               <Button variant="ghost" className="w-full sm:w-auto">
                 Open workspace
               </Button>
             </Link>
-          </div>
+            <Link href={ROUTES.organizerNewEvent} className="w-full sm:w-auto">
+              <Button className="w-full sm:w-auto">Create event</Button>
+            </Link>
+          </>
+        }
+      >
+        <div className="grid gap-4 sm:gap-6 md:grid-cols-2 xl:grid-cols-3">
+          <SummaryCard
+            label="Draft events"
+            value={String(drafts.length)}
+            description="Drafts that still need review, completion, or publishing."
+            accent="highlight"
+          />
+          <SummaryCard
+            label="Published events"
+            value={String(published.length)}
+            description="Events currently exposed to the public catalog."
+          />
+          <Card className="relative grid gap-4 overflow-hidden border-[rgba(243,154,99,0.18)] bg-[radial-gradient(circle_at_top_right,rgba(243,154,99,0.16),transparent_30%),linear-gradient(180deg,rgba(20,31,50,0.98),rgba(10,17,30,0.98))] shadow-[0_24px_56px_rgba(51,28,8,0.22)]">
+            <div className="absolute inset-x-0 top-0 h-px bg-[linear-gradient(90deg,transparent,rgba(255,255,255,0.18),transparent)]" />
+            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[var(--accent-warm)]">
+              Registration shortcut
+            </p>
+            {shortcutEvent ? (
+              <>
+                <h2 className="text-2xl font-semibold tracking-tight text-[var(--text-primary)]">
+                  {shortcutEvent.title}
+                </h2>
+                <p className="text-sm leading-6 text-[var(--text-secondary)]">
+                  Jump into registrations for a live or upcoming managed event.
+                </p>
+                <Link
+                  href={`/organizer/events/${shortcutEvent.id}/registrations`}
+                  className="w-full sm:w-auto"
+                >
+                  <Button className="w-full sm:w-auto">View registrations</Button>
+                </Link>
+              </>
+            ) : (
+              <>
+                <h2 className="text-2xl font-semibold tracking-tight text-[var(--text-primary)]">
+                  Create your first event
+                </h2>
+                <p className="text-sm leading-6 text-[var(--text-secondary)]">
+                  Start with a draft to unlock publishing and registration workflows.
+                </p>
+                <Link href={ROUTES.organizerNewEvent} className="w-full sm:w-auto">
+                  <Button className="w-full sm:w-auto">Create event</Button>
+                </Link>
+              </>
+            )}
+          </Card>
         </div>
+      </SectionPanel>
 
+      <SectionPanel
+        eyebrow="Organizer activity"
+        title="Managed events"
+        description="Review your latest drafts and published events, then jump directly into editing or registration monitoring."
+        className="grid gap-6 border-[var(--line-soft)] bg-[linear-gradient(180deg,rgba(15,24,40,0.94),rgba(8,14,24,0.98))]"
+        action={
+          <Link href={ROUTES.organizerEvents} className="w-full sm:w-auto">
+            <Button variant="ghost" className="w-full sm:w-auto">
+              Open workspace
+            </Button>
+          </Link>
+        }
+      >
         {recentEvents.length === 0 ? (
           <EmptyState
             title="No managed events yet"
             description="Create your first draft to start publishing and registration monitoring."
             action={
-                <Link href={ROUTES.organizerNewEvent} className="w-full sm:w-auto">
-                  <Button className="w-full sm:w-auto">Create event</Button>
-                </Link>
+              <Link href={ROUTES.organizerNewEvent} className="w-full sm:w-auto">
+                <Button className="w-full sm:w-auto">Create event</Button>
+              </Link>
             }
             align="left"
           />
@@ -368,11 +391,11 @@ function OrganizerDashboard({
             {recentEvents.map((event) => (
               <div
                 key={event.id}
-                className="flex flex-col gap-3 rounded-3xl border border-slate-100 bg-slate-50/70 p-4 lg:flex-row lg:items-center lg:justify-between"
+                className="flex flex-col gap-3 rounded-[28px] border border-[var(--line-soft)] bg-[linear-gradient(180deg,rgba(18,28,46,0.78),rgba(10,17,30,0.9))] p-4 shadow-[0_18px_40px_rgba(0,0,0,0.2)] lg:flex-row lg:items-center lg:justify-between"
               >
                 <div className="grid gap-1">
-                  <h3 className="font-semibold text-ink">{event.title}</h3>
-                  <p className="text-sm text-slate-600">
+                  <h3 className="font-semibold text-[var(--text-primary)]">{event.title}</h3>
+                  <p className="text-sm text-[var(--text-secondary)]">
                     {event.city} | {formatDate(event.startAt)}
                   </p>
                 </div>
@@ -396,46 +419,67 @@ function OrganizerDashboard({
             ))}
           </div>
         )}
-      </Card>
+      </SectionPanel>
     </div>
   );
 }
 
 function AdminDashboard() {
   return (
-    <div className="grid gap-4 sm:gap-6 md:grid-cols-3">
-      <Card className="grid gap-2.5">
-        <p className="text-sm text-slate-500">Admin events</p>
-        <h2 className="text-xl font-semibold text-ink">Temporary overview</h2>
-        <p className="text-sm text-slate-600">
-          A dedicated admin metrics contract is not available yet, so this page avoids invented KPIs.
-        </p>
-        <Link href={ROUTES.adminEvents} className="w-full sm:w-auto">
-          <Button variant="ghost" className="w-full sm:w-auto">
-            Open admin events
-          </Button>
-        </Link>
-      </Card>
-      <Card className="grid gap-2.5">
-        <p className="text-sm text-slate-500">Admin users</p>
-        <h2 className="text-xl font-semibold text-ink">User oversight</h2>
-        <p className="text-sm text-slate-600">
-          Review the live admin user list while the metrics surface is still pending.
-        </p>
-        <Link href={ROUTES.adminUsers} className="w-full sm:w-auto">
-          <Button variant="ghost" className="w-full sm:w-auto">
-            Open admin users
-          </Button>
-        </Link>
-      </Card>
-      <Card className="grid gap-2.5">
-        <p className="text-sm text-slate-500">Metrics readiness</p>
-        <h2 className="text-xl font-semibold text-ink">Awaiting backend support</h2>
-        <p className="text-sm text-slate-600">
-          Once the backend exposes admin KPI endpoints, this area can become a live operational summary.
-        </p>
-      </Card>
-    </div>
+    <SectionPanel
+      eyebrow="Admin overview"
+      title="Platform operations at a glance"
+      description="Use the current admin surfaces for limited event review and user oversight while deeper admin tooling is still out of scope."
+      className="grid gap-6 border-[rgba(243,154,99,0.18)] bg-[radial-gradient(circle_at_top_right,rgba(243,154,99,0.14),transparent_30%),linear-gradient(180deg,rgba(18,28,46,0.96),rgba(10,17,30,0.98))] shadow-[0_28px_64px_rgba(0,0,0,0.32)]"
+      action={
+        <>
+          <Link href={ROUTES.adminEvents} className="w-full sm:w-auto">
+            <Button variant="ghost" className="w-full sm:w-auto">
+              Open admin events
+            </Button>
+          </Link>
+          <Link href={ROUTES.adminUsers} className="w-full sm:w-auto">
+            <Button className="w-full sm:w-auto">Open admin users</Button>
+          </Link>
+        </>
+      }
+    >
+      <div className="grid gap-4 sm:gap-6 md:grid-cols-3">
+        <SummaryCard
+          label="Admin events"
+          value="Limited overview"
+          description="A dedicated admin metrics contract is not available yet, so this workspace avoids invented KPIs."
+          accent="highlight"
+        />
+        <Card className="grid gap-3.5 border-[var(--line-soft)] bg-[linear-gradient(180deg,rgba(18,28,46,0.9),rgba(10,17,30,0.98))] shadow-[0_22px_48px_rgba(0,0,0,0.24)]">
+          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[var(--text-muted)]">
+            Admin users
+          </p>
+          <h2 className="text-2xl font-semibold tracking-tight text-[var(--text-primary)]">
+            User oversight
+          </h2>
+          <p className="text-sm leading-6 text-[var(--text-secondary)]">
+            Review the live admin user list while the metrics surface is still pending.
+          </p>
+          <Link href={ROUTES.adminUsers} className="w-full sm:w-auto">
+            <Button variant="ghost" className="w-full sm:w-auto">
+              Open admin users
+            </Button>
+          </Link>
+        </Card>
+        <Card className="grid gap-3.5 border-[var(--line-soft)] bg-[linear-gradient(180deg,rgba(18,28,46,0.9),rgba(10,17,30,0.98))] shadow-[0_22px_48px_rgba(0,0,0,0.24)]">
+          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[var(--text-muted)]">
+            Metrics readiness
+          </p>
+          <h2 className="text-2xl font-semibold tracking-tight text-[var(--text-primary)]">
+            Awaiting backend support
+          </h2>
+          <p className="text-sm leading-6 text-[var(--text-secondary)]">
+            Once the backend exposes admin KPI endpoints, this area can become a live operational summary.
+          </p>
+        </Card>
+      </div>
+    </SectionPanel>
   );
 }
 
@@ -449,13 +493,13 @@ export default function DashboardPage() {
   const organizerEventsQuery = useOrganizerEventsQuery(isOrganizer);
 
   if (isUserLoading) {
-    return <LoadingState label="Loading dashboard..." />;
+    return <LoadingState label="Loading dashboard..." variant="dashboard" />;
   }
 
   const title = user ? `Welcome back, ${user.fullName}.` : "Welcome back.";
 
   return (
-    <div className="grid gap-8">
+    <div className="grid gap-10">
       <PageTitle
         eyebrow="Dashboard"
         title={title}

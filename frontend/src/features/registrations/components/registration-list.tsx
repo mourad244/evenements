@@ -82,6 +82,12 @@ function resolveTicketState(registration: RegistrationItem) {
 
 export function RegistrationList({ registrations }: { registrations: RegistrationItem[] }) {
   const mutation = useCancelRegistrationMutation();
+  const sortedRegistrations = [...registrations].sort((left, right) => {
+    const leftDate = left.updatedAt || left.eventDate;
+    const rightDate = right.updatedAt || right.eventDate;
+
+    return Date.parse(rightDate) - Date.parse(leftDate);
+  });
 
   if (registrations.length === 0) {
     return (
@@ -102,7 +108,7 @@ export function RegistrationList({ registrations }: { registrations: Registratio
       {mutation.isSuccess ? (
         <p
           role="status"
-          className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700"
+          className="rounded-[22px] border border-[rgba(52,211,153,0.22)] bg-[rgba(6,78,59,0.3)] px-4 py-3 text-sm text-[var(--status-success)]"
         >
           Your registration was cancelled. The list will refresh automatically.
         </p>
@@ -110,12 +116,12 @@ export function RegistrationList({ registrations }: { registrations: Registratio
       {mutation.error ? (
         <p
           role="alert"
-          className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
+          className="rounded-[22px] border border-[rgba(251,113,133,0.24)] bg-[rgba(127,29,29,0.26)] px-4 py-3 text-sm text-[var(--status-danger)]"
         >
           {mutation.error.message}
         </p>
       ) : null}
-      {registrations.map((registration) => {
+      {sortedRegistrations.map((registration) => {
         const statusState = resolveStatusState(registration);
         const ticketState = resolveTicketState(registration);
         const isCancellingThis =
@@ -124,15 +130,20 @@ export function RegistrationList({ registrations }: { registrations: Registratio
         return (
           <Card
             key={registration.id}
-            className="grid gap-5 xl:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)_auto]"
+            className="grid gap-5 border-[var(--line-soft)] bg-[linear-gradient(180deg,rgba(18,28,46,0.94),rgba(9,15,26,0.98))] shadow-[0_24px_56px_rgba(0,0,0,0.28)] lg:gap-6 xl:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)_auto]"
           >
             <div className="grid gap-4">
-              <div className="flex flex-wrap items-center gap-3">
-                <h3 className="text-lg font-semibold text-ink">{registration.eventTitle}</h3>
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                <div className="grid gap-1.5">
+                  <h3 className="text-lg font-semibold text-[var(--text-primary)]">{registration.eventTitle}</h3>
+                  <p className="text-xs uppercase tracking-[0.18em] text-[var(--text-muted)]">
+                    Registration overview
+                  </p>
+                </div>
                 <StatusBadge status={registration.status} />
               </div>
 
-              <div className="flex flex-wrap gap-x-4 gap-y-2 text-sm text-slate-600">
+              <div className="flex flex-wrap gap-x-4 gap-y-2 rounded-[22px] border border-[var(--line-soft)] bg-[rgba(12,20,35,0.72)] px-4 py-3 text-sm text-[var(--text-secondary)]">
                 <p>{formatDate(registration.eventDate)}</p>
                 {registration.eventCity ? <p>{registration.eventCity}</p> : null}
                 {registration.updatedAt ? (
@@ -140,32 +151,32 @@ export function RegistrationList({ registrations }: { registrations: Registratio
                 ) : null}
               </div>
 
-              <div className="grid gap-2 rounded-3xl border border-slate-100 bg-white/70 p-4">
-                <p className="text-sm font-semibold text-ink">Registration status</p>
+              <div className="grid gap-2 rounded-[28px] border border-[var(--line-soft)] bg-[linear-gradient(180deg,rgba(16,26,45,0.84),rgba(10,17,30,0.92))] p-4">
+                <p className="text-sm font-semibold text-[var(--text-primary)]">Registration status</p>
                 <p className={`text-sm font-medium ${statusState.tone}`}>{statusState.title}</p>
-                <p className="text-sm text-slate-600">{statusState.description}</p>
+                <p className="text-sm leading-6 text-[var(--text-secondary)]">{statusState.description}</p>
                 {registration.waitlistPosition ? (
-                  <p className="text-xs text-amber-700">
+                  <p className="text-xs text-[var(--status-warning)]">
                     Current waitlist position: {registration.waitlistPosition}
                   </p>
                 ) : null}
               </div>
             </div>
 
-            <div className="grid gap-2 rounded-3xl border border-slate-100 bg-slate-50/70 p-4">
-              <p className="text-sm font-semibold text-ink">Ticket readiness</p>
+            <div className="grid gap-2 rounded-[28px] border border-[var(--line-soft)] bg-[linear-gradient(180deg,rgba(16,26,45,0.84),rgba(10,17,30,0.92))] p-4">
+              <p className="text-sm font-semibold text-[var(--text-primary)]">Ticket readiness</p>
               <p className={`text-sm font-medium ${ticketState.tone}`}>{ticketState.title}</p>
-              <p className="text-sm text-slate-600">{ticketState.description}</p>
+              <p className="text-sm leading-6 text-[var(--text-secondary)]">{ticketState.description}</p>
               {registration.ticketId ? (
-                <p className="text-xs text-slate-500">
+                <p className="text-xs text-[var(--text-muted)]">
                   Ticket reference:{" "}
-                  <span className="font-medium text-slate-700">{registration.ticketId}</span>
+                  <span className="font-medium text-[var(--text-primary)]">{registration.ticketId}</span>
                   {registration.ticketFormat ? ` | Format: ${registration.ticketFormat}` : ""}
                 </p>
               ) : null}
             </div>
 
-            <div className="flex flex-col gap-3 sm:flex-row lg:justify-end">
+            <div className="flex flex-col gap-3 sm:flex-row xl:flex-col xl:items-stretch xl:justify-start">
               <Link href={`/events/${registration.eventId}`} className="w-full sm:w-auto">
                 <Button variant="ghost" className="w-full sm:w-auto">Open event</Button>
               </Link>
