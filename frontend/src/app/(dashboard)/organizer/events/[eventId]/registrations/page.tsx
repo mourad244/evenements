@@ -19,6 +19,14 @@ export default function OrganizerEventRegistrationsPage() {
   const { data, isLoading, isError, error } = useOrganizerEventRegistrationsQuery(
     params.eventId
   );
+  const confirmedCount =
+    data?.registrations.filter((registration) => registration.status === "CONFIRMED").length || 0;
+  const waitlistedCount =
+    data?.registrations.filter((registration) => registration.status === "WAITLISTED").length || 0;
+  const pendingTicketRefs =
+    data?.registrations.filter(
+      (registration) => registration.status === "CONFIRMED" && !registration.ticketRef
+    ).length || 0;
 
   return (
     <div className="grid gap-10">
@@ -39,6 +47,19 @@ export default function OrganizerEventRegistrationsPage() {
           <p className="text-sm leading-6 text-[var(--text-secondary)]">
             Keep track of who is confirmed, who is waiting, and which tickets are already issued.
           </p>
+          {data ? (
+            <div className="flex flex-wrap gap-2 pt-1">
+              <span className="rounded-full border border-[rgba(88,116,255,0.2)] bg-[rgba(88,116,255,0.12)] px-3 py-1.5 text-sm text-[var(--text-primary)]">
+                Confirmed: {confirmedCount}
+              </span>
+              <span className="rounded-full border border-[rgba(243,154,99,0.18)] bg-[rgba(243,154,99,0.1)] px-3 py-1.5 text-sm text-[var(--text-primary)]">
+                Waitlisted: {waitlistedCount}
+              </span>
+              <span className="rounded-full border border-[var(--line-soft)] bg-[rgba(12,20,35,0.72)] px-3 py-1.5 text-sm text-[var(--text-secondary)]">
+                Ticket refs pending: {pendingTicketRefs}
+              </span>
+            </div>
+          ) : null}
         </div>
         <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:flex-wrap">
           <Link href={`/organizer/events/${params.eventId}`} className="w-full sm:w-auto">
@@ -53,6 +74,18 @@ export default function OrganizerEventRegistrationsPage() {
           </Link>
         </div>
       </Card>
+
+      {data ? (
+        <Card className="grid gap-2.5 border-[var(--line-soft)] bg-[linear-gradient(180deg,rgba(16,26,45,0.94),rgba(9,15,26,0.98))]">
+          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[var(--accent-primary-strong)]">
+            Organizer workflow
+          </p>
+          <h2 className="text-lg font-semibold text-[var(--text-primary)]">Use this page for participant review</h2>
+          <p className="text-sm leading-6 text-[var(--text-secondary)]">
+            This is the fastest surface for participant status and ticket-reference checks. Return to the event page when you need to edit event details or change the event state.
+          </p>
+        </Card>
+      ) : null}
 
       {isLoading ? (
         <LoadingState label="Loading event registrations..." variant="table" />

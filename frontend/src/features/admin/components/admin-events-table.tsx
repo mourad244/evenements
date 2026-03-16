@@ -4,6 +4,30 @@ import { formatDate } from "@/lib/utils/format-date";
 
 import type { AdminEvent } from "../types/admin.types";
 
+function resolveLifecycleCue(status: AdminEvent["status"]) {
+  if (status === "DRAFT") {
+    return {
+      title: "Preparation stage",
+      description: "This event is still being prepared and is not yet live to participants.",
+      tone: "text-[var(--status-warning)]"
+    };
+  }
+
+  if (status === "PUBLISHED") {
+    return {
+      title: "Live to participants",
+      description: "This event is currently visible in the participant-facing catalog.",
+      tone: "text-[var(--status-success)]"
+    };
+  }
+
+  return {
+    title: "Review-only state",
+    description: "This event is outside the main live workflow and remains visible here only for limited review.",
+    tone: "text-[var(--text-primary)]"
+  };
+}
+
 export function AdminEventsTable({ events }: { events: AdminEvent[] }) {
   const sortedEvents = [...events].sort((left, right) => {
     const statusRank = {
@@ -79,9 +103,14 @@ export function AdminEventsTable({ events }: { events: AdminEvent[] }) {
             <td className="px-4 py-5 sm:px-6">
               <div className="grid gap-2.5">
                 <StatusBadge status={event.status} />
-                <span className="text-xs text-[var(--text-muted)]">
-                  Current event lifecycle state
-                </span>
+                <div className="grid gap-1 rounded-[18px] border border-[var(--line-soft)] bg-[rgba(12,20,35,0.64)] px-3 py-2">
+                  <span className={`text-xs font-semibold uppercase tracking-[0.18em] ${resolveLifecycleCue(event.status).tone}`}>
+                    {resolveLifecycleCue(event.status).title}
+                  </span>
+                  <span className="text-xs leading-5 text-[var(--text-muted)]">
+                    {resolveLifecycleCue(event.status).description}
+                  </span>
+                </div>
               </div>
             </td>
           </tr>

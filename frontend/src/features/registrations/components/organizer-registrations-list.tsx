@@ -14,7 +14,9 @@ function resolveOrganizerStatus(registration: OrganizerRegistrationItem) {
   if (registration.status === "CONFIRMED") {
     return {
       title: "Confirmed participation",
-      description: "This participant currently holds a confirmed place for the event.",
+      description: registration.ticketRef
+        ? "This participant currently holds a confirmed place and already has a visible ticket reference."
+        : "This participant currently holds a confirmed place, but the ticket reference is still pending.",
       tone: "text-[var(--status-success)]"
     };
   }
@@ -74,19 +76,58 @@ function resolveTicketReadiness(registration: OrganizerRegistrationItem) {
   };
 }
 
+function resolveOrganizerAttention(registration: OrganizerRegistrationItem) {
+  if (registration.status === "CONFIRMED" && !registration.ticketRef) {
+    return {
+      title: "Needs attention",
+      description: "Confirmed participant with no visible ticket reference yet.",
+      rank: 0,
+      tone: "text-[var(--status-warning)]"
+    };
+  }
+
+  if (registration.status === "WAITLISTED") {
+    return {
+      title: "Monitor",
+      description: "Waitlist movement is the main thing to watch here.",
+      rank: 1,
+      tone: "text-[var(--status-warning)]"
+    };
+  }
+
+  if (registration.status === "CONFIRMED" && registration.ticketRef) {
+    return {
+      title: "Ready",
+      description: "Confirmed participation with a visible ticket reference.",
+      rank: 2,
+      tone: "text-[var(--status-success)]"
+    };
+  }
+
+  if (registration.status === "REJECTED") {
+    return {
+      title: "Closed",
+      description: "This registration did not move forward.",
+      rank: 3,
+      tone: "text-[var(--status-danger)]"
+    };
+  }
+
+  return {
+    title: "Inactive",
+    description: "This registration is no longer active for the event.",
+    rank: 4,
+    tone: "text-[var(--text-secondary)]"
+  };
+}
+
 export function OrganizerRegistrationsList({
   eventTitle,
   registrations
 }: OrganizerRegistrationsListProps) {
   const sortedRegistrations = [...registrations].sort((left, right) => {
-    const statusRank = {
-      CONFIRMED: 0,
-      WAITLISTED: 1,
-      REJECTED: 2,
-      CANCELLED: 3
-    } as const;
-
-    const rankDifference = statusRank[left.status] - statusRank[right.status];
+    const rankDifference =
+      resolveOrganizerAttention(left).rank - resolveOrganizerAttention(right).rank;
 
     if (rankDifference !== 0) {
       return rankDifference;
@@ -103,6 +144,11 @@ export function OrganizerRegistrationsList({
   const issuedTicketCount = registrations.filter(
     (registration) => registration.ticketRef !== null
   ).length;
+  const attentionCount = registrations.filter(
+    (registration) =>
+      (registration.status === "CONFIRMED" && !registration.ticketRef) ||
+      registration.status === "WAITLISTED"
+  ).length;
 
   if (registrations.length === 0) {
     return (
@@ -117,9 +163,10 @@ export function OrganizerRegistrationsList({
     <div className="grid gap-6">
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
         <SummaryCard
-          label="Confirmed participants"
-          value={String(confirmedCount)}
-          description="Participants currently confirmed for this event."
+          label="Needs attention"
+          value={String(attentionCount)}
+          description="Confirmed participants without ticket references plus everyone still waiting on the waitlist."
+          accent="highlight"
         />
         <SummaryCard
           label="Waitlisted participants"
@@ -127,7 +174,7 @@ export function OrganizerRegistrationsList({
           description="Participants still pending confirmation."
         />
         <SummaryCard
-          label="Issued ticket references"
+          label="Ticket references ready"
           value={String(issuedTicketCount)}
           description="Registrations that already expose a visible ticket reference."
         />
@@ -142,7 +189,7 @@ export function OrganizerRegistrationsList({
               {registrations.length} registration{registrations.length > 1 ? "s" : ""}
             </p>
             <p className="text-xs uppercase tracking-[0.18em] text-[var(--text-muted)]">
-              Sorted by status, then name
+              Sorted by attention first, then name
             </p>
           </>
         }
@@ -173,6 +220,14 @@ export function OrganizerRegistrationsList({
                     <p className="text-xs text-[var(--text-muted)]">
                       Registration ID: {registration.id}
                     </p>
+                    <div className="grid gap-1 rounded-[18px] border border-[var(--line-soft)] bg-[rgba(12,20,35,0.64)] px-3 py-2">
+                      <p className={`text-xs font-semibold uppercase tracking-[0.18em] ${resolveOrganizerAttention(registration).tone}`}>
+                        {resolveOrganizerAttention(registration).title}
+                      </p>
+                      <p className="text-xs leading-5 text-[var(--text-secondary)]">
+                        {resolveOrganizerAttention(registration).description}
+                      </p>
+                    </div>
                   </div>
                 </th>
                 <td className="px-6 py-5">
