@@ -87,7 +87,7 @@ export function Navbar() {
               </div>
               <Button variant="ghost" onClick={handleLogout}>
                 <LogOut className="mr-2 h-4 w-4" />
-                Logout
+                Sign out
               </Button>
             </>
           ) : (
@@ -146,7 +146,7 @@ export function Navbar() {
                   </div>
                   <Button variant="ghost" className="w-full" onClick={handleLogout}>
                     <LogOut className="mr-2 h-4 w-4" />
-                    Logout
+                    Sign out
                   </Button>
                 </>
               ) : (

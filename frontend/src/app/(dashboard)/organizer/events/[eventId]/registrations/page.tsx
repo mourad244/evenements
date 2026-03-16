@@ -6,9 +6,11 @@ import { useParams } from "next/navigation";
 import { PageTitle } from "@/components/shared/page-title";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { EmptyState } from "@/components/ui/empty-state";
 import { Spinner } from "@/components/ui/spinner";
 import { OrganizerRegistrationsList } from "@/features/registrations/components/organizer-registrations-list";
 import { useOrganizerEventRegistrationsQuery } from "@/features/registrations/hooks/use-organizer-event-registrations-query";
+import { ROUTES } from "@/lib/constants/routes";
 
 export default function OrganizerEventRegistrationsPage() {
   const params = useParams<{ eventId: string }>();
@@ -21,7 +23,7 @@ export default function OrganizerEventRegistrationsPage() {
       <PageTitle
         eyebrow="Organizer"
         title="Event registrations"
-        description="Review participant registrations and status for a specific event."
+        description="Review the participant list, registration states, and ticket-reference readiness for a specific managed event."
       />
 
       <Card className="flex flex-wrap items-center justify-between gap-3">
@@ -30,12 +32,17 @@ export default function OrganizerEventRegistrationsPage() {
             {data?.eventTitle || "Selected event"}
           </p>
           <p className="text-sm text-slate-600">
-            Organizer-facing registration tracking powered by the gateway registration endpoint.
+            Keep track of who is confirmed, who is waiting, and which tickets are already issued.
           </p>
         </div>
-        <Link href={`/organizer/events/${params.eventId}`}>
-          <Button variant="ghost">Back to event</Button>
-        </Link>
+        <div className="flex flex-wrap gap-3">
+          <Link href={`/organizer/events/${params.eventId}`}>
+            <Button variant="ghost">Back to event</Button>
+          </Link>
+          <Link href={ROUTES.organizerEvents}>
+            <Button variant="ghost">All organizer events</Button>
+          </Link>
+        </div>
       </Card>
 
       {isLoading ? (
@@ -48,11 +55,26 @@ export default function OrganizerEventRegistrationsPage() {
             Could not load event registrations
           </h2>
           <p className="text-sm text-slate-600">{error.message}</p>
+          <div>
+            <Link href={`/organizer/events/${params.eventId}`}>
+              <Button variant="ghost">Return to event</Button>
+            </Link>
+          </div>
         </Card>
-      ) : data ? (
+      ) : data && data.registrations.length > 0 ? (
         <OrganizerRegistrationsList
           eventTitle={data.eventTitle}
           registrations={data.registrations}
+        />
+      ) : data ? (
+        <EmptyState
+          title="No registrations yet"
+          description={`No participant registrations are currently available for ${data.eventTitle}. Confirmed and waitlisted participants will appear here once they exist.`}
+          action={
+            <Link href={`/organizer/events/${params.eventId}`}>
+              <Button variant="ghost">Back to event</Button>
+            </Link>
+          }
         />
       ) : (
         <Card className="grid gap-2">

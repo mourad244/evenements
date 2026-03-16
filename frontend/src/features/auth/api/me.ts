@@ -3,7 +3,7 @@ import { normalizeApiError } from "@/lib/api/error-handler";
 import { ENDPOINTS } from "@/lib/api/endpoints";
 import type { User } from "@/types/user.types";
 
-import { getAccessToken, getStoredUser } from "../utils/auth-storage";
+import { getAccessToken } from "../utils/auth-storage";
 
 function normalizeUser(input: Record<string, unknown>): User {
   return {
@@ -17,7 +17,7 @@ function normalizeUser(input: Record<string, unknown>): User {
 export async function getMe(): Promise<User | null> {
   const token = getAccessToken();
   if (!token) {
-    return getStoredUser();
+    return null;
   }
 
   try {
@@ -25,8 +25,6 @@ export async function getMe(): Promise<User | null> {
     const payload = response.data?.data?.user || response.data?.data || response.data;
     return normalizeUser((payload || {}) as Record<string, unknown>);
   } catch (error) {
-    const fallback = getStoredUser();
-    if (fallback) return fallback;
     throw normalizeApiError(error);
   }
 }

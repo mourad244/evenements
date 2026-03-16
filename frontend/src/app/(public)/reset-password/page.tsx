@@ -14,8 +14,8 @@ export default function ResetPasswordPage() {
             description="Paste your reset token or open this page from your recovery link to finish the process."
           />
           <div className="grid gap-3 text-sm text-slate-600">
-            <p>The reset flow uses the existing gateway auth contracts and keeps validation local to the auth feature.</p>
-            <p>Authenticated users are redirected away so this route remains recovery-only.</p>
+            <p>Set a strong new password so you can get back to your account with confidence.</p>
+            <p>If you are already signed in, you can head back to your workspace instead.</p>
           </div>
         </Card>
         <ResetPasswordForm />
