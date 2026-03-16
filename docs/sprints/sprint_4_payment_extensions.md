@@ -2,7 +2,7 @@
 
 Sprint optionnel selon priorite metier des evenements payants.
 
-**Statut:** `PLANNED`  
+**Statut:** `IN_PROGRESS`  
 **Periode indicative:** 2026-05-25 -> 2026-06-12
 
 ## Objectifs

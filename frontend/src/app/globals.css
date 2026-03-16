@@ -1,0 +1,40 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+  --app-bg: #f6f3ee;
+  --card-line: rgba(255, 255, 255, 0.72);
+  --ink: #172033;
+  --brand: #f26a2e;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  background:
+    radial-gradient(circle at top left, rgba(242, 106, 46, 0.08), transparent 28%),
+    linear-gradient(180deg, #fbf8f2 0%, #f3efe8 100%);
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+@layer utilities {
+  .bg-app {
+    background:
+      radial-gradient(circle at top left, rgba(242, 106, 46, 0.08), transparent 28%),
+      linear-gradient(180deg, #fbf8f2 0%, #f3efe8 100%);
+  }
+}

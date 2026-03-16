@@ -68,6 +68,24 @@ function toEventResponse(event) {
   };
 }
 
+function toCatalogEventSummary(event) {
+  return {
+    id: event.eventId,
+    eventId: event.eventId,
+    title: event.title,
+    description: event.description,
+    theme: event.theme,
+    city: event.city,
+    venue: event.venueName,
+    venueName: event.venueName,
+    startAt: event.startAt,
+    endAt: event.endAt,
+    timezone: event.timezone,
+    capacity: event.capacity,
+    coverImageRef: event.coverImageRef
+  };
+}
+
 function parsePositiveInt(value, fallback) {
   const parsed = Number.parseInt(String(value ?? fallback), 10);
   if (!Number.isFinite(parsed) || parsed <= 0) return null;
@@ -226,6 +244,56 @@ app.get("/ready", async (_req, res) => {
   }
 });
 
+app.get("/catalog/events", async (req, res) => {
+  const page = parsePositiveInt(req.query.page, 1);
+  const pageSize = parsePositiveInt(req.query.pageSize, 20);
+  if (!page || !pageSize || pageSize > 100) {
+    return res
+      .status(400)
+      .json(error("Validation failed", "VALIDATION_ERROR", [
+        "page and pageSize must be positive integers and pageSize <= 100"
+      ]));
+  }
+
+  const from = req.query.from ? new Date(String(req.query.from)).toISOString() : null;
+  const to = req.query.to ? new Date(String(req.query.to)).toISOString() : null;
+  if ((req.query.from && Number.isNaN(Date.parse(String(req.query.from)))) ||
+      (req.query.to && Number.isNaN(Date.parse(String(req.query.to))))) {
+    return res
+      .status(400)
+      .json(error("Validation failed", "VALIDATION_ERROR", [
+        "from and to must be valid ISO datetimes"
+      ]));
+  }
+
+  const result = await repository.listPublicEvents({
+    q: String(req.query.q || "").trim() || null,
+    theme: String(req.query.theme || "").trim() || null,
+    city: String(req.query.city || "").trim() || null,
+    from,
+    to,
+    page,
+    pageSize
+  });
+
+  return res.status(200).json(
+    success({
+      items: result.items.map(toCatalogEventSummary),
+      page,
+      pageSize,
+      total: result.total
+    })
+  );
+});
+
+app.get("/catalog/events/:eventId", async (req, res) => {
+  const event = await repository.findPublicById(req.params.eventId);
+  if (!event) {
+    return res.status(404).json(error("Event not found", "EVENT_NOT_FOUND"));
+  }
+  return res.status(200).json(success(toCatalogEventSummary(event)));
+});
+
 app.use("/events", (req, res, next) => {
   const context = authContext(req);
   if (!context) {
@@ -276,6 +344,34 @@ app.get("/events/drafts", async (req, res) => {
   const result = await repository.listDrafts({
     organizerId: req.auth.userId,
     isAdmin,
+    page,
+    pageSize
+  });
+
+  return res.status(200).json(
+    success({
+      items: result.items.map(toEventResponse),
+      page,
+      pageSize,
+      total: result.total
+    })
+  );
+});
+
+app.get("/events/me", async (req, res) => {
+  const page = parsePositiveInt(req.query.page, 1);
+  const pageSize = parsePositiveInt(req.query.pageSize, 20);
+  if (!page || !pageSize || pageSize > 100) {
+    return res
+      .status(400)
+      .json(error("Validation failed", "VALIDATION_ERROR", [
+        "page and pageSize must be positive integers and pageSize <= 100"
+      ]));
+  }
+
+  const result = await repository.listManagedEvents({
+    organizerId: req.auth.userId,
+    isAdmin: req.auth.role === "ADMIN",
     page,
     pageSize
   });
@@ -355,6 +451,25 @@ app.delete("/events/drafts/:eventId", async (req, res) => {
   return res.status(204).send();
 });
 
+app.post("/events/drafts/:eventId/publish", async (req, res) => {
+  const event = await repository.findById(req.params.eventId);
+  if (!event) {
+    return res.status(404).json(error("Event not found", "EVENT_NOT_FOUND"));
+  }
+  if (!canAccessEvent(req.auth, event)) {
+    return res.status(403).json(error("Forbidden", "FORBIDDEN"));
+  }
+  if (event.status !== "DRAFT") {
+    return res
+      .status(409)
+      .json(error("Only drafts can be published", "EVENT_NOT_PUBLISHABLE"));
+  }
+
+  const timestamp = nowIso();
+  const published = await repository.publishDraft(event.eventId, timestamp, timestamp);
+  return res.status(200).json(success(toEventResponse(published)));
+});
+
 app.use((_req, res) => {
   return res.status(404).json(error("Route not found", "NOT_FOUND"));
 });
@@ -400,4 +515,3 @@ process.on("SIGTERM", () => {
 process.on("SIGINT", () => {
   shutdown().finally(() => process.exit(0));
 });
-
