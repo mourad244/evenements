@@ -18,6 +18,30 @@ function sortEventsByDate(events: EventItem[]) {
   return [...events].sort((left, right) => Date.parse(left.startAt) - Date.parse(right.startAt));
 }
 
+function getOrganizerAttentionCue(event: EventItem) {
+  if (event.status === "DRAFT") {
+    return {
+      title: "Needs attention now",
+      description: "Complete the draft details before this event is ready to publish.",
+      tone: "text-[var(--status-warning)]"
+    };
+  }
+
+  if (event.status === "PUBLISHED") {
+    return {
+      title: "Live and ready to monitor",
+      description: "Use the registrations view when you need the fastest participant-status check.",
+      tone: "text-[var(--status-success)]"
+    };
+  }
+
+  return {
+    title: "Review-only state",
+    description: "This event is outside the main draft-to-live workflow, so use it for context and record-keeping.",
+    tone: "text-[var(--text-primary)]"
+  };
+}
+
 function OrganizerEventSection({
   title,
   description,
@@ -54,6 +78,14 @@ function OrganizerEventSection({
                 <div className="flex flex-wrap items-center gap-3">
                   <h3 className="text-lg font-semibold text-[var(--text-primary)]">{event.title}</h3>
                   <StatusBadge status={event.status} />
+                </div>
+                <div className="grid gap-1 rounded-[22px] border border-[var(--line-soft)] bg-[rgba(12,20,35,0.68)] px-4 py-3">
+                  <p className={`text-sm font-medium ${getOrganizerAttentionCue(event).tone}`}>
+                    {getOrganizerAttentionCue(event).title}
+                  </p>
+                  <p className="text-sm leading-6 text-[var(--text-secondary)]">
+                    {getOrganizerAttentionCue(event).description}
+                  </p>
                 </div>
                 <p className="text-sm leading-6 text-[var(--text-secondary)]">{event.description}</p>
                 <div className="flex flex-wrap gap-x-4 gap-y-2 text-sm text-[var(--text-muted)]">
@@ -95,6 +127,7 @@ export default function OrganizerEventsPage() {
   const otherEvents = sortedEvents.filter(
     (event) => event.status !== "DRAFT" && event.status !== "PUBLISHED"
   );
+  const attentionCount = draftEvents.length + otherEvents.length;
 
   return (
     <div className="grid gap-10">
@@ -112,6 +145,14 @@ export default function OrganizerEventsPage() {
           <p className="text-sm leading-6 text-[var(--text-secondary)]">
             Keep drafts and published events organized in one place, with clear next steps for each stage.
           </p>
+          <div className="flex flex-wrap gap-2 pt-1">
+            <span className="rounded-full border border-[rgba(243,154,99,0.18)] bg-[rgba(243,154,99,0.1)] px-3 py-1.5 text-sm text-[var(--text-primary)]">
+              Needs attention: {attentionCount}
+            </span>
+            <span className="rounded-full border border-[rgba(88,116,255,0.2)] bg-[rgba(88,116,255,0.12)] px-3 py-1.5 text-sm text-[var(--text-primary)]">
+              Live now: {publishedEvents.length}
+            </span>
+          </div>
         </div>
         <Link href={ROUTES.organizerNewEvent} className="w-full sm:w-auto">
           <Button className="w-full sm:w-auto">Create event</Button>
@@ -151,10 +192,10 @@ export default function OrganizerEventsPage() {
               </p>
             </Card>
             <Card className="grid gap-2.5 border-[var(--line-soft)] bg-[linear-gradient(180deg,rgba(18,28,46,0.92),rgba(10,17,30,0.98))] shadow-[0_22px_50px_rgba(0,0,0,0.26)]">
-              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--text-muted)]">Total managed events</p>
-              <h2 className="text-3xl font-semibold tracking-tight text-[var(--text-primary)]">{sortedEvents.length}</h2>
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--text-muted)]">Needs attention</p>
+              <h2 className="text-3xl font-semibold tracking-tight text-[var(--text-primary)]">{attentionCount}</h2>
               <p className="text-sm leading-6 text-[var(--text-secondary)]">
-                Your complete organizer event list across every visible status.
+                Drafts and other non-live states that still need organizer review.
               </p>
             </Card>
           </div>

@@ -91,6 +91,26 @@ function sortEventsByStart(events: EventItem[]) {
   return [...events].sort((left, right) => Date.parse(left.startAt) - Date.parse(right.startAt));
 }
 
+function getParticipantActivityNote(registration: RegistrationItem) {
+  if (registration.status === "CONFIRMED") {
+    return registration.canDownloadTicket
+      ? "Confirmed place with ticket details already visible in your history."
+      : "Confirmed place. Ticket readiness will appear in your history as soon as it is available.";
+  }
+
+  if (registration.status === "WAITLISTED") {
+    return registration.waitlistPosition
+      ? `Still waitlisted at position ${registration.waitlistPosition}.`
+      : "Still waitlisted and waiting for movement.";
+  }
+
+  if (registration.status === "REJECTED") {
+    return "This request did not move forward.";
+  }
+
+  return "This registration is no longer active.";
+}
+
 function ParticipantDashboard({
   registrations,
   isLoading,
@@ -130,6 +150,12 @@ function ParticipantDashboard({
     (registration) =>
       registration.status === "CONFIRMED" || registration.status === "WAITLISTED"
   );
+  const waitlistedRegistrations = registrations.filter(
+    (registration) => registration.status === "WAITLISTED"
+  );
+  const ticketReadyRegistrations = registrations.filter(
+    (registration) => registration.canDownloadTicket && registration.ticketId
+  );
 
   return (
     <div className="grid gap-8">
@@ -165,6 +191,18 @@ function ParticipantDashboard({
                 {nextAction.description}
               </p>
             </div>
+            <div className="flex flex-wrap gap-2">
+              <span className="rounded-full border border-[var(--line-soft)] bg-[rgba(12,20,35,0.72)] px-3 py-1.5 text-sm text-[var(--text-secondary)]">
+                Active registrations:{" "}
+                <span className="font-semibold text-[var(--text-primary)]">{activeRegistrations.length}</span>
+              </span>
+              <span className="rounded-full border border-[rgba(88,116,255,0.2)] bg-[rgba(88,116,255,0.12)] px-3 py-1.5 text-sm text-[var(--text-primary)]">
+                Ticket-ready: {ticketReadyRegistrations.length}
+              </span>
+              <span className="rounded-full border border-[rgba(243,154,99,0.18)] bg-[rgba(243,154,99,0.1)] px-3 py-1.5 text-sm text-[var(--text-primary)]">
+                Waitlisted: {waitlistedRegistrations.length}
+              </span>
+            </div>
             <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
               <Link href={nextAction.href} className="w-full sm:w-auto">
                 <Button className="w-full sm:w-auto">{nextAction.cta}</Button>
@@ -187,9 +225,9 @@ function ParticipantDashboard({
             accent="highlight"
           />
           <SummaryCard
-            label="Active registrations"
-            value={String(activeRegistrations.length)}
-            description="Confirmed and waitlisted registrations that still need your attention."
+            label="Ticket-ready now"
+            value={String(ticketReadyRegistrations.length)}
+            description="Registrations in your history that already expose ticket details."
           />
         </div>
       </SectionPanel>
@@ -230,6 +268,9 @@ function ParticipantDashboard({
                   <p className="text-sm text-[var(--text-secondary)]">
                     {formatDate(registration.eventDate)}
                     {registration.eventCity ? ` | ${registration.eventCity}` : ""}
+                  </p>
+                  <p className="text-sm text-[var(--text-secondary)]">
+                    {getParticipantActivityNote(registration)}
                   </p>
                   <p className="text-sm text-[var(--text-muted)]">
                     {registration.updatedAt
