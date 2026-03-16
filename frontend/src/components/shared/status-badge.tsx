@@ -8,6 +8,7 @@ const toneMap: Record<string, string> = {
   CONFIRMED: "bg-emerald-50 text-emerald-700",
   WAITLISTED: "bg-amber-50 text-amber-700",
   CANCELLED: "bg-rose-50 text-rose-700",
+  REJECTED: "bg-rose-100 text-rose-800",
   DRAFT: "bg-slate-100 text-slate-700",
   PUBLISHED: "bg-brand-50 text-brand-700"
 };

@@ -11,11 +11,11 @@ export default function RegisterPage() {
           <PageTitle
             eyebrow="Create account"
             title="Open your participant or organizer account."
-            description="This starter keeps registration isolated in the auth feature for easy backend integration."
+            description="Create your account and get started as a participant or organizer."
           />
           <div className="grid gap-3 text-sm text-slate-600">
             <p>Choose the role that matches your workflow and create a validated account securely.</p>
-            <p>Organizer and participant onboarding stays in one feature module for easier backend evolution.</p>
+            <p>You can start simple today and grow into more advanced workflows as your events expand.</p>
           </div>
         </Card>
         <RegisterForm />

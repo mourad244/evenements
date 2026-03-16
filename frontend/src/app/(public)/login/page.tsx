@@ -15,7 +15,7 @@ export default function LoginPage() {
           />
           <div className="grid gap-3 text-sm text-slate-600">
             <p>Access participant dashboards, organizer event operations, and admin workflows.</p>
-            <p>Validation is handled with React Hook Form and Zod for a reliable frontend contract.</p>
+            <p>Pick up where you left off and move between the parts of the platform that matter to you.</p>
           </div>
         </Card>
         <LoginForm />

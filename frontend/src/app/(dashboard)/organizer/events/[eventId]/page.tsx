@@ -1,23 +1,26 @@
 "use client";
 
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useParams } from "next/navigation";
-import Link from "next/link";
 
+import { PageTitle } from "@/components/shared/page-title";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Spinner } from "@/components/ui/spinner";
-import { PageTitle } from "@/components/shared/page-title";
 import { EventForm } from "@/features/events/components/event-form";
 import { useDeleteEventMutation } from "@/features/events/hooks/use-delete-event-mutation";
 import { useOrganizerEventDetailsQuery } from "@/features/events/hooks/use-organizer-event-details-query";
 import { usePublishEventMutation } from "@/features/events/hooks/use-publish-event-mutation";
 import { useUpdateEventMutation } from "@/features/events/hooks/use-update-event-mutation";
+import { ROUTES } from "@/lib/constants/routes";
 
 export default function OrganizerEventDetailsPage() {
   const router = useRouter();
   const params = useParams<{ eventId: string }>();
-  const { data, isLoading } = useOrganizerEventDetailsQuery(params.eventId);
+  const { data, isLoading, isError, error } = useOrganizerEventDetailsQuery(
+    params.eventId
+  );
   const mutation = useUpdateEventMutation(params.eventId);
   const publishMutation = usePublishEventMutation();
   const deleteMutation = useDeleteEventMutation();
@@ -36,10 +39,40 @@ export default function OrganizerEventDetailsPage() {
       <PageTitle
         eyebrow="Organizer"
         title="Edit event"
-        description="Organizer event detail and edit screen backed by the draft management endpoint."
+        description="Update event details, prepare your draft, and publish when everything is ready."
       />
-      {isLoading || !data ? (
-        <div className="flex min-h-[240px] items-center justify-center"><Spinner /></div>
+      {isLoading ? (
+        <div className="flex min-h-[240px] items-center justify-center">
+          <Spinner />
+        </div>
+      ) : isError ? (
+        <Card className="grid gap-3">
+          <h2 className="text-xl font-semibold text-ink">Could not load event</h2>
+          <p className="text-sm text-slate-600">{error.message}</p>
+          <div className="flex flex-wrap gap-3">
+            <Link href={ROUTES.organizerEvents}>
+              <Button variant="ghost">Back to organizer events</Button>
+            </Link>
+            <Link href={ROUTES.organizerNewEvent}>
+              <Button>Create new event</Button>
+            </Link>
+          </div>
+        </Card>
+      ) : !data || !data.id ? (
+        <Card className="grid gap-3">
+          <h2 className="text-xl font-semibold text-ink">Event unavailable</h2>
+          <p className="text-sm text-slate-600">
+            This organizer event could not be found or is no longer available in the draft workspace.
+          </p>
+          <div className="flex flex-wrap gap-3">
+            <Link href={ROUTES.organizerEvents}>
+              <Button variant="ghost">Back to organizer events</Button>
+            </Link>
+            <Link href={ROUTES.organizerNewEvent}>
+              <Button>Create new event</Button>
+            </Link>
+          </div>
+        </Card>
       ) : (
         <>
           <Card className="flex flex-wrap items-center justify-between gap-3">

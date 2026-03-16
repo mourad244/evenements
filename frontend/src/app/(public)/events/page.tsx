@@ -19,7 +19,7 @@ export default function EventsPage() {
       <PageTitle
         eyebrow="Public catalog"
         title="Discover events built for ambitious communities."
-        description="Search upcoming experiences and verify that the catalog contract is ready for backend event service integration."
+        description="Search upcoming experiences, explore what fits your interests, and plan your next event."
       />
       <EventFilters filters={filters} onChange={setFilters} />
       {isLoading ? (

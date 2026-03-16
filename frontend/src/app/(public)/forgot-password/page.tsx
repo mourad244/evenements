@@ -11,11 +11,11 @@ export default function ForgotPasswordPage() {
           <PageTitle
             eyebrow="Password recovery"
             title="Recover access to your workspace."
-            description="Use the recovery flow to request a password reset without leaving the auth module."
+            description="Request a password reset and get back into your account safely."
           />
           <div className="grid gap-3 text-sm text-slate-600">
             <p>Enter the email linked to your account to start the reset process.</p>
-            <p>This page stays public-only and redirects authenticated users back into the app.</p>
+            <p>If you are already signed in, you can return to your workspace instead.</p>
           </div>
         </Card>
         <ForgotPasswordForm />
