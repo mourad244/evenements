@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 import { ErrorState } from "@/components/ui/error-state";
@@ -16,6 +17,7 @@ import type {
   RegistrationItem,
   RegistrationStatusFilter
 } from "@/features/registrations/types/registration.types";
+import { ROUTES } from "@/lib/constants/routes";
 import { formatDate } from "@/lib/utils/format-date";
 
 const STATUS_OPTIONS: RegistrationStatusFilter[] = [
@@ -54,6 +56,60 @@ function getPageSummary(registrations: RegistrationItem[]) {
     waitlisted,
     ticketReady,
     latestUpdate
+  };
+}
+
+function getHistoryGuidance(
+  registrations: RegistrationItem[],
+  status: RegistrationStatusFilter,
+  totalVisible: number
+) {
+  const active = registrations.filter(
+    (registration) =>
+      registration.status === "CONFIRMED" || registration.status === "WAITLISTED"
+  ).length;
+  const ticketReady = registrations.filter(
+    (registration) => registration.canDownloadTicket && registration.ticketId
+  ).length;
+
+  if (totalVisible === 0) {
+    return {
+      title: "Your history is ready whenever you are",
+      description:
+        "Once you register for an event, this page becomes your clearest record for participation status, waitlist movement, and ticket readiness."
+    };
+  }
+
+  if (status === "WAITLISTED") {
+    return {
+      title: "This view is focused on waitlist movement",
+      description:
+        "Use it to monitor waitlist position changes, then return to the dashboard when you want a broader participant summary."
+    };
+  }
+
+  if (status === "CONFIRMED") {
+    return {
+      title: ticketReady > 0 ? "Confirmed places with ticket progress" : "Confirmed places that still need attention",
+      description:
+        ticketReady > 0
+          ? "This filtered view keeps confirmed places and visible ticket readiness together in one place."
+          : "Your confirmed places are here, even if ticket details are still being prepared."
+    };
+  }
+
+  if (active > 0) {
+    return {
+      title: "Your active participation is visible here",
+      description:
+        "Use this page for the detailed record, then return to the dashboard when you want the fastest next-step guidance."
+    };
+  }
+
+  return {
+    title: "Your history keeps the full story",
+    description:
+      "This page is best for understanding what changed, what is still active, and which registrations no longer need attention."
   };
 }
 
@@ -101,6 +157,7 @@ export default function MyRegistrationsPage() {
     totalPages: 1
   };
   const pageSummary = getPageSummary(data?.items || []);
+  const historyGuidance = getHistoryGuidance(data?.items || [], status, pagination.total);
 
   return (
     <RoleGuard user={user} allowedRoles={["PARTICIPANT"]}>
@@ -108,8 +165,32 @@ export default function MyRegistrationsPage() {
         <PageTitle
           eyebrow="Participant"
           title="My registrations"
-          description="Review your participation history, ticket readiness, and registration progress in one place."
+          description="Review your participation history, understand what each registration means, and keep ticket readiness in view from one trusted place."
         />
+
+        <Card className="grid gap-5 border-[rgba(88,116,255,0.18)] bg-[radial-gradient(circle_at_top_right,rgba(88,116,255,0.14),transparent_28%),linear-gradient(180deg,rgba(18,28,46,0.96),rgba(9,15,26,0.98))] shadow-[0_28px_64px_rgba(14,24,54,0.3)]">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+            <div className="grid gap-2">
+              <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[var(--accent-primary-strong)]">
+                Participant guidance
+              </p>
+              <h2 className="text-xl font-semibold text-[var(--text-primary)]">{historyGuidance.title}</h2>
+              <p className="max-w-3xl text-sm leading-6 text-[var(--text-secondary)]">
+                {historyGuidance.description}
+              </p>
+            </div>
+            <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:flex-wrap">
+              <Link href={ROUTES.dashboard} className="w-full sm:w-auto">
+                <Button variant="ghost" className="w-full sm:w-auto">
+                  Open dashboard
+                </Button>
+              </Link>
+              <Link href={ROUTES.events} className="w-full sm:w-auto">
+                <Button className="w-full sm:w-auto">Browse events</Button>
+              </Link>
+            </div>
+          </div>
+        </Card>
 
         <Card className="grid gap-5 border-[rgba(88,116,255,0.18)] bg-[radial-gradient(circle_at_top_right,rgba(88,116,255,0.14),transparent_28%),linear-gradient(180deg,rgba(18,28,46,0.96),rgba(9,15,26,0.98))] shadow-[0_28px_64px_rgba(14,24,54,0.3)]">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
@@ -217,9 +298,14 @@ export default function MyRegistrationsPage() {
                   {status !== "ALL" ? ` with status ${status}` : ""}.
                 </p>
               </div>
-              <p className="text-sm text-[var(--text-muted)]">
-                Page {pagination.page} of {pagination.totalPages}
-              </p>
+              <div className="grid gap-1 text-sm text-[var(--text-muted)] sm:text-right">
+                <p>
+                  Page {pagination.page} of {pagination.totalPages}
+                </p>
+                <p>
+                  Use the dashboard for next-step guidance, then return here for the full record.
+                </p>
+              </div>
             </Card>
 
             <RegistrationList registrations={data?.items || []} />

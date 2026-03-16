@@ -41,6 +41,16 @@ export default function AdminUsersPage() {
         />
       ) : (
         <>
+          <Card className="grid gap-2.5 border-[rgba(88,116,255,0.18)] bg-[radial-gradient(circle_at_top_right,rgba(88,116,255,0.12),transparent_28%),linear-gradient(180deg,rgba(18,28,46,0.94),rgba(9,15,26,0.98))]">
+            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[var(--accent-primary-strong)]">
+              Admin reading guide
+            </p>
+            <h2 className="text-lg font-semibold text-[var(--text-primary)]">Summary first, directory second</h2>
+            <p className="text-sm leading-6 text-[var(--text-secondary)]">
+              The cards below describe the same visible user set shown in the table. Use them to understand role mix first, then scan the newest accounts in the directory.
+            </p>
+          </Card>
+
           <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
             <Card className="grid gap-2.5 border-[rgba(88,116,255,0.18)] bg-[radial-gradient(circle_at_top_right,rgba(88,116,255,0.12),transparent_30%),linear-gradient(180deg,rgba(18,28,46,0.92),rgba(10,17,30,0.98))] shadow-[0_22px_50px_rgba(0,0,0,0.26)]">
               <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--text-muted)]">Total users</p>
@@ -76,7 +86,7 @@ export default function AdminUsersPage() {
             <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[var(--accent-primary-strong)]">Admin users</p>
             <h2 className="text-lg font-semibold text-[var(--text-primary)]">User directory</h2>
             <p className="text-sm leading-6 text-[var(--text-secondary)]">
-              Scan identity, access role, and account age from one clean admin table.
+              Scan identity, access level, and account age from one clean admin table. The role summaries above match the rows below.
             </p>
           </Card>
 

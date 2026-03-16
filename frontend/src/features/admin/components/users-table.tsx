@@ -7,6 +7,30 @@ function formatRoleLabel(role: AdminUser["role"]) {
   return role.charAt(0) + role.slice(1).toLowerCase();
 }
 
+function resolveRoleReview(role: AdminUser["role"]) {
+  if (role === "ADMIN") {
+    return {
+      title: "High-access account",
+      description: "Platform oversight access is active for this user.",
+      tone: "text-[var(--status-warning)]"
+    };
+  }
+
+  if (role === "ORGANIZER") {
+    return {
+      title: "Event workspace account",
+      description: "This user can manage organizer-facing event workflows.",
+      tone: "text-[var(--accent-primary-strong)]"
+    };
+  }
+
+  return {
+    title: "Participant account",
+    description: "This user currently belongs to the participant-facing experience.",
+    tone: "text-[var(--text-primary)]"
+  };
+}
+
 export function UsersTable({ users }: { users: AdminUser[] }) {
   const sortedUsers = [...users].sort(
     (left, right) => Date.parse(right.createdAt) - Date.parse(left.createdAt)
@@ -46,7 +70,7 @@ export function UsersTable({ users }: { users: AdminUser[] }) {
         {sortedUsers.map((user) => (
           <tr key={user.id} className="border-t border-[var(--line-soft)] text-[var(--text-secondary)] align-top">
             <th scope="row" className="px-4 py-5 text-left sm:px-6">
-              <div className="grid gap-2">
+              <div className="grid gap-2.5">
                 <span className="font-medium text-[var(--text-primary)]">{user.fullName}</span>
                 <span className="break-all text-sm text-[var(--text-secondary)] sm:break-normal">
                   {user.email}
@@ -55,11 +79,16 @@ export function UsersTable({ users }: { users: AdminUser[] }) {
               </div>
             </th>
             <td className="px-4 py-5 sm:px-6">
-              <div className="grid gap-1.5">
+              <div className="grid gap-2.5">
                 <span className="font-medium text-[var(--text-primary)]">{formatRoleLabel(user.role)}</span>
-                <span className="text-xs text-[var(--text-muted)]">
-                  Current platform access level
-                </span>
+                <div className="grid gap-1 rounded-[18px] border border-[var(--line-soft)] bg-[rgba(12,20,35,0.64)] px-3 py-2">
+                  <span className={`text-xs font-semibold uppercase tracking-[0.18em] ${resolveRoleReview(user.role).tone}`}>
+                    {resolveRoleReview(user.role).title}
+                  </span>
+                  <span className="text-xs leading-5 text-[var(--text-muted)]">
+                    {resolveRoleReview(user.role).description}
+                  </span>
+                </div>
               </div>
             </td>
             <td className="px-4 py-5 sm:px-6">

@@ -21,6 +21,12 @@ export default function EventsPage() {
   const [sortBy, setSortBy] = useState<EventSortOption>("soonest");
   const { data = [], isLoading, isError, error } = useEventsQuery(filters);
   const query = (filters.query || "").trim().toLowerCase();
+  const hasActiveFilters = Boolean(query) || sortBy !== "soonest";
+
+  function handleResetFilters() {
+    setFilters({ query: "" });
+    setSortBy("soonest");
+  }
 
   const visibleEvents = useMemo(() => {
     const filtered = data.filter((event) => {
@@ -74,6 +80,8 @@ export default function EventsPage() {
           onChange={setFilters}
           sortBy={sortBy}
           onSortChange={setSortBy}
+          onReset={handleResetFilters}
+          hasActiveFilters={hasActiveFilters}
           resultCount={visibleEvents.length}
           totalCount={data.length}
         />
@@ -86,6 +94,8 @@ export default function EventsPage() {
         <EventList
           events={visibleEvents}
           sortBy={sortBy}
+          totalCount={data.length}
+          query={query}
           hasQuery={Boolean(query)}
         />
       )}
