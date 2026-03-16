@@ -32,10 +32,13 @@ function OrganizerEventSection({
   emptyDescription: string;
 }) {
   return (
-    <Card className="grid gap-4.5">
+    <Card className="grid gap-5 border-[var(--line-soft)] bg-[linear-gradient(180deg,rgba(18,28,46,0.94),rgba(9,15,26,0.98))] shadow-[0_24px_56px_rgba(0,0,0,0.28)]">
       <div className="grid gap-1">
-        <h2 className="text-xl font-semibold text-ink">{title}</h2>
-        <p className="text-sm text-slate-600">{description}</p>
+        <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[var(--accent-primary-strong)]">
+          Organizer section
+        </p>
+        <h2 className="text-xl font-semibold text-[var(--text-primary)]">{title}</h2>
+        <p className="text-sm leading-6 text-[var(--text-secondary)]">{description}</p>
       </div>
 
       {events.length === 0 ? (
@@ -45,15 +48,15 @@ function OrganizerEventSection({
           {events.map((event) => (
             <div
               key={event.id}
-              className="flex flex-col gap-4 rounded-3xl border border-slate-100 bg-slate-50/70 p-4 xl:flex-row xl:items-center xl:justify-between"
+              className="flex flex-col gap-4 rounded-[28px] border border-[var(--line-soft)] bg-[linear-gradient(180deg,rgba(18,28,46,0.82),rgba(10,17,30,0.92))] p-4 shadow-[0_18px_40px_rgba(0,0,0,0.2)] xl:flex-row xl:items-center xl:justify-between"
             >
               <div className="grid gap-2">
                 <div className="flex flex-wrap items-center gap-3">
-                  <h3 className="text-lg font-semibold text-ink">{event.title}</h3>
+                  <h3 className="text-lg font-semibold text-[var(--text-primary)]">{event.title}</h3>
                   <StatusBadge status={event.status} />
                 </div>
-                <p className="text-sm text-slate-600">{event.description}</p>
-                <div className="flex flex-wrap gap-x-4 gap-y-2 text-sm text-slate-500">
+                <p className="text-sm leading-6 text-[var(--text-secondary)]">{event.description}</p>
+                <div className="flex flex-wrap gap-x-4 gap-y-2 text-sm text-[var(--text-muted)]">
                   <p>{formatDate(event.startAt)}</p>
                   <p>
                     {event.city} | {event.venue}
@@ -94,16 +97,19 @@ export default function OrganizerEventsPage() {
   );
 
   return (
-    <div className="grid gap-8">
+    <div className="grid gap-10">
       <PageTitle
         eyebrow="Organizer"
         title="Organizer events"
         description="Manage drafts, monitor published events, and move quickly between the organizer tasks that matter most."
       />
-      <Card className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      <Card className="flex flex-col gap-4 border-[rgba(88,116,255,0.18)] bg-[radial-gradient(circle_at_top_right,rgba(88,116,255,0.12),transparent_28%),linear-gradient(180deg,rgba(18,28,46,0.96),rgba(9,15,26,0.98))] shadow-[0_28px_64px_rgba(14,24,54,0.3)] sm:flex-row sm:items-center sm:justify-between">
         <div className="grid gap-1">
-          <h2 className="text-xl font-semibold text-ink">Event workspace</h2>
-          <p className="text-sm text-slate-600">
+          <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[var(--accent-primary-strong)]">
+            Organizer workspace
+          </p>
+          <h2 className="text-xl font-semibold text-[var(--text-primary)]">Event workspace</h2>
+          <p className="text-sm leading-6 text-[var(--text-secondary)]">
             Keep drafts and published events organized in one place, with clear next steps for each stage.
           </p>
         </div>
@@ -113,7 +119,7 @@ export default function OrganizerEventsPage() {
       </Card>
 
       {isLoading ? (
-        <LoadingState label="Loading organizer events..." />
+        <LoadingState label="Loading organizer events..." variant="workspace" />
       ) : isError ? (
         <ErrorState title="Could not load organizer events" description={error.message} />
       ) : data.length === 0 ? (
@@ -130,24 +136,24 @@ export default function OrganizerEventsPage() {
       ) : (
         <>
           <div className="grid gap-4 md:grid-cols-3">
-            <Card className="grid gap-2.5">
-              <p className="text-sm text-slate-500">Draft events</p>
-              <h2 className="text-2xl font-semibold text-ink">{draftEvents.length}</h2>
-              <p className="text-sm text-slate-600">
+            <Card className="grid gap-2.5 border-[rgba(88,116,255,0.18)] bg-[radial-gradient(circle_at_top_right,rgba(88,116,255,0.12),transparent_30%),linear-gradient(180deg,rgba(18,28,46,0.92),rgba(10,17,30,0.98))] shadow-[0_22px_50px_rgba(0,0,0,0.26)]">
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--text-muted)]">Draft events</p>
+              <h2 className="text-3xl font-semibold tracking-tight text-[var(--text-primary)]">{draftEvents.length}</h2>
+              <p className="text-sm leading-6 text-[var(--text-secondary)]">
                 Drafts that still need refinement or publishing.
               </p>
             </Card>
-            <Card className="grid gap-2.5">
-              <p className="text-sm text-slate-500">Published events</p>
-              <h2 className="text-2xl font-semibold text-ink">{publishedEvents.length}</h2>
-              <p className="text-sm text-slate-600">
+            <Card className="grid gap-2.5 border-[rgba(243,154,99,0.18)] bg-[radial-gradient(circle_at_top_right,rgba(243,154,99,0.1),transparent_30%),linear-gradient(180deg,rgba(18,28,46,0.92),rgba(10,17,30,0.98))] shadow-[0_22px_50px_rgba(0,0,0,0.26)]">
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--text-muted)]">Published events</p>
+              <h2 className="text-3xl font-semibold tracking-tight text-[var(--text-primary)]">{publishedEvents.length}</h2>
+              <p className="text-sm leading-6 text-[var(--text-secondary)]">
                 Live events that participants can already discover.
               </p>
             </Card>
-            <Card className="grid gap-2.5">
-              <p className="text-sm text-slate-500">Total managed events</p>
-              <h2 className="text-2xl font-semibold text-ink">{sortedEvents.length}</h2>
-              <p className="text-sm text-slate-600">
+            <Card className="grid gap-2.5 border-[var(--line-soft)] bg-[linear-gradient(180deg,rgba(18,28,46,0.92),rgba(10,17,30,0.98))] shadow-[0_22px_50px_rgba(0,0,0,0.26)]">
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--text-muted)]">Total managed events</p>
+              <h2 className="text-3xl font-semibold tracking-tight text-[var(--text-primary)]">{sortedEvents.length}</h2>
+              <p className="text-sm leading-6 text-[var(--text-secondary)]">
                 Your complete organizer event list across every visible status.
               </p>
             </Card>

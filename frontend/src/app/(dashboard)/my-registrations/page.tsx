@@ -104,23 +104,26 @@ export default function MyRegistrationsPage() {
 
   return (
     <RoleGuard user={user} allowedRoles={["PARTICIPANT"]}>
-      <div className="grid gap-8">
+      <div className="grid gap-10">
         <PageTitle
           eyebrow="Participant"
           title="My registrations"
           description="Review your participation history, ticket readiness, and registration progress in one place."
         />
 
-        <Card className="grid gap-5">
+        <Card className="grid gap-5 border-[rgba(88,116,255,0.18)] bg-[radial-gradient(circle_at_top_right,rgba(88,116,255,0.14),transparent_28%),linear-gradient(180deg,rgba(18,28,46,0.96),rgba(9,15,26,0.98))] shadow-[0_28px_64px_rgba(14,24,54,0.3)]">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
             <div className="grid gap-2">
-              <h2 className="text-xl font-semibold text-ink">Filters and pagination</h2>
-              <p className="text-sm text-slate-600">
+              <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[var(--accent-primary-strong)]">
+                History controls
+              </p>
+              <h2 className="text-xl font-semibold text-[var(--text-primary)]">Filters and pagination</h2>
+              <p className="text-sm leading-6 text-[var(--text-secondary)]">
                 Narrow your history by registration status and control how many results are shown per page.
               </p>
             </div>
             {isFetching && !isLoading ? (
-              <p className="text-sm text-slate-500">Refreshing registrations...</p>
+              <p className="text-sm text-[var(--text-muted)]">Refreshing registrations...</p>
             ) : null}
           </div>
 
@@ -133,10 +136,10 @@ export default function MyRegistrationsPage() {
                   type="button"
                   onClick={() => updateSearchParams({ status: option, page: "1" })}
                   aria-pressed={option === status}
-                  className={`min-h-11 rounded-full px-4 py-2 text-sm font-semibold transition ${
+                  className={`min-h-11 rounded-full border px-4 py-2 text-sm font-semibold transition ${
                     option === status
-                      ? "bg-brand-600 text-white"
-                      : "bg-white/70 text-ink ring-1 ring-line hover:bg-white"
+                      ? "border-[rgba(88,116,255,0.42)] bg-[linear-gradient(135deg,rgba(88,116,255,0.28),rgba(65,93,255,0.12))] text-[var(--text-primary)] shadow-[0_14px_28px_rgba(65,93,255,0.18)]"
+                      : "border-[var(--line-soft)] bg-[rgba(16,26,45,0.82)] text-[var(--text-secondary)] hover:bg-[rgba(22,36,58,0.92)] hover:text-[var(--text-primary)]"
                   }`}
                 >
                   {option === "ALL" ? "All statuses" : option}
@@ -145,7 +148,7 @@ export default function MyRegistrationsPage() {
             </fieldset>
 
             <label
-              className="grid gap-2 text-sm text-slate-600 sm:max-w-[220px] lg:max-w-none"
+              className="grid gap-2 text-sm text-[var(--text-secondary)] sm:max-w-[220px] lg:max-w-none"
               htmlFor="registrations-page-size"
             >
               Page size
@@ -155,7 +158,7 @@ export default function MyRegistrationsPage() {
                 onChange={(event) =>
                   updateSearchParams({ pageSize: event.target.value, page: "1" })
                 }
-                className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-ink outline-none focus-visible:border-brand-400 focus-visible:ring-2 focus-visible:ring-brand-100"
+                className="rounded-[22px] border border-[var(--line-soft)] bg-[linear-gradient(180deg,rgba(16,26,45,0.96),rgba(10,17,30,0.98))] px-4 py-3 text-sm text-[var(--text-primary)] outline-none focus-visible:border-[rgba(88,116,255,0.38)] focus-visible:ring-2 focus-visible:ring-[var(--ring-brand)]"
               >
                 {PAGE_SIZE_OPTIONS.map((option) => (
                   <option key={option} value={option}>
@@ -168,63 +171,63 @@ export default function MyRegistrationsPage() {
         </Card>
 
         {isLoading ? (
-          <LoadingState label="Loading registrations..." />
+          <LoadingState label="Loading registrations..." variant="table" />
         ) : isError ? (
           <ErrorState title="Could not load registrations" description={error.message} />
         ) : (
           <>
             <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-              <Card className="grid gap-2.5">
-                <p className="text-sm text-slate-500">Confirmed on this page</p>
-                <h2 className="text-2xl font-semibold text-ink">{pageSummary.confirmed}</h2>
-                <p className="text-sm text-slate-600">
+              <Card className="grid gap-2.5 border-[var(--line-soft)] bg-[linear-gradient(180deg,rgba(18,28,46,0.92),rgba(10,17,30,0.98))] shadow-[0_22px_50px_rgba(0,0,0,0.26)]">
+                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--text-muted)]">Confirmed on this page</p>
+                <h2 className="text-3xl font-semibold tracking-tight text-[var(--text-primary)]">{pageSummary.confirmed}</h2>
+                <p className="text-sm leading-6 text-[var(--text-secondary)]">
                   Registrations that already hold a confirmed place.
                 </p>
               </Card>
-              <Card className="grid gap-2.5">
-                <p className="text-sm text-slate-500">Waitlisted on this page</p>
-                <h2 className="text-2xl font-semibold text-ink">{pageSummary.waitlisted}</h2>
-                <p className="text-sm text-slate-600">
+              <Card className="grid gap-2.5 border-[rgba(243,154,99,0.18)] bg-[radial-gradient(circle_at_top_right,rgba(243,154,99,0.12),transparent_30%),linear-gradient(180deg,rgba(18,28,46,0.92),rgba(10,17,30,0.98))] shadow-[0_22px_50px_rgba(0,0,0,0.26)]">
+                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--text-muted)]">Waitlisted on this page</p>
+                <h2 className="text-3xl font-semibold tracking-tight text-[var(--text-primary)]">{pageSummary.waitlisted}</h2>
+                <p className="text-sm leading-6 text-[var(--text-secondary)]">
                   Registrations still waiting for movement from the organizer.
                 </p>
               </Card>
-              <Card className="grid gap-2.5">
-                <p className="text-sm text-slate-500">Ticket-ready on this page</p>
-                <h2 className="text-2xl font-semibold text-ink">{pageSummary.ticketReady}</h2>
-                <p className="text-sm text-slate-600">
+              <Card className="grid gap-2.5 border-[rgba(88,116,255,0.18)] bg-[radial-gradient(circle_at_top_right,rgba(88,116,255,0.12),transparent_30%),linear-gradient(180deg,rgba(18,28,46,0.92),rgba(10,17,30,0.98))] shadow-[0_22px_50px_rgba(0,0,0,0.26)]">
+                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--text-muted)]">Ticket-ready on this page</p>
+                <h2 className="text-3xl font-semibold tracking-tight text-[var(--text-primary)]">{pageSummary.ticketReady}</h2>
+                <p className="text-sm leading-6 text-[var(--text-secondary)]">
                   Confirmed registrations that already expose ticket details.
                 </p>
               </Card>
-              <Card className="grid gap-2.5">
-                <p className="text-sm text-slate-500">Latest update on this page</p>
-                <h2 className="text-xl font-semibold text-ink">
+              <Card className="grid gap-2.5 border-[var(--line-soft)] bg-[linear-gradient(180deg,rgba(18,28,46,0.92),rgba(10,17,30,0.98))] shadow-[0_22px_50px_rgba(0,0,0,0.26)]">
+                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--text-muted)]">Latest update on this page</p>
+                <h2 className="text-xl font-semibold text-[var(--text-primary)]">
                   {pageSummary.latestUpdate ? formatDate(pageSummary.latestUpdate) : "No updates yet"}
                 </h2>
-                <p className="text-sm text-slate-600">
+                <p className="text-sm leading-6 text-[var(--text-secondary)]">
                   The most recent registration change visible in your current results.
                 </p>
               </Card>
             </div>
 
-            <Card className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <Card className="flex flex-col gap-3 border-[var(--line-soft)] bg-[linear-gradient(180deg,rgba(16,26,45,0.94),rgba(9,15,26,0.98))] sm:flex-row sm:items-center sm:justify-between">
               <div className="grid gap-1">
-                <h2 className="text-xl font-semibold text-ink">Participant history</h2>
-                <p className="text-sm text-slate-600">
+                <h2 className="text-xl font-semibold text-[var(--text-primary)]">Participant history</h2>
+                <p className="text-sm text-[var(--text-secondary)]">
                   {pagination.total} registration{pagination.total === 1 ? "" : "s"} found
                   {status !== "ALL" ? ` with status ${status}` : ""}.
                 </p>
               </div>
-              <p className="text-sm text-slate-500">
+              <p className="text-sm text-[var(--text-muted)]">
                 Page {pagination.page} of {pagination.totalPages}
               </p>
             </Card>
 
             <RegistrationList registrations={data?.items || []} />
 
-            <Card className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <Card className="flex flex-col gap-4 border-[var(--line-soft)] bg-[linear-gradient(180deg,rgba(16,26,45,0.94),rgba(9,15,26,0.98))] sm:flex-row sm:items-center sm:justify-between">
               <div className="grid gap-1">
-                <h2 className="text-lg font-semibold text-ink">Pagination</h2>
-                <p className="text-sm text-slate-600">
+                <h2 className="text-lg font-semibold text-[var(--text-primary)]">Pagination</h2>
+                <p className="text-sm text-[var(--text-secondary)]">
                   Showing up to {pagination.pageSize} registrations per page.
                 </p>
               </div>

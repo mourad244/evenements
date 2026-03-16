@@ -90,14 +90,14 @@ export default function OrganizerEventDetailsPage() {
   }
 
   return (
-    <div className="grid gap-8">
+    <div className="grid gap-10">
       <PageTitle
         eyebrow="Organizer"
         title="Edit event"
         description="Update event details, prepare your draft, and publish when everything is ready."
       />
       {isLoading ? (
-        <LoadingState label="Loading event..." />
+        <LoadingState label="Loading event..." variant="editor" />
       ) : isError ? (
         <ErrorState
           title="Could not load event"
@@ -130,20 +130,23 @@ export default function OrganizerEventDetailsPage() {
         />
       ) : (
         <>
-          <Card className="grid gap-4">
+          <Card className="grid gap-4 border-[rgba(88,116,255,0.18)] bg-[radial-gradient(circle_at_top_right,rgba(88,116,255,0.14),transparent_28%),linear-gradient(180deg,rgba(18,28,46,0.96),rgba(9,15,26,0.98))] shadow-[0_28px_64px_rgba(14,24,54,0.3)]">
             <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
               <div className="grid gap-3">
                 <div className="flex flex-wrap items-center gap-3">
                   <StatusBadge status={data.status} />
-                  <p className="text-sm text-slate-500">
+                  <p className="text-sm text-[var(--text-muted)]">
                     {data.startAt ? `Starts ${formatDate(data.startAt)}` : "Start date pending"}
                   </p>
                 </div>
                 <div className="grid gap-1">
-                  <h2 className="text-xl font-semibold text-ink">{getStateSummary(data.status).title}</h2>
-                  <p className="text-sm text-slate-600">{getStateSummary(data.status).description}</p>
+                  <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[var(--accent-primary-strong)]">
+                    Event state
+                  </p>
+                  <h2 className="text-xl font-semibold text-[var(--text-primary)]">{getStateSummary(data.status).title}</h2>
+                  <p className="text-sm leading-6 text-[var(--text-secondary)]">{getStateSummary(data.status).description}</p>
                 </div>
-                <div className="flex flex-wrap gap-x-4 gap-y-2 text-sm text-slate-500">
+                <div className="flex flex-wrap gap-x-4 gap-y-2 rounded-[24px] border border-[var(--line-soft)] bg-[rgba(12,20,35,0.72)] px-4 py-3 text-sm text-[var(--text-muted)]">
                   <p>{data.city}</p>
                   <p>{data.venue}</p>
                   <p>{data.capacity} seats</p>
@@ -189,20 +192,20 @@ export default function OrganizerEventDetailsPage() {
           </Card>
 
           {publishMutation.isPending || deleteMutation.isPending || mutation.isPending || actionFeedback ? (
-            <Card className="grid gap-3">
-              <p className="text-sm font-medium text-ink">Organizer updates</p>
+            <Card className="grid gap-3 border-[var(--line-soft)] bg-[linear-gradient(180deg,rgba(16,26,45,0.94),rgba(9,15,26,0.98))]">
+              <p className="text-sm font-medium text-[var(--text-primary)]">Organizer updates</p>
               {mutation.isPending ? (
-                <p role="status" className="text-sm text-slate-600">
+                <p role="status" className="text-sm text-[var(--text-secondary)]">
                   Saving your event changes...
                 </p>
               ) : null}
               {publishMutation.isPending ? (
-                <p role="status" className="text-sm text-slate-600">
+                <p role="status" className="text-sm text-[var(--text-secondary)]">
                   Publishing your event...
                 </p>
               ) : null}
               {deleteMutation.isPending ? (
-                <p role="status" className="text-sm text-slate-600">
+                <p role="status" className="text-sm text-[var(--text-secondary)]">
                   Deleting this draft and returning to your organizer events...
                 </p>
               ) : null}
@@ -211,8 +214,8 @@ export default function OrganizerEventDetailsPage() {
                   role={actionFeedback.tone === "error" ? "alert" : "status"}
                   className={`rounded-2xl px-4 py-3 text-sm ${
                     actionFeedback.tone === "success"
-                      ? "border border-emerald-200 bg-emerald-50 text-emerald-700"
-                      : "border border-red-200 bg-red-50 text-red-700"
+                      ? "border border-[rgba(52,211,153,0.22)] bg-[rgba(6,78,59,0.3)] text-[var(--status-success)]"
+                      : "border border-[rgba(251,113,133,0.24)] bg-[rgba(127,29,29,0.26)] text-[var(--status-danger)]"
                   }`}
                 >
                   {actionFeedback.message}
