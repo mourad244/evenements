@@ -58,6 +58,7 @@ export function ResetPasswordForm() {
           placeholder="Paste your token"
           {...form.register("token")}
           error={form.formState.errors.token?.message}
+          disabled={mutation.isPending}
         />
         <PasswordField
           id="reset-password"
@@ -66,6 +67,7 @@ export function ResetPasswordForm() {
           placeholder="Choose a new password"
           {...form.register("password")}
           error={form.formState.errors.password?.message}
+          disabled={mutation.isPending}
         />
         <PasswordField
           id="reset-password-confirm"
@@ -74,9 +76,15 @@ export function ResetPasswordForm() {
           placeholder="Repeat your new password"
           {...form.register("confirmPassword")}
           error={form.formState.errors.confirmPassword?.message}
+          disabled={mutation.isPending}
         />
+        {mutation.isPending ? (
+          <p role="status" className="text-sm text-slate-600">
+            Resetting your password. You will return to sign in once this is complete.
+          </p>
+        ) : null}
         {mutation.error ? (
-          <p className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+          <p role="alert" className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
             {mutation.error.message}
           </p>
         ) : null}

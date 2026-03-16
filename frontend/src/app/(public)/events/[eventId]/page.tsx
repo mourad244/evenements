@@ -2,8 +2,9 @@
 
 import { useParams } from "next/navigation";
 
-import { Card } from "@/components/ui/card";
-import { Spinner } from "@/components/ui/spinner";
+import { ErrorState } from "@/components/ui/error-state";
+import { LoadingState } from "@/components/ui/loading-state";
+import { UnavailableState } from "@/components/ui/unavailable-state";
 import { EventDetails } from "@/features/events/components/event-details";
 import { RegistrationButton } from "@/features/registrations/components/registration-button";
 import { useEventDetailsQuery } from "@/features/events/hooks/use-event-details-query";
@@ -13,24 +14,25 @@ export default function EventDetailsPage() {
   const { data, isLoading, isError, error } = useEventDetailsQuery(params.eventId);
 
   if (isLoading) {
-    return (
-      <div className="flex min-h-[40vh] items-center justify-center">
-        <Spinner />
-      </div>
-    );
+    return <LoadingState label="Loading event details..." minHeightClassName="min-h-[40vh]" />;
   }
 
   if (isError) {
     return (
-      <Card className="text-sm text-slate-600">
-        <p className="font-semibold text-ink">Could not load event details.</p>
-        <p className="mt-2">{error.message}</p>
-      </Card>
+      <ErrorState
+        title="Could not load event details"
+        description={error.message}
+      />
     );
   }
 
   if (!data) {
-    return <Card>Event not found.</Card>;
+    return (
+      <UnavailableState
+        title="Event not found"
+        description="This event is unavailable or may have been removed."
+      />
+    );
   }
 
   return (

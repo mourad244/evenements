@@ -1,0 +1,17 @@
+
+> start:frontend
+> corepack pnpm --filter event-platform-frontend dev
+
+
+> event-platform-frontend@0.2.0 dev C:\Users\sqs\Desktop\MUS\evenment project\evenements-main\frontend
+> next dev
+
+   ▲ Next.js 15.5.12
+   - Local:        http://localhost:3000
+   - Network:      http://172.24.0.1:3000
+   - Environments: .env.local
+
+ ✓ Starting...
+ ✓ Ready in 10.1s
+ ○ Compiling / ...
+ ✓ Compiled / in 21.3s (951 modules)
