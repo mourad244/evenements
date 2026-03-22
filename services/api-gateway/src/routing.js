@@ -57,6 +57,14 @@ export function buildRouteTable(config) {
     },
     {
       method: "GET",
+      path: "/api/admin/events",
+      public: false,
+      allowedRoles: ["ADMIN"],
+      targetBaseUrl: config.eventManagementServiceUrl,
+      targetPath: "/admin/events"
+    },
+    {
+      method: "GET",
       path: "/api/catalog/events",
       public: true,
       targetBaseUrl: config.eventManagementServiceUrl,
@@ -142,6 +150,14 @@ export function buildRouteTable(config) {
       targetPath: "/organizer/events/:eventId/registrations"
     },
     {
+      method: "GET",
+      path: "/api/organizer/events/:eventId/registrations/export",
+      public: false,
+      allowedRoles: organizerOrAdmin,
+      targetBaseUrl: config.registrationServiceUrl,
+      targetPath: "/organizer/events/:eventId/registrations/export"
+    },
+    {
       method: "POST",
       path: "/api/registrations",
       public: false,
@@ -156,6 +172,45 @@ export function buildRouteTable(config) {
       allowedRoles: participantOnly,
       targetBaseUrl: config.registrationServiceUrl,
       targetPath: "/registrations/:registrationId/cancel"
+    },
+    {
+      method: "GET",
+      path: "/api/tickets/:ticketId",
+      public: false,
+      allowedRoles: participantOnly,
+      targetBaseUrl: config.registrationServiceUrl,
+      targetPath: "/tickets/:ticketId"
+    },
+    {
+      method: "GET",
+      path: "/api/notifications",
+      public: false,
+      allowedRoles: authenticatedRoles,
+      targetBaseUrl: config.registrationServiceUrl,
+      targetPath: "/notifications"
+    },
+    {
+      method: "PATCH",
+      path: "/api/notifications/:notificationId/read",
+      public: false,
+      allowedRoles: authenticatedRoles,
+      targetBaseUrl: config.registrationServiceUrl,
+      targetPath: "/notifications/:notificationId/read"
+    },
+    {
+      method: "POST",
+      path: "/api/payments/session",
+      public: false,
+      allowedRoles: participantOnly,
+      targetBaseUrl: config.registrationServiceUrl,
+      targetPath: "/payments/session"
+    },
+    {
+      method: "POST",
+      path: "/api/payments/webhook",
+      public: true,
+      targetBaseUrl: config.registrationServiceUrl,
+      targetPath: "/payments/webhook"
     },
     {
       method: "GET",

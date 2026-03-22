@@ -400,6 +400,39 @@ export function createEventRepository(pool) {
         [eventId, publishedAt, updatedAt]
       );
       return mapEvent(rows[0]);
+    },
+
+    async cancelEvent(eventId, updatedAt) {
+      const { rows } = await pool.query(
+        `
+          UPDATE events
+          SET status = 'CANCELLED', updated_at = $2
+          WHERE event_id = $1
+            AND deleted_at IS NULL
+          RETURNING
+            event_id,
+            organizer_id,
+            title,
+            description,
+            theme,
+            venue_name,
+            city,
+            start_at,
+            end_at,
+            timezone,
+            capacity,
+            visibility,
+            pricing_type,
+            status,
+            cover_image_ref,
+            published_at,
+            created_at,
+            updated_at,
+            deleted_at
+        `,
+        [eventId, updatedAt]
+      );
+      return mapEvent(rows[0]);
     }
   };
 }
