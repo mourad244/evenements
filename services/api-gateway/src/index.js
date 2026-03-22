@@ -1,3 +1,5 @@
+import crypto from "node:crypto";
+
 import express from "express";
 import jwt from "jsonwebtoken";
 import {
@@ -24,12 +26,77 @@ const config = {
     process.env.EVENT_MANAGEMENT_SERVICE_URL || "http://127.0.0.1:4002",
   registrationServiceUrl:
     process.env.REGISTRATION_SERVICE_URL || "http://127.0.0.1:4003",
-  jwtAccessSecret: process.env.JWT_ACCESS_SECRET || "dev-access-secret"
+  upstreamTimeoutMs: Number(process.env.UPSTREAM_TIMEOUT_MS || 4000)
 };
 const log = createJsonLogger(config.serviceName);
 
+function resolveJwtSecret(envKey, fallbackValue) {
+  const configured = String(process.env[envKey] || "").trim();
+  if (configured) {
+    if (configured.length < 32) {
+      log("warn", "auth.jwt.secret.weak", {
+        envKey,
+        length: configured.length
+      });
+    }
+    return configured;
+  }
+
+  if (process.env.ALLOW_INSECURE_JWT_DEFAULTS === "true") {
+    log("warn", "auth.jwt.secret.insecure_default", {
+      envKey,
+      message: "Using insecure default secret; set env to harden."
+    });
+    return fallbackValue;
+  }
+
+  if (String(process.env.NODE_ENV || "").toLowerCase() === "production") {
+    throw new Error(`${envKey} is required in production`);
+  }
+
+  const generated = crypto.randomBytes(32).toString("hex");
+  log("warn", "auth.jwt.secret.generated", {
+    envKey,
+    message: "Generated ephemeral secret; set env for stable sessions."
+  });
+  return generated;
+}
+
+config.jwtAccessSecret = resolveJwtSecret(
+  "JWT_ACCESS_SECRET",
+  "dev-insecure-access-secret"
+);
+
 const app = express();
 app.use(express.json());
+
+const corsOrigins = String(process.env.CORS_ORIGINS || "http://localhost:3000")
+  .split(",")
+  .map((origin) => origin.trim())
+  .filter(Boolean);
+
+app.use((req, res, next) => {
+  const origin = req.header("origin");
+  if (origin && corsOrigins.includes(origin)) {
+    res.setHeader("access-control-allow-origin", origin);
+    res.setHeader("vary", "origin");
+    res.setHeader("access-control-allow-credentials", "true");
+  }
+  res.setHeader(
+    "access-control-allow-headers",
+    "authorization, content-type, x-correlation-id"
+  );
+  res.setHeader(
+    "access-control-allow-methods",
+    "GET,POST,PATCH,PUT,DELETE,OPTIONS"
+  );
+
+  if (req.method === "OPTIONS") {
+    return res.status(204).send("");
+  }
+
+  return next();
+});
 
 const routeTable = [
   ...buildRouteTable(config),
@@ -74,6 +141,38 @@ function parseBearerToken(authorizationHeader) {
   return token;
 }
 
+async function fetchWithTimeout(url, init = {}) {
+  const controller = new AbortController();
+  const timeout = setTimeout(
+    () => controller.abort(),
+    config.upstreamTimeoutMs
+  );
+  try {
+    return await fetch(url, { ...init, signal: controller.signal });
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
+async function checkUpstreamReadiness(url) {
+  const candidates = ["/ready", "/health"];
+
+  for (const path of candidates) {
+    try {
+      const response = await fetchWithTimeout(new URL(path, url), {
+        method: "GET"
+      });
+      if (response.ok) {
+        return { ok: true, path };
+      }
+    } catch {
+      // Try the next readiness endpoint.
+    }
+  }
+
+  return { ok: false };
+}
+
 app.use(createCorrelationIdMiddleware());
 app.use(
   createRequestCompletionLogger({
@@ -93,11 +192,35 @@ app.get("/health", (_req, res) => {
   );
 });
 
-app.get("/ready", (_req, res) => {
-  res.status(200).json(
+app.get("/ready", async (_req, res) => {
+  const upstreamChecks = await Promise.all([
+    checkUpstreamReadiness(config.identityServiceUrl),
+    checkUpstreamReadiness(config.eventManagementServiceUrl),
+    checkUpstreamReadiness(config.registrationServiceUrl)
+  ]);
+
+  const [identity, eventManagement, registration] = upstreamChecks;
+  const allReady = upstreamChecks.every((result) => result.ok);
+
+  if (!allReady) {
+    return res.status(503).json(
+      error("Service not ready", "UPSTREAM_UNAVAILABLE", {
+        identity: identity.ok,
+        eventManagement: eventManagement.ok,
+        registration: registration.ok
+      })
+    );
+  }
+
+  return res.status(200).json(
     success({
       status: "ready",
-      service: config.serviceName
+      service: config.serviceName,
+      upstreams: {
+        identity: identity.path,
+        eventManagement: eventManagement.path,
+        registration: registration.path
+      }
     })
   );
 });
@@ -127,6 +250,8 @@ app.use((req, res, next) => {
 
   const authContext = {
     userId: payload.sub,
+    email: payload.email || null,
+    name: payload.name || null,
     role: payload.role,
     sessionId: payload.sid,
     accountStatus: payload.account_status
@@ -154,6 +279,20 @@ app.use(async (req, res) => {
     return route.localHandler(req, res);
   }
 
+  const spoofedHeaders = [
+    "x-user-id",
+    "x-user-role",
+    "x-user-email",
+    "x-user-name",
+    "x-session-id"
+  ].filter((header) => req.header(header));
+  if (spoofedHeaders.length > 0) {
+    log("warn", "gateway.auth.spoofed_headers", {
+      headers: spoofedHeaders,
+      path: req.path
+    });
+  }
+
   const incomingUrl = new URL(req.originalUrl, "http://gateway.local");
   const targetPath = interpolatePath(route.targetPath, req.matchedRouteParams);
   const targetBaseUrl = route.targetBaseUrl || config.identityServiceUrl;
@@ -172,6 +311,12 @@ app.use(async (req, res) => {
     headers["x-user-id"] = req.auth.userId;
     headers["x-user-role"] = req.auth.role;
     headers["x-session-id"] = req.auth.sessionId;
+    if (req.auth.email) {
+      headers["x-user-email"] = req.auth.email;
+    }
+    if (req.auth.name) {
+      headers["x-user-name"] = req.auth.name;
+    }
   }
 
   const requestInit = {
@@ -185,8 +330,11 @@ app.use(async (req, res) => {
 
   let upstreamResponse;
   try {
-    upstreamResponse = await fetch(targetUrl, requestInit);
-  } catch {
+    upstreamResponse = await fetchWithTimeout(targetUrl, requestInit);
+  } catch (err) {
+    if (err?.name === "AbortError") {
+      return res.status(504).json(error("Upstream timeout", "UPSTREAM_TIMEOUT"));
+    }
     return res.status(502).json(error("Bad gateway", "UPSTREAM_UNREACHABLE"));
   }
 
@@ -199,7 +347,16 @@ app.use(async (req, res) => {
   }
 
   if (contentType.includes("application/json")) {
-    return res.send(responseText ? JSON.parse(responseText) : {});
+    if (!responseText) {
+      return res.send({});
+    }
+    try {
+      return res.send(JSON.parse(responseText));
+    } catch {
+      return res
+        .status(502)
+        .json(error("Invalid upstream response", "UPSTREAM_INVALID_RESPONSE"));
+    }
   }
 
   return res.send(responseText);
