@@ -5,12 +5,24 @@ export async function ensureSchema(pool) {
       email TEXT NOT NULL UNIQUE,
       password_hash TEXT NOT NULL,
       display_name TEXT NOT NULL,
+      full_name TEXT,
+      phone TEXT,
+      city TEXT,
+      bio TEXT,
       role TEXT NOT NULL,
       account_status TEXT NOT NULL,
       created_at TIMESTAMPTZ NOT NULL,
       updated_at TIMESTAMPTZ NOT NULL,
       last_login_at TIMESTAMPTZ
     );
+  `);
+
+  await pool.query(`
+    ALTER TABLE auth_users
+      ADD COLUMN IF NOT EXISTS full_name TEXT,
+      ADD COLUMN IF NOT EXISTS phone TEXT,
+      ADD COLUMN IF NOT EXISTS city TEXT,
+      ADD COLUMN IF NOT EXISTS bio TEXT;
   `);
 
   await pool.query(`
@@ -45,4 +57,3 @@ export async function ensureSchema(pool) {
       ON auth_password_reset_tokens (user_id);
   `);
 }
-

@@ -5,6 +5,10 @@ function mapUser(row) {
     email: row.email,
     passwordHash: row.password_hash,
     displayName: row.display_name,
+    fullName: row.full_name,
+    phone: row.phone,
+    city: row.city,
+    bio: row.bio,
     role: row.role,
     accountStatus: row.account_status,
     createdAt: row.created_at,
@@ -12,6 +16,22 @@ function mapUser(row) {
     lastLoginAt: row.last_login_at
   };
 }
+
+const userColumns = `
+  user_id,
+  email,
+  password_hash,
+  display_name,
+  full_name,
+  phone,
+  city,
+  bio,
+  role,
+  account_status,
+  created_at,
+  updated_at,
+  last_login_at
+`;
 
 function mapSession(row) {
   if (!row) return null;
@@ -62,15 +82,7 @@ export function createAuthRepository(pool) {
       const { rows } = await pool.query(
         `
           SELECT
-            user_id,
-            email,
-            password_hash,
-            display_name,
-            role,
-            account_status,
-            created_at,
-            updated_at,
-            last_login_at
+            ${userColumns}
           FROM auth_users
           WHERE email = $1
           LIMIT 1
@@ -84,15 +96,7 @@ export function createAuthRepository(pool) {
       const { rows } = await pool.query(
         `
           SELECT
-            user_id,
-            email,
-            password_hash,
-            display_name,
-            role,
-            account_status,
-            created_at,
-            updated_at,
-            last_login_at
+            ${userColumns}
           FROM auth_users
           WHERE user_id = $1
           LIMIT 1
@@ -106,15 +110,7 @@ export function createAuthRepository(pool) {
       const { rows } = await pool.query(
         `
           SELECT
-            user_id,
-            email,
-            password_hash,
-            display_name,
-            role,
-            account_status,
-            created_at,
-            updated_at,
-            last_login_at
+            ${userColumns}
           FROM auth_users
           ORDER BY created_at DESC
         `
@@ -130,29 +126,29 @@ export function createAuthRepository(pool) {
             email,
             password_hash,
             display_name,
+            full_name,
+            phone,
+            city,
+            bio,
             role,
             account_status,
             created_at,
             updated_at,
             last_login_at
           )
-          VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+          VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
           RETURNING
-            user_id,
-            email,
-            password_hash,
-            display_name,
-            role,
-            account_status,
-            created_at,
-            updated_at,
-            last_login_at
+            ${userColumns}
         `,
         [
           user.userId,
           user.email,
           user.passwordHash,
           user.displayName,
+          user.fullName,
+          user.phone,
+          user.city,
+          user.bio,
           user.role,
           user.accountStatus,
           user.createdAt,
@@ -170,15 +166,7 @@ export function createAuthRepository(pool) {
           SET last_login_at = $2, updated_at = $2
           WHERE user_id = $1
           RETURNING
-            user_id,
-            email,
-            password_hash,
-            display_name,
-            role,
-            account_status,
-            created_at,
-            updated_at,
-            last_login_at
+            ${userColumns}
         `,
         [userId, loggedAt]
       );
@@ -192,17 +180,49 @@ export function createAuthRepository(pool) {
           SET password_hash = $2, updated_at = $3
           WHERE user_id = $1
           RETURNING
-            user_id,
-            email,
-            password_hash,
-            display_name,
-            role,
-            account_status,
-            created_at,
-            updated_at,
-            last_login_at
+            ${userColumns}
         `,
         [userId, passwordHash, updatedAt]
+      );
+      return mapUser(rows[0]);
+    },
+
+    async updateUserProfile(userId, updates, updatedAt) {
+      const fields = [];
+      const values = [];
+      let index = 1;
+
+      const pushField = (column, key) => {
+        if (!Object.prototype.hasOwnProperty.call(updates, key)) return;
+        fields.push(`${column} = $${index}`);
+        values.push(updates[key]);
+        index += 1;
+      };
+
+      pushField("display_name", "displayName");
+      pushField("full_name", "fullName");
+      pushField("phone", "phone");
+      pushField("city", "city");
+      pushField("bio", "bio");
+
+      if (fields.length === 0) {
+        return null;
+      }
+
+      fields.push(`updated_at = $${index}`);
+      values.push(updatedAt);
+      index += 1;
+      values.push(userId);
+
+      const { rows } = await pool.query(
+        `
+          UPDATE auth_users
+          SET ${fields.join(", ")}
+          WHERE user_id = $${index}
+          RETURNING
+            ${userColumns}
+        `,
+        values
       );
       return mapUser(rows[0]);
     },

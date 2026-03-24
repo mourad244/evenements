@@ -8,6 +8,8 @@ export const ROUTES = {
   events: "/events",
   dashboard: "/dashboard",
   myRegistrations: "/my-registrations",
+  profile: "/profile",
+  notifications: "/notifications",
   organizerEvents: "/organizer/events",
   organizerNewEvent: "/organizer/events/new",
   adminEvents: "/admin/events",

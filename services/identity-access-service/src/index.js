@@ -111,15 +111,21 @@ function nowIso() {
 }
 
 function toUserView(user) {
+  const resolvedFullName = user.fullName || user.displayName || null;
+  const resolvedDisplayName = user.displayName || user.fullName || null;
+  const resolvedName = resolvedDisplayName || resolvedFullName || user.email;
   return {
     id: user.userId,
     userId: user.userId,
     email: user.email,
-    name: user.displayName,
-    fullName: user.displayName,
-    displayName: user.displayName,
+    name: resolvedName,
+    fullName: resolvedFullName,
+    displayName: resolvedDisplayName,
     role: user.role,
     accountStatus: user.accountStatus,
+    phone: user.phone || null,
+    city: user.city || null,
+    bio: user.bio || null,
     createdAt: user.createdAt || null,
     updatedAt: user.updatedAt || null,
     lastLoginAt: user.lastLoginAt || null
@@ -227,6 +233,10 @@ app.post("/auth/register", async (req, res) => {
     email,
     passwordHash,
     displayName,
+    fullName: displayName,
+    phone: null,
+    city: null,
+    bio: null,
     role,
     accountStatus: "ACTIVE",
     createdAt: nowIso(),
@@ -527,6 +537,122 @@ app.get("/auth/me", async (req, res) => {
         sessionId,
         correlationId: correlationId || null
       }
+    })
+  );
+});
+
+app.get("/profile", async (req, res) => {
+  const userId = req.header("x-user-id");
+  const role = req.header("x-user-role");
+  const sessionId = req.header("x-session-id");
+
+  if (!userId || !role || !sessionId) {
+    return res
+      .status(401)
+      .json(error("Missing auth context", "MISSING_AUTH_CONTEXT"));
+  }
+
+  const session = await repository.findSessionById(sessionId);
+  if (!session || session.userId !== userId || session.revokedAt) {
+    return res
+      .status(401)
+      .json(error("Session is not active", "SESSION_INVALID"));
+  }
+  if (hasExpired(session.expiresAt)) {
+    return res.status(401).json(error("Session expired", "SESSION_EXPIRED"));
+  }
+
+  const user = await repository.findUserById(userId);
+  if (!user) {
+    return res.status(404).json(error("User not found", "USER_NOT_FOUND"));
+  }
+
+  return res.status(200).json(
+    success({
+      user: toUserView(user)
+    })
+  );
+});
+
+app.patch("/profile", async (req, res) => {
+  const userId = req.header("x-user-id");
+  const role = req.header("x-user-role");
+  const sessionId = req.header("x-session-id");
+
+  if (!userId || !role || !sessionId) {
+    return res
+      .status(401)
+      .json(error("Missing auth context", "MISSING_AUTH_CONTEXT"));
+  }
+
+  const session = await repository.findSessionById(sessionId);
+  if (!session || session.userId !== userId || session.revokedAt) {
+    return res
+      .status(401)
+      .json(error("Session is not active", "SESSION_INVALID"));
+  }
+  if (hasExpired(session.expiresAt)) {
+    return res.status(401).json(error("Session expired", "SESSION_EXPIRED"));
+  }
+
+  const updates = {};
+  const details = [];
+  const body = req.body || {};
+
+  if (Object.prototype.hasOwnProperty.call(body, "displayName")) {
+    const value = String(body.displayName || "").trim();
+    if (!value) {
+      details.push("displayName cannot be empty");
+    } else {
+      updates.displayName = value;
+    }
+  }
+
+  if (Object.prototype.hasOwnProperty.call(body, "fullName")) {
+    const value = String(body.fullName || "").trim();
+    if (!value) {
+      details.push("fullName cannot be empty");
+    } else {
+      updates.fullName = value;
+    }
+  }
+
+  if (Object.prototype.hasOwnProperty.call(body, "phone")) {
+    const value =
+      body.phone === null ? null : String(body.phone || "").trim();
+    updates.phone = value || null;
+  }
+
+  if (Object.prototype.hasOwnProperty.call(body, "city")) {
+    const value = body.city === null ? null : String(body.city || "").trim();
+    updates.city = value || null;
+  }
+
+  if (Object.prototype.hasOwnProperty.call(body, "bio")) {
+    const value = body.bio === null ? null : String(body.bio || "").trim();
+    updates.bio = value || null;
+  }
+
+  if (details.length > 0) {
+    return res
+      .status(400)
+      .json(error("Validation failed", "VALIDATION_ERROR", details));
+  }
+
+  if (Object.keys(updates).length === 0) {
+    return res
+      .status(400)
+      .json(error("No profile fields provided", "VALIDATION_ERROR"));
+  }
+
+  const user = await repository.updateUserProfile(userId, updates, nowIso());
+  if (!user) {
+    return res.status(404).json(error("User not found", "USER_NOT_FOUND"));
+  }
+
+  return res.status(200).json(
+    success({
+      user: toUserView(user)
     })
   );
 });

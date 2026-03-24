@@ -274,6 +274,46 @@ test("auth register/login/me returns normalized user aliases", async () => {
   assert.equal(me.body.data.context.sessionId, organizerSessionId);
 });
 
+test("profile read/update returns normalized profile fields", async () => {
+  const profile = await jsonFetch(`${gatewayBase}/api/profile`, {
+    method: "GET",
+    headers: {
+      authorization: `Bearer ${organizerAccessToken}`
+    }
+  });
+  assert.equal(profile.res.status, 200);
+  const profileUser = profile.body.data.user;
+  assertAlias(profileUser, "id", "userId");
+  assert.equal(profileUser.userId, organizerUserId);
+  assert.equal(profileUser.email, organizerEmail);
+  assert.equal(profileUser.role, "ORGANIZER");
+  assert.ok(profileUser.fullName);
+  assert.ok(profileUser.displayName);
+  assert.ok(profileUser.name);
+
+  const updatedProfile = await jsonFetch(`${gatewayBase}/api/profile`, {
+    method: "PATCH",
+    headers: {
+      authorization: `Bearer ${organizerAccessToken}`
+    },
+    body: JSON.stringify({
+      fullName: "Organizer Q. User",
+      displayName: "Org Q",
+      phone: "+212600000000",
+      city: "Rabat",
+      bio: "Organizer profile for MVP smoke coverage."
+    })
+  });
+  assert.equal(updatedProfile.res.status, 200);
+  const updatedUser = updatedProfile.body.data.user;
+  assert.equal(updatedUser.fullName, "Organizer Q. User");
+  assert.equal(updatedUser.displayName, "Org Q");
+  assert.equal(updatedUser.name, "Org Q");
+  assert.equal(updatedUser.phone, "+212600000000");
+  assert.equal(updatedUser.city, "Rabat");
+  assert.equal(updatedUser.bio, "Organizer profile for MVP smoke coverage.");
+});
+
 test("event draft creation, publish, and normalized event aliases", async () => {
   const draft = await jsonFetch(`${gatewayBase}/api/events/drafts`, {
     method: "POST",

@@ -14,6 +14,7 @@ export const ENDPOINTS = {
     login: "/api/auth/login",
     register: "/api/auth/register",
     me: "/api/auth/me",
+    profile: "/api/profile",
     forgotPassword: "/api/auth/forgot-password",
     resetPassword: "/api/auth/reset-password"
   },
@@ -34,5 +35,16 @@ export const ENDPOINTS = {
     cancel: (registrationId: string) => `/api/registrations/${registrationId}/cancel`,
     organizerEventRegistrations: (eventId: string) =>
       `/api/organizer/events/${eventId}/registrations`
+  },
+  tickets: {
+    details: (ticketId: string) => `/api/tickets/${ticketId}`
+  },
+  notifications: {
+    list: "/api/notifications",
+    markRead: (notificationId: string) =>
+      `/api/notifications/${notificationId}/read`
+  },
+  payments: {
+    session: "/api/payments/session"
   }
 } as const;

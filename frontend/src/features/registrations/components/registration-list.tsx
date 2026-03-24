@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { StatusBadge } from "@/components/shared/status-badge";
+import { useCreatePaymentSessionMutation } from "@/features/payments/hooks/use-create-payment-session-mutation";
 import { ROUTES } from "@/lib/constants/routes";
 import { formatDate } from "@/lib/utils/format-date";
 
@@ -52,7 +53,7 @@ function resolveTicketState(registration: RegistrationItem) {
   if (registration.canDownloadTicket && registration.ticketId) {
     return {
       title: `${registration.ticketFormat || "Ticket"} available`,
-      description: "Your ticket record is ready. Download will appear here once it becomes available in the app.",
+      description: "Your ticket record is ready. Open the ticket view to see the issued payload.",
       tone: "text-[var(--status-success)]"
     };
   }
@@ -85,7 +86,7 @@ function resolveNextStep(registration: RegistrationItem) {
     return {
       title: registration.canDownloadTicket ? "Everything is in place" : "Check back for ticket readiness",
       description: registration.canDownloadTicket
-        ? "You can review the event details any time, and your full participant history will keep this record visible."
+        ? "Your ticket is ready. Open the ticket view or review the event details any time."
         : "Your place is secured. Keep this history view nearby so you can spot the ticket update as soon as it appears."
     };
   }
@@ -114,6 +115,7 @@ function resolveNextStep(registration: RegistrationItem) {
 
 export function RegistrationList({ registrations }: { registrations: RegistrationItem[] }) {
   const mutation = useCancelRegistrationMutation();
+  const paymentMutation = useCreatePaymentSessionMutation();
   const sortedRegistrations = [...registrations].sort((left, right) => {
     const leftDate = left.updatedAt || left.eventDate;
     const rightDate = right.updatedAt || right.eventDate;
@@ -153,12 +155,33 @@ export function RegistrationList({ registrations }: { registrations: Registratio
           {mutation.error.message}
         </p>
       ) : null}
+      {paymentMutation.error ? (
+        <p
+          role="alert"
+          className="rounded-[22px] border border-[rgba(251,113,133,0.24)] bg-[rgba(127,29,29,0.26)] px-4 py-3 text-sm text-[var(--status-danger)]"
+        >
+          {paymentMutation.error.message}
+        </p>
+      ) : null}
       {sortedRegistrations.map((registration) => {
         const statusState = resolveStatusState(registration);
         const ticketState = resolveTicketState(registration);
         const nextStep = resolveNextStep(registration);
         const isCancellingThis =
           mutation.isPending && mutation.variables === registration.id;
+        const isPaymentTarget =
+          paymentMutation.variables?.registrationId === registration.id;
+        const isPayable =
+          registration.status === "CONFIRMED" && !registration.canDownloadTicket;
+        const paymentSession = isPaymentTarget ? paymentMutation.data : null;
+        const resolvedTicketState = paymentSession
+          ? {
+              title: "Ticket awaiting payment confirmation",
+              description:
+                "Ticket access will become available automatically once payment is confirmed.",
+              tone: "text-[var(--text-secondary)]"
+            }
+          : ticketState;
 
         return (
           <Card
@@ -198,14 +221,62 @@ export function RegistrationList({ registrations }: { registrations: Registratio
 
             <div className="grid gap-2 rounded-[28px] border border-[var(--line-soft)] bg-[linear-gradient(180deg,rgba(16,26,45,0.84),rgba(10,17,30,0.92))] p-4">
               <p className="text-sm font-semibold text-[var(--text-primary)]">Ticket readiness</p>
-              <p className={`text-sm font-medium ${ticketState.tone}`}>{ticketState.title}</p>
-              <p className="text-sm leading-6 text-[var(--text-secondary)]">{ticketState.description}</p>
+              <p className={`text-sm font-medium ${resolvedTicketState.tone}`}>
+                {resolvedTicketState.title}
+              </p>
+              <p className="text-sm leading-6 text-[var(--text-secondary)]">
+                {resolvedTicketState.description}
+              </p>
               {registration.ticketId ? (
                 <p className="text-xs text-[var(--text-muted)]">
                   Ticket reference:{" "}
                   <span className="font-medium text-[var(--text-primary)]">{registration.ticketId}</span>
                   {registration.ticketFormat ? ` | Format: ${registration.ticketFormat}` : ""}
                 </p>
+              ) : null}
+              {paymentSession ? (
+                <div className="grid gap-2 rounded-[22px] border border-[rgba(88,116,255,0.24)] bg-[rgba(12,20,35,0.72)] px-3 py-3 text-sm text-[var(--text-secondary)]">
+                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--accent-primary-strong)]">
+                    Payment status
+                  </p>
+                  <p className="text-sm font-medium text-[var(--text-primary)]">
+                    Pending confirmation
+                  </p>
+                  <p className="text-sm leading-6 text-[var(--text-secondary)]">
+                    Payment is not completed yet. Once confirmation arrives, your ticket will update automatically.
+                  </p>
+                </div>
+              ) : null}
+              {isPayable ? (
+                <div className="grid gap-2 rounded-[22px] border border-[rgba(88,116,255,0.2)] bg-[rgba(12,20,35,0.72)] px-3 py-3 text-sm text-[var(--text-secondary)]">
+                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--accent-primary-strong)]">
+                    Payment session
+                  </p>
+                  <p>
+                    Start a payment session to move this confirmed registration toward ticket readiness.
+                  </p>
+                  <Button
+                    variant="ghost"
+                    onClick={() =>
+                      paymentMutation.mutate({
+                        registrationId: registration.id,
+                        eventId: registration.eventId,
+                        amount: 0,
+                        currency: "MAD",
+                        metadata: { source: "participant-ui" }
+                      })
+                    }
+                    disabled={paymentMutation.isPending && isPaymentTarget}
+                    className="w-full sm:w-auto"
+                  >
+                    {paymentMutation.isPending && isPaymentTarget
+                      ? "Starting session..."
+                      : "Start payment session"}
+                  </Button>
+                  <p className="text-xs text-[var(--text-muted)]">
+                    No external checkout is available yet in this MVP flow.
+                  </p>
+                </div>
               ) : null}
             </div>
 
@@ -216,6 +287,14 @@ export function RegistrationList({ registrations }: { registrations: Registratio
                 <p className="text-sm leading-6 text-[var(--text-secondary)]">{nextStep.description}</p>
               </div>
               <div className="flex flex-col gap-3 sm:flex-row xl:flex-col xl:items-stretch xl:justify-start">
+                {registration.canDownloadTicket && registration.ticketId ? (
+                  <Link
+                    href={`/tickets/${registration.ticketId}`}
+                    className="w-full sm:w-auto"
+                  >
+                    <Button className="w-full sm:w-auto">View ticket</Button>
+                  </Link>
+                ) : null}
                 <Link href={`/events/${registration.eventId}`} className="w-full sm:w-auto">
                   <Button variant="ghost" className="w-full sm:w-auto">Review event</Button>
                 </Link>

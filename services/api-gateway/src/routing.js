@@ -49,6 +49,22 @@ export function buildRouteTable(config) {
     },
     {
       method: "GET",
+      path: "/api/profile",
+      public: false,
+      allowedRoles: authenticatedRoles,
+      targetBaseUrl: config.identityServiceUrl,
+      targetPath: "/profile"
+    },
+    {
+      method: "PATCH",
+      path: "/api/profile",
+      public: false,
+      allowedRoles: authenticatedRoles,
+      targetBaseUrl: config.identityServiceUrl,
+      targetPath: "/profile"
+    },
+    {
+      method: "GET",
       path: "/api/admin/users",
       public: false,
       allowedRoles: ["ADMIN"],

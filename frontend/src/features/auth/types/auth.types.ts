@@ -1,3 +1,4 @@
+import type { Role } from "@/types/common.types";
 import type { User } from "@/types/user.types";
 
 export type LoginInput = {
@@ -28,4 +29,25 @@ export type AuthSession = {
   refreshToken?: string;
   expiresIn?: number;
   user: User;
+};
+
+export type UserProfile = {
+  id: string;
+  userId: string;
+  fullName: string;
+  displayName: string;
+  name: string;
+  email: string;
+  role: Role;
+  phone: string | null;
+  city: string | null;
+  bio: string | null;
+};
+
+export type UpdateProfileInput = {
+  fullName?: string;
+  displayName?: string;
+  phone?: string | null;
+  city?: string | null;
+  bio?: string | null;
 };

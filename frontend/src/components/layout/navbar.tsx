@@ -25,6 +25,8 @@ type NavItem = {
 const navItems: NavItem[] = [
   { href: ROUTES.events, label: "Events" },
   { href: ROUTES.dashboard, label: "Dashboard", roles: ["PARTICIPANT", "ORGANIZER", "ADMIN"] },
+  { href: ROUTES.profile, label: "Profile", roles: ["PARTICIPANT", "ORGANIZER"] },
+  { href: ROUTES.notifications, label: "Notifications", roles: ["PARTICIPANT", "ORGANIZER", "ADMIN"] },
   { href: ROUTES.myRegistrations, label: "My registrations", roles: ["PARTICIPANT"] },
   { href: ROUTES.organizerEvents, label: "Organizer", roles: ["ORGANIZER", "ADMIN"] },
   { href: ROUTES.adminEvents, label: "Admin", roles: ["ADMIN"] }
@@ -55,6 +57,14 @@ function getCurrentSection(pathname: string) {
 
   if (pathname === ROUTES.dashboard || pathname.startsWith(`${ROUTES.dashboard}/`)) {
     return "Dashboard";
+  }
+
+  if (pathname === ROUTES.profile || pathname.startsWith(`${ROUTES.profile}/`)) {
+    return "Profile";
+  }
+
+  if (pathname === ROUTES.notifications || pathname.startsWith(`${ROUTES.notifications}/`)) {
+    return "Notifications";
   }
 
   if (pathname === ROUTES.events || pathname.startsWith(`${ROUTES.events}/`)) {
