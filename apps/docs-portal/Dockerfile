@@ -4,14 +4,14 @@ ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
 
 RUN corepack enable
-RUN corepack prepare pnpm@8.5.1 --activate
+RUN corepack prepare pnpm@9.15.9 --activate
 
 WORKDIR /workspace
 
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 COPY apps/docs-portal/package.json apps/docs-portal/package.json
 
-RUN pnpm install --frozen-lockfile --filter docs-portal...
+RUN pnpm install --no-frozen-lockfile --filter docs-portal...
 
 COPY apps/docs-portal ./apps/docs-portal
 COPY docs ./docs

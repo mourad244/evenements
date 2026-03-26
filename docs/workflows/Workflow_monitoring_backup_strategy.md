@@ -39,9 +39,9 @@ Hors scope:
 
 | Tier | RPO cible | RTO cible | Priorite restauration |
 | --- | --- | --- | --- |
-| `T0` | <= 15 min | <= 60 min | priorite 1 |
-| `T1` | <= 60 min | <= 4 h | priorite 2 |
-| `T2` | <= 24 h | <= 24 h | priorite 3 |
+| `T0` | `<= 15 min` | `<= 60 min` | priorite 1 |
+| `T1` | `<= 60 min` | `<= 4 h` | priorite 2 |
+| `T2` | `<= 24 h` | `<= 24 h` | priorite 3 |
 
 Definitions:
 
