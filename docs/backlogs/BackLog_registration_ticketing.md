@@ -91,7 +91,7 @@ promotion automatique, la billetterie et l'export des inscrits.
 
 ### R04 - Generer le billet electronique et le QR code
 
-- Status: `TODO`
+- Status: `DONE`
 - Priority: `P1` · Difficulty: `M` · Impact: `H`
 - Owner: `Mourad`
 - Support: `Ibrahim`
@@ -105,13 +105,13 @@ promotion automatique, la billetterie et l'export des inscrits.
 
 | Ticket ID | Status | Priority | Owner | Support | Sprint cible | Dependances | Interfaces impactees | Sortie attendue | Critere d'acceptation | Branche suggeree |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| R04.1 | TODO | P1 | Mourad | Ibrahim | Sprint 0 | R01.1 | Modele `Ticket`, event `ticket.generated` | Contrat ticketing documente | La reference billet, le format artefact et l'option QR sont definis | `docs/ticketing-contract` |
-| R04.2 | TODO | P1 | Mourad | Ibrahim | Sprint 2 | R04.1, R03.3 | Generation PDF/PNG | Generation billet implementable | Un billet unique est genere uniquement apres confirmation effective | `feature/ticket-pdf-generation` |
-| R04.3 | TODO | P1 | Mourad | Ibrahim | Sprint 2 | R04.1, R04.2 | QR code | Option QR code implementable | Le QR est present si active et reference le billet sans divulguer de donnees sensibles | `feature/ticket-qr-code` |
+| R04.1 | DONE | P1 | Mourad | Ibrahim | Sprint 0 | R01.1 | Modele `Ticket`, event `ticket.generated` | Contrat ticketing documente | La reference billet, le format artefact et l'option QR sont definis | `docs/ticketing-contract` |
+| R04.2 | DONE | P1 | Mourad | Ibrahim | Sprint 2 | R04.1, R03.3 | Generation PDF/PNG | Generation billet implementable | Un billet unique est genere uniquement apres confirmation effective | `feature/ticket-pdf-generation` |
+| R04.3 | DONE | P1 | Mourad | Ibrahim | Sprint 2 | R04.1, R04.2 | QR code | Option QR code implementable | Le QR est present si active et reference le billet sans divulguer de donnees sensibles | `feature/ticket-qr-code` |
 
 ### R05 - Exposer l'historique de participations et le telechargement billet
 
-- Status: `TODO`
+- Status: `PARTIAL`
 - Priority: `P1` · Difficulty: `M` · Impact: `M`
 - Owner: `Ibrahim`
 - Support: `Mourad`
@@ -126,12 +126,12 @@ promotion automatique, la billetterie et l'export des inscrits.
 | Ticket ID | Status | Priority | Owner | Support | Sprint cible | Dependances | Interfaces impactees | Sortie attendue | Critere d'acceptation | Branche suggeree |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | R05.1 | DONE | P1 | Ibrahim | Mourad | Sprint 0 | F02.1 | Reponse dashboard participant | Contrat historique participant documente | Les colonnes statut, date, evenement et billet sont stabilisees | `docs/participant-history-contract` |
-| R05.2 | TODO | P1 | Mourad | Ibrahim | Sprint 1 | R05.1, R03.2 | REST participations | Endpoint historique implementable | Un participant recupere ses inscriptions et leurs statuts sans voir celles des autres | `feature/participant-history-endpoint` |
-| R05.3 | TODO | P1 | Ibrahim | Mourad | Sprint 2 | R05.1, R04.2, F06.2 | Dashboard participant | Telechargement billet integre | Le dashboard affiche un bouton de telechargement uniquement pour les inscriptions confirmees | `feature/participant-ticket-download-ui` |
+| R05.2 | DONE | P1 | Mourad | Ibrahim | Sprint 1 | R05.1, R03.2 | REST participations | Endpoint historique implementable | Un participant recupere ses inscriptions et leurs statuts sans voir celles des autres | `feature/participant-history-endpoint` |
+| R05.3 | DONE | P1 | Ibrahim | Mourad | Sprint 2 | R05.1, R04.2, F06.2 | Dashboard participant | Telechargement billet integre | Le dashboard affiche un bouton de telechargement uniquement pour les inscriptions confirmees | `feature/participant-ticket-download-ui` |
 
 ### R06 - Exporter les inscrits pour les organisateurs
 
-- Status: `TODO`
+- Status: `DONE`
 - Priority: `P2` · Difficulty: `S` · Impact: `M`
 - Owner: `Mourad`
 - Support: `Ibrahim`
@@ -144,6 +144,6 @@ promotion automatique, la billetterie et l'export des inscrits.
 
 | Ticket ID | Status | Priority | Owner | Support | Sprint cible | Dependances | Interfaces impactees | Sortie attendue | Critere d'acceptation | Branche suggeree |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| R06.1 | TODO | P2 | Mourad | Ibrahim | Sprint 0 | E05.1 | Format export organisateur | Contrat export documente | Les colonnes obligatoires et le format cible sont valides avec l'UI organisateur | `docs/organizer-export-contract` |
-| R06.2 | TODO | P2 | Mourad | Ibrahim | Sprint 2 | R06.1, R05.2 | REST export inscrits | Export implementable | L'organisateur exporte les inscrits de ses evenements uniquement | `feature/organizer-registrants-export` |
-| R06.3 | TODO | P2 | Ibrahim | Mourad | Sprint 2 | R06.1, F03.3 | Back-office organisateur | Action export integree | Le bouton export apparait dans la vue inscrits avec le bon etat de chargement/erreur | `feature/organizer-export-ui` |
+| R06.1 | DONE | P2 | Mourad | Ibrahim | Sprint 0 | E05.1 | Format export organisateur | Contrat export documente | Les colonnes obligatoires et le format cible sont valides avec l'UI organisateur | `docs/organizer-export-contract` |
+| R06.2 | DONE | P2 | Mourad | Ibrahim | Sprint 2 | R06.1, R05.2 | REST export inscrits | Export implementable | L'organisateur exporte les inscrits de ses evenements uniquement | `feature/organizer-registrants-export` |
+| R06.3 | DONE | P2 | Ibrahim | Mourad | Sprint 2 | R06.1, F03.3 | Back-office organisateur | Action export integree | Le bouton export apparait dans la vue inscrits avec le bon etat de chargement/erreur | `feature/organizer-export-ui` |

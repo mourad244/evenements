@@ -1,7 +1,22 @@
-import { randomUUID } from "node:crypto";
+import crypto from "node:crypto";
 
 import express from "express";
 import jwt from "jsonwebtoken";
+import {
+  createCorrelationIdMiddleware,
+  createJsonLogger,
+  createRequestCompletionLogger
+} from "../../shared/observability.js";
+import {
+  gatewayAuthLogFields,
+  isGatewayAuthPath
+} from "./observabilityConfig.js";
+import {
+  buildRouteTable,
+  compileRoutes,
+  interpolatePath,
+  matchRoute
+} from "./routing.js";
 
 const config = {
   serviceName: "api-gateway",
@@ -11,144 +26,80 @@ const config = {
     process.env.EVENT_MANAGEMENT_SERVICE_URL || "http://127.0.0.1:4002",
   registrationServiceUrl:
     process.env.REGISTRATION_SERVICE_URL || "http://127.0.0.1:4003",
-  jwtAccessSecret: process.env.JWT_ACCESS_SECRET || "dev-access-secret"
+  upstreamTimeoutMs: Number(process.env.UPSTREAM_TIMEOUT_MS || 4000)
 };
+const log = createJsonLogger(config.serviceName);
+
+function resolveJwtSecret(envKey, fallbackValue) {
+  const configured = String(process.env[envKey] || "").trim();
+  if (configured) {
+    if (configured.length < 32) {
+      log("warn", "auth.jwt.secret.weak", {
+        envKey,
+        length: configured.length
+      });
+    }
+    return configured;
+  }
+
+  if (process.env.ALLOW_INSECURE_JWT_DEFAULTS === "true") {
+    log("warn", "auth.jwt.secret.insecure_default", {
+      envKey,
+      message: "Using insecure default secret; set env to harden."
+    });
+    return fallbackValue;
+  }
+
+  if (String(process.env.NODE_ENV || "").toLowerCase() === "production") {
+    throw new Error(`${envKey} is required in production`);
+  }
+
+  const generated = crypto.randomBytes(32).toString("hex");
+  log("warn", "auth.jwt.secret.generated", {
+    envKey,
+    message: "Generated ephemeral secret; set env for stable sessions."
+  });
+  return generated;
+}
+
+config.jwtAccessSecret = resolveJwtSecret(
+  "JWT_ACCESS_SECRET",
+  "dev-insecure-access-secret"
+);
 
 const app = express();
 app.use(express.json());
 
+const corsOrigins = String(process.env.CORS_ORIGINS || "http://localhost:3000")
+  .split(",")
+  .map((origin) => origin.trim())
+  .filter(Boolean);
+
+app.use((req, res, next) => {
+  const origin = req.header("origin");
+  if (origin && corsOrigins.includes(origin)) {
+    res.setHeader("access-control-allow-origin", origin);
+    res.setHeader("vary", "origin");
+    res.setHeader("access-control-allow-credentials", "true");
+  }
+  res.setHeader(
+    "access-control-allow-headers",
+    "authorization, content-type, x-correlation-id"
+  );
+  res.setHeader(
+    "access-control-allow-methods",
+    "GET,POST,PATCH,PUT,DELETE,OPTIONS"
+  );
+
+  if (req.method === "OPTIONS") {
+    return res.status(204).send("");
+  }
+
+  return next();
+});
+
 const routeTable = [
-  {
-    method: "POST",
-    path: "/api/auth/register",
-    public: true,
-    serviceTarget: "identityServiceUrl",
-    targetPath: "/auth/register"
-  },
-  {
-    method: "POST",
-    path: "/api/auth/login",
-    public: true,
-    serviceTarget: "identityServiceUrl",
-    targetPath: "/auth/login"
-  },
-  {
-    method: "POST",
-    path: "/api/auth/refresh",
-    public: true,
-    serviceTarget: "identityServiceUrl",
-    targetPath: "/auth/refresh"
-  },
-  {
-    method: "POST",
-    path: "/api/auth/forgot-password",
-    public: true,
-    serviceTarget: "identityServiceUrl",
-    targetPath: "/auth/forgot-password"
-  },
-  {
-    method: "POST",
-    path: "/api/auth/reset-password",
-    public: true,
-    serviceTarget: "identityServiceUrl",
-    targetPath: "/auth/reset-password"
-  },
-  {
-    method: "GET",
-    path: "/api/auth/me",
-    public: false,
-    allowedRoles: ["PARTICIPANT", "ORGANIZER", "ADMIN"],
-    serviceTarget: "identityServiceUrl",
-    targetPath: "/auth/me"
-  },
-  {
-    method: "POST",
-    path: "/api/events/drafts",
-    public: false,
-    allowedRoles: ["ORGANIZER", "ADMIN"],
-    serviceTarget: "eventManagementServiceUrl",
-    targetPath: "/events/drafts"
-  },
-  {
-    method: "GET",
-    path: "/api/events/drafts",
-    public: false,
-    allowedRoles: ["ORGANIZER", "ADMIN"],
-    serviceTarget: "eventManagementServiceUrl",
-    targetPath: "/events/drafts"
-  },
-  {
-    method: "GET",
-    path: "/api/events/drafts/:eventId",
-    public: false,
-    allowedRoles: ["ORGANIZER", "ADMIN"],
-    serviceTarget: "eventManagementServiceUrl",
-    targetPath: ({ eventId }) => `/events/drafts/${eventId}`
-  },
-  {
-    method: "PATCH",
-    path: "/api/events/drafts/:eventId",
-    public: false,
-    allowedRoles: ["ORGANIZER", "ADMIN"],
-    serviceTarget: "eventManagementServiceUrl",
-    targetPath: ({ eventId }) => `/events/drafts/${eventId}`
-  },
-  {
-    method: "DELETE",
-    path: "/api/events/drafts/:eventId",
-    public: false,
-    allowedRoles: ["ORGANIZER", "ADMIN"],
-    serviceTarget: "eventManagementServiceUrl",
-    targetPath: ({ eventId }) => `/events/drafts/${eventId}`
-  },
-  {
-    method: "POST",
-    path: "/api/events/drafts/:eventId/publish",
-    public: false,
-    allowedRoles: ["ORGANIZER", "ADMIN"],
-    serviceTarget: "eventManagementServiceUrl",
-    targetPath: ({ eventId }) => `/events/drafts/${eventId}/publish`
-  },
-  {
-    method: "POST",
-    path: "/api/events/:eventId/cancel",
-    public: false,
-    allowedRoles: ["ORGANIZER", "ADMIN"],
-    serviceTarget: "eventManagementServiceUrl",
-    targetPath: ({ eventId }) => `/events/${eventId}/cancel`
-  },
-  {
-    method: "GET",
-    path: "/api/events/me",
-    public: false,
-    allowedRoles: ["ORGANIZER", "ADMIN"],
-    serviceTarget: "eventManagementServiceUrl",
-    targetPath: "/events/me"
-  },
-  {
-    method: "POST",
-    path: "/api/registrations",
-    public: false,
-    allowedRoles: ["PARTICIPANT"],
-    serviceTarget: "registrationServiceUrl",
-    targetPath: "/registrations"
-  },
-  {
-    method: "POST",
-    path: "/api/registrations/:registrationId/cancel",
-    public: false,
-    allowedRoles: ["PARTICIPANT"],
-    serviceTarget: "registrationServiceUrl",
-    targetPath: ({ registrationId }) => `/registrations/${registrationId}/cancel`
-  },
-  {
-    method: "GET",
-    path: "/api/profile/participations",
-    public: false,
-    allowedRoles: ["PARTICIPANT"],
-    serviceTarget: "registrationServiceUrl",
-    targetPath: "/profile/participations"
-  },
+  ...buildRouteTable(config),
   {
     method: "GET",
     path: "/api/organizer/ping",
@@ -165,51 +116,7 @@ const routeTable = [
   }
 ];
 
-const compiledRoutes = routeTable.map(compileRoute);
-
-function normalizePath(path) {
-  const trimmed = String(path || "").trim();
-  if (!trimmed || trimmed === "/") return "/";
-  return trimmed.replace(/\/+$/, "");
-}
-
-function escapeRegexLiteral(value) {
-  return value.replace(/[|\\{}()[\]^$+*?.-]/g, "\\$&");
-}
-
-function compileRoute(route) {
-  const normalizedPath = normalizePath(route.path);
-  if (normalizedPath === "/") {
-    return {
-      ...route,
-      method: route.method.toUpperCase(),
-      matcher: /^\/$/
-    };
-  }
-
-  const pattern = normalizedPath
-    .split("/")
-    .filter(Boolean)
-    .map((segment) =>
-      segment.startsWith(":")
-        ? `(?<${segment.slice(1)}>[^/]+)`
-        : escapeRegexLiteral(segment)
-    )
-    .join("/");
-
-  return {
-    ...route,
-    method: route.method.toUpperCase(),
-    matcher: new RegExp(`^/${pattern}$`)
-  };
-}
-
-function resolveTargetPath(route, params) {
-  if (typeof route.targetPath === "function") {
-    return route.targetPath(params);
-  }
-  return route.targetPath;
-}
+const compiledRoutes = compileRoutes(routeTable);
 
 function success(data, meta) {
   if (meta) return { success: true, data, meta };
@@ -224,20 +131,7 @@ function error(errorMessage, code, details) {
 }
 
 function getRoute(req) {
-  const normalizedPath = normalizePath(req.path);
-  for (const route of compiledRoutes) {
-    if (route.method !== req.method.toUpperCase()) continue;
-
-    const match = route.matcher.exec(normalizedPath);
-    if (match) {
-      return {
-        route,
-        params: match.groups || {}
-      };
-    }
-  }
-
-  return null;
+  return matchRoute(compiledRoutes, req.method, req.path);
 }
 
 function parseBearerToken(authorizationHeader) {
@@ -247,12 +141,47 @@ function parseBearerToken(authorizationHeader) {
   return token;
 }
 
-app.use((req, res, next) => {
-  const incoming = String(req.header("x-correlation-id") || "").trim();
-  req.correlationId = incoming || randomUUID();
-  res.setHeader("x-correlation-id", req.correlationId);
-  next();
-});
+async function fetchWithTimeout(url, init = {}) {
+  const controller = new AbortController();
+  const timeout = setTimeout(
+    () => controller.abort(),
+    config.upstreamTimeoutMs
+  );
+  try {
+    return await fetch(url, { ...init, signal: controller.signal });
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
+async function checkUpstreamReadiness(url) {
+  const candidates = ["/ready", "/health"];
+
+  for (const path of candidates) {
+    try {
+      const response = await fetchWithTimeout(new URL(path, url), {
+        method: "GET"
+      });
+      if (response.ok) {
+        return { ok: true, path };
+      }
+    } catch {
+      // Try the next readiness endpoint.
+    }
+  }
+
+  return { ok: false };
+}
+
+app.use(createCorrelationIdMiddleware());
+app.use(
+  createRequestCompletionLogger({
+    log,
+    eventName: "gateway.auth.request.completed",
+    isObserved: isGatewayAuthPath,
+    buildFields: gatewayAuthLogFields
+  })
+);
 
 app.get("/health", (_req, res) => {
   res.status(200).json(
@@ -263,24 +192,49 @@ app.get("/health", (_req, res) => {
   );
 });
 
-app.get("/ready", (_req, res) => {
-  res.status(200).json(
+app.get("/ready", async (_req, res) => {
+  const upstreamChecks = await Promise.all([
+    checkUpstreamReadiness(config.identityServiceUrl),
+    checkUpstreamReadiness(config.eventManagementServiceUrl),
+    checkUpstreamReadiness(config.registrationServiceUrl)
+  ]);
+
+  const [identity, eventManagement, registration] = upstreamChecks;
+  const allReady = upstreamChecks.every((result) => result.ok);
+
+  if (!allReady) {
+    return res.status(503).json(
+      error("Service not ready", "UPSTREAM_UNAVAILABLE", {
+        identity: identity.ok,
+        eventManagement: eventManagement.ok,
+        registration: registration.ok
+      })
+    );
+  }
+
+  return res.status(200).json(
     success({
       status: "ready",
-      service: config.serviceName
+      service: config.serviceName,
+      upstreams: {
+        identity: identity.path,
+        eventManagement: eventManagement.path,
+        registration: registration.path
+      }
     })
   );
 });
 
 app.use((req, res, next) => {
-  const routeMatch = getRoute(req);
-  if (!routeMatch) {
+  const matched = getRoute(req);
+  if (!matched) {
     return res.status(404).json(error("Route not found", "NOT_FOUND"));
   }
 
-  req.matchedRoute = routeMatch.route;
-  req.routeParams = routeMatch.params;
-  if (req.matchedRoute.public) return next();
+  req.matchedRoute = matched.route;
+  req.matchedRouteParams = matched.params;
+  const route = req.matchedRoute;
+  if (route.public) return next();
 
   const token = parseBearerToken(req.header("authorization"));
   if (!token) {
@@ -296,6 +250,8 @@ app.use((req, res, next) => {
 
   const authContext = {
     userId: payload.sub,
+    email: payload.email || null,
+    name: payload.name || null,
     role: payload.role,
     sessionId: payload.sid,
     accountStatus: payload.account_status
@@ -306,9 +262,9 @@ app.use((req, res, next) => {
   }
 
   if (
-    Array.isArray(req.matchedRoute.allowedRoles) &&
-    req.matchedRoute.allowedRoles.length > 0 &&
-    !req.matchedRoute.allowedRoles.includes(authContext.role)
+    Array.isArray(route.allowedRoles) &&
+    route.allowedRoles.length > 0 &&
+    !route.allowedRoles.includes(authContext.role)
   ) {
     return res.status(403).json(error("Forbidden", "FORBIDDEN"));
   }
@@ -323,10 +279,24 @@ app.use(async (req, res) => {
     return route.localHandler(req, res);
   }
 
-  const upstreamBaseUrl = config[route.serviceTarget];
+  const spoofedHeaders = [
+    "x-user-id",
+    "x-user-role",
+    "x-user-email",
+    "x-user-name",
+    "x-session-id"
+  ].filter((header) => req.header(header));
+  if (spoofedHeaders.length > 0) {
+    log("warn", "gateway.auth.spoofed_headers", {
+      headers: spoofedHeaders,
+      path: req.path
+    });
+  }
+
   const incomingUrl = new URL(req.originalUrl, "http://gateway.local");
-  const targetPath = resolveTargetPath(route, req.routeParams || {});
-  const targetUrl = new URL(targetPath, upstreamBaseUrl);
+  const targetPath = interpolatePath(route.targetPath, req.matchedRouteParams);
+  const targetBaseUrl = route.targetBaseUrl || config.identityServiceUrl;
+  const targetUrl = new URL(targetPath, targetBaseUrl);
   targetUrl.search = incomingUrl.search;
 
   const headers = {
@@ -336,14 +306,17 @@ app.use(async (req, res) => {
   if (req.header("content-type")) {
     headers["content-type"] = req.header("content-type");
   }
-  if (req.header("idempotency-key")) {
-    headers["idempotency-key"] = req.header("idempotency-key");
-  }
 
   if (req.auth) {
     headers["x-user-id"] = req.auth.userId;
     headers["x-user-role"] = req.auth.role;
     headers["x-session-id"] = req.auth.sessionId;
+    if (req.auth.email) {
+      headers["x-user-email"] = req.auth.email;
+    }
+    if (req.auth.name) {
+      headers["x-user-name"] = req.auth.name;
+    }
   }
 
   const requestInit = {
@@ -357,8 +330,11 @@ app.use(async (req, res) => {
 
   let upstreamResponse;
   try {
-    upstreamResponse = await fetch(targetUrl, requestInit);
-  } catch {
+    upstreamResponse = await fetchWithTimeout(targetUrl, requestInit);
+  } catch (err) {
+    if (err?.name === "AbortError") {
+      return res.status(504).json(error("Upstream timeout", "UPSTREAM_TIMEOUT"));
+    }
     return res.status(502).json(error("Bad gateway", "UPSTREAM_UNREACHABLE"));
   }
 
@@ -371,15 +347,23 @@ app.use(async (req, res) => {
   }
 
   if (contentType.includes("application/json")) {
-    return res.send(responseText ? JSON.parse(responseText) : {});
+    if (!responseText) {
+      return res.send({});
+    }
+    try {
+      return res.send(JSON.parse(responseText));
+    } catch {
+      return res
+        .status(502)
+        .json(error("Invalid upstream response", "UPSTREAM_INVALID_RESPONSE"));
+    }
   }
 
   return res.send(responseText);
 });
 
 app.listen(config.port, () => {
-  // eslint-disable-next-line no-console
-  console.log(
-    `[${config.serviceName}] listening on port ${config.port}`
-  );
+  log("info", "service.started", {
+    port: config.port
+  });
 });

@@ -5,7 +5,7 @@ docKind: sprint
 domain: delivery
 phase: P1
 owner: Mourad
-status: IN_PROGRESS
+status: DONE
 priority: P0
 tags:
   - sprint-1
@@ -18,14 +18,14 @@ slug: sprint-1-tracker
 
 - Sprint: `S1`
 - Source: `docs/sprints/sprint_1_mvp_event_publication_registration.md`
-- Last updated: `2026-03-14T01:46:03.773Z`
+- Last updated: `2026-03-09T00:45:47.781Z`
 
 ## Summary
 
-- TODO: `1`
+- TODO: `0`
 - IN_PROGRESS: `0`
-- PARTIAL: `1`
-- DONE: `4`
+- PARTIAL: `0`
+- DONE: `6`
 - BLOCKED: `0`
 
 ## Tasks
@@ -33,16 +33,17 @@ slug: sprint-1-tracker
 | ID | Status | Priority | Refs | Task | Last update |
 | --- | --- | --- | --- | --- | --- |
 | S1-T01 | DONE | P0 | S1-M01, I02.3 | Replace in-memory auth/session/reset stores with Postgres-backed repositories. | 2026-03-08T13:30:00Z |
-| S1-T02 | DONE | P0 | S1-M02, S1-M04, I04.2 | Add gateway proxies + ACL matrix for next Sprint 1 routes (/api/events/*, /api/registrations/*). | 2026-03-14T01:46:03.764Z |
-| S1-T03 | TODO | P1 | S1-M01, M01.2, M02.3 | Add docker-compose and CI job to run test:s1-m01 automatically. | 2026-03-08T13:30:00Z |
-| S1-T04 | PARTIAL | P1 | S1-M06, M02.2, M02.3 | S1-M06 hardening on current services: structured logs + guaranteed x-correlation-id tracing on every auth path (Gateway + Identity), plus smoke assertions. | 2026-03-08T13:30:00Z |
+| S1-T02 | DONE | P0 | S1-M02, S1-M04, I04.2 | Add gateway proxies + ACL matrix for next Sprint 1 routes (/api/events/*, /api/registrations/*). | 2026-03-08T20:31:42.203Z |
+| S1-T03 | DONE | P1 | S1-M01, M01.2, M02.3 | Add docker-compose and CI job to run test:s1-m01 automatically. | 2026-03-08T22:19:37.517Z |
+| S1-T04 | DONE | P1 | S1-M06, M02.2, M02.3 | S1-M06 hardening on current services: structured logs + guaranteed x-correlation-id tracing on every auth path (Gateway + Identity), plus smoke assertions. | 2026-03-09T00:45:47.779Z |
 | S1-T05 | DONE | P0 | S1-M02, E02.2, E02.3, I04.2 | S1-M02 implementation start: scaffold event-management-service with Postgres and implement POST/GET/PATCH/DELETE /api/events/drafts* + ownership rules. | 2026-03-08T13:26:25.287Z |
-| S1-T06 | DONE | P0 | S1-M02, I04.2 | Wire Gateway routes for events and extend role guards (ORGANIZER, ADMIN) with the same contract style as S1-M01. | 2026-03-14T01:46:03.772Z |
+| S1-T06 | DONE | P0 | S1-M02, I04.2 | Wire Gateway routes for events and extend role guards (ORGANIZER, ADMIN) with the same contract style as S1-M01. | 2026-03-08T22:16:43.669Z |
 
 ## Latest Notes
 
 - `S1-T01` `DONE` (2026-03-08T13:30:00Z): Identity auth/session/reset persistence migrated to Postgres with schema + repository + smoke validation.
-- `S1-T02` `DONE` (2026-03-14T01:46:03.764Z): Gateway now proxies /api/events/*, /api/registrations/* and /api/profile/participations with documented ACLs; smoke covers organizer event draft flow and participant registration facade routing.
-- `S1-T04` `PARTIAL` (2026-03-08T13:30:00Z): Gateway propagates x-correlation-id and smoke validates one auth flow; structured log format is not implemented yet.
+- `S1-T02` `DONE` (2026-03-08T20:31:42.204Z): Introduced explicit gateway ACL/proxy route matrix for /api/events/*, /api/registrations/*, and /api/profile/participations via routing module; added and passed unit tests in tests/s1-t02.gateway-acl-matrix.unit.test.js.
+- `S1-T03` `DONE` (2026-03-08T22:19:37.518Z): S1-M01 automation is in place: dedicated docker-compose Postgres stack and CI workflow running pnpm test:s1-m01 automatically on PR/push with deterministic setup/teardown.
+- `S1-T04` `DONE` (2026-03-09T00:45:47.781Z): Refactored observability into testable middleware modules, enforced correlation-id middleware and structured auth-path completion logging for Gateway + Identity, and added passing unit coverage in tests/s1-t04.observability.unit.test.js; smoke assertions for x-correlation-id remain in tests/s1-m01.smoke.test.js.
 - `S1-T05` `DONE` (2026-03-08T13:26:25.288Z): Implemented event-management-service draft CRUD with Postgres, ownership guards, and passing S1-T05 smoke + S1-M01 regression.
-- `S1-T06` `DONE` (2026-03-14T01:46:03.773Z): Gateway event routes are wired to event-management-service with ORGANIZER/ADMIN guards and passing end-to-end smoke coverage.
+- `S1-T06` `DONE` (2026-03-08T22:16:43.670Z): Gateway event routes are fully wired with organizer/admin guards in shared routing matrix; exact target-path contracts and ACL expectations are covered by passing unit tests (tests/s1-t02.gateway-acl-matrix.unit.test.js).

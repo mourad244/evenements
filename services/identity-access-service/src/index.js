@@ -6,8 +6,17 @@ import bcrypt from "bcryptjs";
 import express from "express";
 import jwt from "jsonwebtoken";
 import pg from "pg";
+import {
+  createCorrelationIdMiddleware,
+  createJsonLogger,
+  createRequestCompletionLogger
+} from "../../shared/observability.js";
 
 import { ensureSchema } from "./db/schema.js";
+import {
+  identityAuthLogFields,
+  isIdentityAuthPath
+} from "./observabilityConfig.js";
 import { createAuthRepository } from "./repositories/authRepository.js";
 
 const { Pool } = pg;
@@ -17,16 +26,56 @@ const config = {
   port: Number(process.env.PORT || 4001),
   databaseUrl:
     process.env.DATABASE_URL ||
-    "postgres://postgres:postgres@127.0.0.1:5432/evenements_identity",
+    "postgres://postgres:postgres@127.0.0.1:55432/evenements_s1_m01",
   dbAutoMigrate: process.env.DB_AUTO_MIGRATE !== "false",
-  jwtAccessSecret: process.env.JWT_ACCESS_SECRET || "dev-access-secret",
-  jwtRefreshSecret: process.env.JWT_REFRESH_SECRET || "dev-refresh-secret",
   accessTokenTtlSec: Number(process.env.ACCESS_TOKEN_TTL_SEC || 900),
   refreshTokenTtlSec: Number(process.env.REFRESH_TOKEN_TTL_SEC || 604800),
   resetTokenTtlSec: Number(process.env.RESET_TOKEN_TTL_SEC || 900),
   bcryptSaltRounds: Number(process.env.BCRYPT_SALT_ROUNDS || 10),
   exposeDebugResetToken: process.env.DEBUG_EXPOSE_RESET_TOKEN === "true"
 };
+const log = createJsonLogger(config.serviceName);
+
+function resolveJwtSecret(envKey, fallbackValue) {
+  const configured = String(process.env[envKey] || "").trim();
+  if (configured) {
+    if (configured.length < 32) {
+      log("warn", "auth.jwt.secret.weak", {
+        envKey,
+        length: configured.length
+      });
+    }
+    return configured;
+  }
+
+  if (process.env.ALLOW_INSECURE_JWT_DEFAULTS === "true") {
+    log("warn", "auth.jwt.secret.insecure_default", {
+      envKey,
+      message: "Using insecure default secret; set env to harden."
+    });
+    return fallbackValue;
+  }
+
+  if (String(process.env.NODE_ENV || "").toLowerCase() === "production") {
+    throw new Error(`${envKey} is required in production`);
+  }
+
+  const generated = crypto.randomBytes(32).toString("hex");
+  log("warn", "auth.jwt.secret.generated", {
+    envKey,
+    message: "Generated ephemeral secret; set env for stable sessions."
+  });
+  return generated;
+}
+
+config.jwtAccessSecret = resolveJwtSecret(
+  "JWT_ACCESS_SECRET",
+  "dev-insecure-access-secret"
+);
+config.jwtRefreshSecret = resolveJwtSecret(
+  "JWT_REFRESH_SECRET",
+  "dev-insecure-refresh-secret"
+);
 
 const allowedSelfServiceRoles = new Set(["PARTICIPANT", "ORGANIZER"]);
 const activeAccountStatuses = new Set(["ACTIVE"]);
@@ -63,11 +112,17 @@ function nowIso() {
 
 function toUserView(user) {
   return {
+    id: user.userId,
     userId: user.userId,
     email: user.email,
+    name: user.displayName,
+    fullName: user.displayName,
     displayName: user.displayName,
     role: user.role,
-    accountStatus: user.accountStatus
+    accountStatus: user.accountStatus,
+    createdAt: user.createdAt || null,
+    updatedAt: user.updatedAt || null,
+    lastLoginAt: user.lastLoginAt || null
   };
 }
 
@@ -76,6 +131,8 @@ function signAccessToken(user, sessionId) {
     {
       sub: user.userId,
       sid: sessionId,
+      email: user.email,
+      name: user.displayName,
       role: user.role,
       account_status: user.accountStatus
     },
@@ -103,6 +160,16 @@ function tokenDigest(token) {
 function hasExpired(value) {
   return Date.now() >= new Date(value).getTime();
 }
+
+app.use(createCorrelationIdMiddleware());
+app.use(
+  createRequestCompletionLogger({
+    log,
+    eventName: "identity.auth.request.completed",
+    isObserved: isIdentityAuthPath,
+    buildFields: identityAuthLogFields
+  })
+);
 
 app.get("/health", (_req, res) => {
   res.status(200).json(
@@ -428,12 +495,22 @@ app.get("/auth/me", async (req, res) => {
   const userId = req.header("x-user-id");
   const role = req.header("x-user-role");
   const sessionId = req.header("x-session-id");
-  const correlationId = req.header("x-correlation-id");
+  const correlationId = req.correlationId || null;
 
   if (!userId || !role || !sessionId) {
     return res
       .status(401)
       .json(error("Missing auth context", "MISSING_AUTH_CONTEXT"));
+  }
+
+  const session = await repository.findSessionById(sessionId);
+  if (!session || session.userId !== userId || session.revokedAt) {
+    return res
+      .status(401)
+      .json(error("Session is not active", "SESSION_INVALID"));
+  }
+  if (hasExpired(session.expiresAt)) {
+    return res.status(401).json(error("Session expired", "SESSION_EXPIRED"));
   }
 
   const user = await repository.findUserById(userId);
@@ -450,6 +527,39 @@ app.get("/auth/me", async (req, res) => {
         sessionId,
         correlationId: correlationId || null
       }
+    })
+  );
+});
+
+app.get("/admin/users", async (req, res) => {
+  const role = String(req.header("x-user-role") || "").trim().toUpperCase();
+  const sessionId = String(req.header("x-session-id") || "").trim();
+  const userId = String(req.header("x-user-id") || "").trim();
+
+  if (!userId || !role || !sessionId) {
+    return res
+      .status(401)
+      .json(error("Missing auth context", "MISSING_AUTH_CONTEXT"));
+  }
+
+  const session = await repository.findSessionById(sessionId);
+  if (!session || session.userId !== userId || session.revokedAt) {
+    return res
+      .status(401)
+      .json(error("Session is not active", "SESSION_INVALID"));
+  }
+  if (hasExpired(session.expiresAt)) {
+    return res.status(401).json(error("Session expired", "SESSION_EXPIRED"));
+  }
+
+  if (role !== "ADMIN") {
+    return res.status(403).json(error("Forbidden", "FORBIDDEN"));
+  }
+
+  const users = await repository.listUsers();
+  return res.status(200).json(
+    success({
+      items: users.map(toUserView)
     })
   );
 });
@@ -477,14 +587,16 @@ async function boot() {
   }
 
   app.listen(config.port, () => {
-    // eslint-disable-next-line no-console
-    console.log(`[${config.serviceName}] listening on port ${config.port}`);
+    log("info", "service.started", {
+      port: config.port
+    });
   });
 }
 
 boot().catch((err) => {
-  // eslint-disable-next-line no-console
-  console.error(`[${config.serviceName}] failed to boot`, err);
+  log("error", "service.boot.failed", {
+    message: err.message
+  });
   process.exit(1);
 });
 

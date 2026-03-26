@@ -18,7 +18,7 @@ slug: sprint-3-admin-moderation
 
 Sprint centre sur la gouvernance, la supervision et la moderation.
 
-**Statut:** `PLANNED`  
+**Statut:** `IN_PROGRESS`  
 **Periode indicative:** 2026-05-04 -> 2026-05-22
 
 ## Objectifs
