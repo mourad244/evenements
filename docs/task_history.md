@@ -1023,6 +1023,30 @@ Journal synthetique des livrables majeurs et des baselines de cadrage.
 - Mise a jour du ticket `N02.3` en `DONE` dans
   `docs/backlogs/BackLog_notification.md`.
 
+## 2026-03-26 - Evenements d'audit securite auth (`I05.2`)
+
+- Ajout du schema d'audit auth persistant dans
+  `services/identity-access-service/src/db/schema.js` avec table
+  `auth_security_audit_logs` et indexes de base.
+- Implementation du builder d'audit dans
+  `services/identity-access-service/src/authSecurityAudit.js` et du
+  support repository dans
+  `services/identity-access-service/src/repositories/authRepository.js`.
+- Instrumentation des routes auth dans
+  `services/identity-access-service/src/index.js` pour journaliser:
+  login succes/echec, demande de reset, reset succes/echec et refus sur
+  compte verrouille.
+- Ajout du smoke test dedie
+  `tests/s1-t07.auth-security-audit.smoke.test.js` et du script npm
+  `test:s1-t07`.
+- Verification executee:
+  `npm run test:s1-t07` -> `3 passed`, `0 failed`.
+- Verification regression executee:
+  `S1_M01_USE_EXTERNAL_POSTGRES=true S1_M01_DATABASE_URL=postgres://postgres:postgres@127.0.0.1:55439/evenements_s1_m01 npm run test:s1-m01`
+  -> `8 passed`, `0 failed`.
+- Mise a jour du ticket `I05.2` en `DONE` et passage de `I05` en
+  `PARTIAL` dans `docs/backlogs/BackLog_identity_access.md`.
+
 ## 2026-03-11 - Initialisation Sprint 6
 
 - Creation du cadrage sprint dans

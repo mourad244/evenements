@@ -3,7 +3,7 @@
     "sprint_id": "S1",
     "name": "Sprint 1 - MVP publication & inscription",
     "source": "docs/sprints/sprint_1_mvp_event_publication_registration.md",
-    "last_updated": "2026-03-26T21:16:40.355Z"
+    "last_updated": "2026-03-26T21:27:06.589Z"
   },
   "tasks": [
     {
@@ -73,7 +73,7 @@
         "ci test s1-m01",
         "automation smoke s1-m01"
       ],
-      "updated_at": "2026-03-26T21:11:17.185Z",
+      "updated_at": "2026-03-26T21:27:06.588Z",
       "notes": [
         {
           "date": "2026-03-08T21:12:41.777Z",
@@ -94,13 +94,33 @@
           "date": "2026-03-26T21:11:17.185Z",
           "status": "DONE",
           "text": "Updated the workspace lockfile for the docs portal and frontend manifests, pinned packageManager to pnpm 10.33.0, and verified corepack pnpm install --frozen-lockfile --ignore-scripts succeeds locally."
+        },
+        {
+          "date": "2026-03-26T21:19:03.082Z",
+          "status": "IN_PROGRESS",
+          "text": "Fixing GitHub Actions pnpm setup failure caused by duplicate pnpm version declaration in workflow and package.json."
+        },
+        {
+          "date": "2026-03-26T21:22:28.800Z",
+          "status": "DONE",
+          "text": "Removed the explicit pnpm version from the s1-m01-smoke workflow so pnpm/action-setup uses the packageManager-pinned version from package.json; validated the workflow with actionlint."
+        },
+        {
+          "date": "2026-03-26T21:26:28.461Z",
+          "status": "IN_PROGRESS",
+          "text": "Fixing S1-M01 smoke startup probe after api-gateway /ready began requiring event-management and registration upstreams in addition to identity."
+        },
+        {
+          "date": "2026-03-26T21:27:06.589Z",
+          "status": "DONE",
+          "text": "Adjusted the S1-M01 smoke test to wait on api-gateway /health instead of /ready because /ready now depends on event-management and registration upstreams; verified corepack pnpm test:s1-m01 passes with docker-compose.s1-m01.yml external Postgres."
         }
       ]
     },
     {
       "id": "S1-T04",
       "title": "S1-M06 hardening on current services: structured logs + guaranteed x-correlation-id tracing on every auth path (Gateway + Identity), plus smoke assertions.",
-      "status": "IN_PROGRESS",
+      "status": "DONE",
       "priority": "P1",
       "refs": [
         "S1-M06",
@@ -133,11 +153,6 @@
           "date": "2026-03-09T00:45:47.781Z",
           "status": "DONE",
           "text": "Refactored observability into testable middleware modules, enforced correlation-id middleware and structured auth-path completion logging for Gateway + Identity, and added passing unit coverage in tests/s1-t04.observability.unit.test.js; smoke assertions for x-correlation-id remain in tests/s1-m01.smoke.test.js."
-        },
-        {
-          "date": "2026-03-26T21:16:40.355Z",
-          "status": "IN_PROGRESS",
-          "text": "Auto-start from prompt: I05.2 auth security audit events in BackLog_identity_access.md"
         }
       ]
     },
@@ -206,6 +221,34 @@
           "date": "2026-03-08T22:16:43.670Z",
           "status": "DONE",
           "text": "Gateway event routes are fully wired with organizer/admin guards in shared routing matrix; exact target-path contracts and ACL expectations are covered by passing unit tests (tests/s1-t02.gateway-acl-matrix.unit.test.js)."
+        }
+      ]
+    },
+    {
+      "id": "S1-T07",
+      "title": "Implement auth security audit events for login, reset, forgot-password, and lockout denials in identity-access-service.",
+      "status": "DONE",
+      "priority": "P1",
+      "refs": [
+        "S1-M07",
+        "I05.2"
+      ],
+      "aliases": [
+        "auth security audit events",
+        "identity audit login reset lockout",
+        "i05.2 auth audit"
+      ],
+      "updated_at": "2026-03-26T21:24:33.658Z",
+      "notes": [
+        {
+          "date": "2026-03-26T21:16:40.355Z",
+          "status": "IN_PROGRESS",
+          "text": "Started I05.2: add persistent auth security audit events for login success/failure, password reset flows, and lockout denials with correlation metadata."
+        },
+        {
+          "date": "2026-03-26T21:24:33.658Z",
+          "status": "DONE",
+          "text": "Implemented persistent auth security audit events in identity-access-service for login success/failure, forgot/reset flows, and lockout denials; verified with npm run test:s1-t07 plus S1_M01_USE_EXTERNAL_POSTGRES=true regression smoke."
         }
       ]
     }

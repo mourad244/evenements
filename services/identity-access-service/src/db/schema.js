@@ -44,5 +44,39 @@ export async function ensureSchema(pool) {
     CREATE INDEX IF NOT EXISTS idx_auth_reset_tokens_user_id
       ON auth_password_reset_tokens (user_id);
   `);
-}
 
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS auth_security_audit_logs (
+      audit_id UUID PRIMARY KEY,
+      occurred_at TIMESTAMPTZ NOT NULL,
+      source_service TEXT NOT NULL,
+      actor_id TEXT NOT NULL,
+      actor_role TEXT NOT NULL,
+      action TEXT NOT NULL,
+      target_type TEXT NOT NULL,
+      target_id TEXT NOT NULL,
+      result TEXT NOT NULL,
+      correlation_id TEXT NOT NULL,
+      reason_code TEXT,
+      reason_note TEXT,
+      metadata JSONB NOT NULL DEFAULT '{}'::jsonb,
+      ip_address TEXT,
+      user_agent TEXT
+    );
+  `);
+
+  await pool.query(`
+    CREATE INDEX IF NOT EXISTS idx_auth_security_audit_occurred_at
+      ON auth_security_audit_logs (occurred_at DESC);
+  `);
+
+  await pool.query(`
+    CREATE INDEX IF NOT EXISTS idx_auth_security_audit_actor_id
+      ON auth_security_audit_logs (actor_id);
+  `);
+
+  await pool.query(`
+    CREATE INDEX IF NOT EXISTS idx_auth_security_audit_action
+      ON auth_security_audit_logs (action);
+  `);
+}
