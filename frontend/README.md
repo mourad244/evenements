@@ -19,6 +19,12 @@ Production-ready starter for a microservices-based event management platform usi
 - `pnpm start`
 - `pnpm lint`
 
+## Docker
+
+- Frontend container: `docker compose -f docker-compose.backend.yml up -d --build frontend`
+- Frontend URL: `http://localhost:3001`
+- Backend gateway for the browser: `http://localhost:4000`
+
 ## Environment
 
 See `.env.example`.

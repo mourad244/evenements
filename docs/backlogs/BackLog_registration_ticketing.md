@@ -5,7 +5,7 @@ docKind: backlog
 domain: registration-ticketing
 phase: P1-P2
 owner: Mourad
-status: TODO
+status: PARTIAL
 priority: P0
 tags:
   - registration
@@ -21,17 +21,18 @@ promotion automatique, la billetterie et l'export des inscrits.
 
 ## Meta
 
-- Statut global: `TODO`
+- Statut global: `PARTIAL`
 - Date debut: `2026-03-07`
 - Priorite produit: `P1/P2`
 - Lead: `Mourad`
 - Support: `Ibrahim`
+- Reste principal au `2026-03-26`: `R02.2`, `R02.3`, `R03.3`, `R05.3`, `R06.3`
 
 ## Taches
 
 ### R01 - Implementer la creation d'inscription et la verification de capacite
 
-- Status: `TODO`
+- Status: `DONE`
 - Priority: `P0` · Difficulty: `M` · Impact: `H`
 - Owner: `Mourad`
 - Support: `Ibrahim`
@@ -46,12 +47,12 @@ promotion automatique, la billetterie et l'export des inscrits.
 | Ticket ID | Status | Priority | Owner | Support | Sprint cible | Dependances | Interfaces impactees | Sortie attendue | Critere d'acceptation | Branche suggeree |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | R01.1 | DONE | P0 | Mourad | Ibrahim | Sprint 0 | E01.3 | REST `POST /registrations` | Contrat de creation inscription documente | Les regles capacite, eligibilite et reponses `CONFIRMED` ou `WAITLISTED` sont explicites | `docs/registration-create-contract` |
-| R01.2 | TODO | P0 | Mourad | Ibrahim | Sprint 1 | R01.1 | Creation inscription confirmee | Inscription directe implementable | Une inscription confirmee reserve une place sans depasser la capacite | `feature/registration-confirmed-flow` |
-| R01.3 | TODO | P0 | Mourad | Ibrahim | Sprint 1 | R01.1 | Creation inscription attente | Basculer en waitlist implementable | Un evenement complet place automatiquement le participant en `WAITLISTED` | `feature/registration-waitlist-flow` |
+| R01.2 | DONE | P0 | Mourad | Ibrahim | Sprint 1 | R01.1 | Creation inscription confirmee | Inscription directe implementable | Une inscription confirmee reserve une place sans depasser la capacite | `feature/registration-confirmed-flow` |
+| R01.3 | DONE | P0 | Mourad | Ibrahim | Sprint 1 | R01.1 | Creation inscription attente | Basculer en waitlist implementable | Un evenement complet place automatiquement le participant en `WAITLISTED` | `feature/registration-waitlist-flow` |
 
 ### R02 - Garantir l'absence de doublons et le controle de concurrence
 
-- Status: `TODO`
+- Status: `PARTIAL`
 - Priority: `P0` · Difficulty: `L` · Impact: `H`
 - Owner: `Mourad`
 - Support: `Ibrahim`
@@ -66,12 +67,12 @@ promotion automatique, la billetterie et l'export des inscrits.
 | Ticket ID | Status | Priority | Owner | Support | Sprint cible | Dependances | Interfaces impactees | Sortie attendue | Critere d'acceptation | Branche suggeree |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | R02.1 | DONE | P0 | Mourad | Ibrahim | Sprint 0 | R01.1 | Modele `Registration` | Strategie unicite et concurrence documentee | Les cas double clic, multi-onglet et dernier siege simultane sont couverts | `docs/registration-concurrency-rules` |
-| R02.2 | TODO | P0 | Mourad | Ibrahim | Sprint 1 | R02.1, R01.2 | Couche persistence registration | Gardes anti-doublon implementables | Une meme personne ne peut pas obtenir deux inscriptions actives sur le meme evenement | `feature/registration-uniqueness-guards` |
+| R02.2 | PARTIAL | P0 | Mourad | Ibrahim | Sprint 1 | R02.1, R01.2 | Couche persistence registration | Gardes anti-doublon implementables | Une meme personne ne peut pas obtenir deux inscriptions actives sur le meme evenement | `feature/registration-uniqueness-guards` |
 | R02.3 | TODO | P0 | Mourad | Ibrahim | Sprint 1 | R02.1, R03.3 | Tests concurrence | Jeu de tests critique definis | Les scenarios de course et promotion concurrente sont ecrits et passes en revue | `test/registration-concurrency-cases` |
 
 ### R03 - Gerer annulation et promotion automatique depuis la waitlist
 
-- Status: `TODO`
+- Status: `PARTIAL`
 - Priority: `P0` · Difficulty: `M` · Impact: `H`
 - Owner: `Mourad`
 - Support: `Ibrahim`
@@ -86,8 +87,8 @@ promotion automatique, la billetterie et l'export des inscrits.
 | Ticket ID | Status | Priority | Owner | Support | Sprint cible | Dependances | Interfaces impactees | Sortie attendue | Critere d'acceptation | Branche suggeree |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | R03.1 | DONE | P0 | Mourad | Ibrahim | Sprint 0 | R01.1 | REST cancel registration, event `registration.promoted` | Contrat annulation/promotion documente | Les cas annulation participant, annulation organisateur et promotion sont decrits | `docs/registration-cancel-promote-contract` |
-| R03.2 | TODO | P0 | Mourad | Ibrahim | Sprint 1 | R03.1 | Flux annulation | Annulation d'inscription implementable | Une annulation libere une place et met a jour le statut sans incoherence | `feature/registration-cancel-flow` |
-| R03.3 | TODO | P0 | Mourad | Ibrahim | Sprint 1 | R03.1, R02.1 | Promotion waitlist | Promotion automatique implementable | Le premier candidat eligible est promu de facon atomique et un evenement metier est emis | `feature/registration-waitlist-promotion` |
+| R03.2 | DONE | P0 | Mourad | Ibrahim | Sprint 1 | R03.1 | Flux annulation | Annulation d'inscription implementable | Une annulation libere une place et met a jour le statut sans incoherence | `feature/registration-cancel-flow` |
+| R03.3 | PARTIAL | P0 | Mourad | Ibrahim | Sprint 1 | R03.1, R02.1 | Promotion waitlist | Promotion automatique implementable | Le premier candidat eligible est promu de facon atomique et un evenement metier est emis | `feature/registration-waitlist-promotion` |
 
 ### R04 - Generer le billet electronique et le QR code
 
@@ -127,11 +128,11 @@ promotion automatique, la billetterie et l'export des inscrits.
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | R05.1 | DONE | P1 | Ibrahim | Mourad | Sprint 0 | F02.1 | Reponse dashboard participant | Contrat historique participant documente | Les colonnes statut, date, evenement et billet sont stabilisees | `docs/participant-history-contract` |
 | R05.2 | DONE | P1 | Mourad | Ibrahim | Sprint 1 | R05.1, R03.2 | REST participations | Endpoint historique implementable | Un participant recupere ses inscriptions et leurs statuts sans voir celles des autres | `feature/participant-history-endpoint` |
-| R05.3 | DONE | P1 | Ibrahim | Mourad | Sprint 2 | R05.1, R04.2, F06.2 | Dashboard participant | Telechargement billet integre | Le dashboard affiche un bouton de telechargement uniquement pour les inscriptions confirmees | `feature/participant-ticket-download-ui` |
+| R05.3 | PARTIAL | P1 | Ibrahim | Mourad | Sprint 2 | R05.1, R04.2, F06.2 | Dashboard participant | Telechargement billet integre | Le dashboard affiche un bouton de telechargement uniquement pour les inscriptions confirmees | `feature/participant-ticket-download-ui` |
 
 ### R06 - Exporter les inscrits pour les organisateurs
 
-- Status: `DONE`
+- Status: `PARTIAL`
 - Priority: `P2` · Difficulty: `S` · Impact: `M`
 - Owner: `Mourad`
 - Support: `Ibrahim`
@@ -146,4 +147,4 @@ promotion automatique, la billetterie et l'export des inscrits.
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | R06.1 | DONE | P2 | Mourad | Ibrahim | Sprint 0 | E05.1 | Format export organisateur | Contrat export documente | Les colonnes obligatoires et le format cible sont valides avec l'UI organisateur | `docs/organizer-export-contract` |
 | R06.2 | DONE | P2 | Mourad | Ibrahim | Sprint 2 | R06.1, R05.2 | REST export inscrits | Export implementable | L'organisateur exporte les inscrits de ses evenements uniquement | `feature/organizer-registrants-export` |
-| R06.3 | DONE | P2 | Ibrahim | Mourad | Sprint 2 | R06.1, F03.3 | Back-office organisateur | Action export integree | Le bouton export apparait dans la vue inscrits avec le bon etat de chargement/erreur | `feature/organizer-export-ui` |
+| R06.3 | PARTIAL | P2 | Ibrahim | Mourad | Sprint 2 | R06.1, F03.3 | Back-office organisateur | Action export integree | Le bouton export apparait dans la vue inscrits avec le bon etat de chargement/erreur | `feature/organizer-export-ui` |

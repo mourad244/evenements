@@ -63,7 +63,8 @@ vi.mock("next/link", () => ({
 }));
 
 vi.mock("next/image", () => ({
-  default: (props: Record<string, unknown>) => React.createElement("img", props)
+  default: ({ fill: _fill, alt, ...props }: Record<string, unknown>) =>
+    React.createElement("img", { alt: String(alt ?? ""), ...props })
 }));
 
 vi.mock("@/features/events/hooks/use-events-query", () => ({
@@ -103,8 +104,8 @@ describe("events routes", () => {
     const html = render(<EventsPage />);
 
     expect(html).toContain("Discover events built for ambitious communities.");
-    expect(html).toContain("Search events");
-    expect(html).toContain("Explore");
+    expect(html).toContain("Refine the visible catalog");
+    expect(html).toContain("Search visible events");
   });
 
   it("/events shows loading state while query is pending", () => {

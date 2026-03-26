@@ -108,7 +108,7 @@ describe("Sprint 3 admin polish", () => {
     expect(html).toContain("User identity");
     expect(html).toContain("Access role");
     expect(html).toContain("User ID: usr-1");
-    expect(html).toContain("Current platform access level");
+    expect(html).toContain("High-access account");
     expect(html).toContain("Account creation date");
   });
 
@@ -155,6 +155,6 @@ describe("Sprint 3 admin polish", () => {
     expect(html).toContain("Scheduled date");
     expect(html).toContain("Lifecycle");
     expect(html).toContain("Event ID: evt-1");
-    expect(html).toContain("Current event lifecycle state");
+    expect(html).toContain("Preparation stage");
   });
 });
