@@ -7,6 +7,10 @@ const config = {
   serviceName: "api-gateway",
   port: Number(process.env.PORT || 4000),
   identityServiceUrl: process.env.IDENTITY_SERVICE_URL || "http://127.0.0.1:4001",
+  eventManagementServiceUrl:
+    process.env.EVENT_MANAGEMENT_SERVICE_URL || "http://127.0.0.1:4002",
+  registrationServiceUrl:
+    process.env.REGISTRATION_SERVICE_URL || "http://127.0.0.1:4003",
   jwtAccessSecret: process.env.JWT_ACCESS_SECRET || "dev-access-secret"
 };
 
@@ -18,30 +22,35 @@ const routeTable = [
     method: "POST",
     path: "/api/auth/register",
     public: true,
+    serviceTarget: "identityServiceUrl",
     targetPath: "/auth/register"
   },
   {
     method: "POST",
     path: "/api/auth/login",
     public: true,
+    serviceTarget: "identityServiceUrl",
     targetPath: "/auth/login"
   },
   {
     method: "POST",
     path: "/api/auth/refresh",
     public: true,
+    serviceTarget: "identityServiceUrl",
     targetPath: "/auth/refresh"
   },
   {
     method: "POST",
     path: "/api/auth/forgot-password",
     public: true,
+    serviceTarget: "identityServiceUrl",
     targetPath: "/auth/forgot-password"
   },
   {
     method: "POST",
     path: "/api/auth/reset-password",
     public: true,
+    serviceTarget: "identityServiceUrl",
     targetPath: "/auth/reset-password"
   },
   {
@@ -49,7 +58,96 @@ const routeTable = [
     path: "/api/auth/me",
     public: false,
     allowedRoles: ["PARTICIPANT", "ORGANIZER", "ADMIN"],
+    serviceTarget: "identityServiceUrl",
     targetPath: "/auth/me"
+  },
+  {
+    method: "POST",
+    path: "/api/events/drafts",
+    public: false,
+    allowedRoles: ["ORGANIZER", "ADMIN"],
+    serviceTarget: "eventManagementServiceUrl",
+    targetPath: "/events/drafts"
+  },
+  {
+    method: "GET",
+    path: "/api/events/drafts",
+    public: false,
+    allowedRoles: ["ORGANIZER", "ADMIN"],
+    serviceTarget: "eventManagementServiceUrl",
+    targetPath: "/events/drafts"
+  },
+  {
+    method: "GET",
+    path: "/api/events/drafts/:eventId",
+    public: false,
+    allowedRoles: ["ORGANIZER", "ADMIN"],
+    serviceTarget: "eventManagementServiceUrl",
+    targetPath: ({ eventId }) => `/events/drafts/${eventId}`
+  },
+  {
+    method: "PATCH",
+    path: "/api/events/drafts/:eventId",
+    public: false,
+    allowedRoles: ["ORGANIZER", "ADMIN"],
+    serviceTarget: "eventManagementServiceUrl",
+    targetPath: ({ eventId }) => `/events/drafts/${eventId}`
+  },
+  {
+    method: "DELETE",
+    path: "/api/events/drafts/:eventId",
+    public: false,
+    allowedRoles: ["ORGANIZER", "ADMIN"],
+    serviceTarget: "eventManagementServiceUrl",
+    targetPath: ({ eventId }) => `/events/drafts/${eventId}`
+  },
+  {
+    method: "POST",
+    path: "/api/events/drafts/:eventId/publish",
+    public: false,
+    allowedRoles: ["ORGANIZER", "ADMIN"],
+    serviceTarget: "eventManagementServiceUrl",
+    targetPath: ({ eventId }) => `/events/drafts/${eventId}/publish`
+  },
+  {
+    method: "POST",
+    path: "/api/events/:eventId/cancel",
+    public: false,
+    allowedRoles: ["ORGANIZER", "ADMIN"],
+    serviceTarget: "eventManagementServiceUrl",
+    targetPath: ({ eventId }) => `/events/${eventId}/cancel`
+  },
+  {
+    method: "GET",
+    path: "/api/events/me",
+    public: false,
+    allowedRoles: ["ORGANIZER", "ADMIN"],
+    serviceTarget: "eventManagementServiceUrl",
+    targetPath: "/events/me"
+  },
+  {
+    method: "POST",
+    path: "/api/registrations",
+    public: false,
+    allowedRoles: ["PARTICIPANT"],
+    serviceTarget: "registrationServiceUrl",
+    targetPath: "/registrations"
+  },
+  {
+    method: "POST",
+    path: "/api/registrations/:registrationId/cancel",
+    public: false,
+    allowedRoles: ["PARTICIPANT"],
+    serviceTarget: "registrationServiceUrl",
+    targetPath: ({ registrationId }) => `/registrations/${registrationId}/cancel`
+  },
+  {
+    method: "GET",
+    path: "/api/profile/participations",
+    public: false,
+    allowedRoles: ["PARTICIPANT"],
+    serviceTarget: "registrationServiceUrl",
+    targetPath: "/profile/participations"
   },
   {
     method: "GET",
@@ -67,11 +165,50 @@ const routeTable = [
   }
 ];
 
-const routesByKey = new Map(routeTable.map((route) => [routeKey(route.method, route.path), route]));
+const compiledRoutes = routeTable.map(compileRoute);
 
-function routeKey(method, path) {
-  const normalizedPath = path.length > 1 ? path.replace(/\/+$/, "") : path;
-  return `${method.toUpperCase()} ${normalizedPath}`;
+function normalizePath(path) {
+  const trimmed = String(path || "").trim();
+  if (!trimmed || trimmed === "/") return "/";
+  return trimmed.replace(/\/+$/, "");
+}
+
+function escapeRegexLiteral(value) {
+  return value.replace(/[|\\{}()[\]^$+*?.-]/g, "\\$&");
+}
+
+function compileRoute(route) {
+  const normalizedPath = normalizePath(route.path);
+  if (normalizedPath === "/") {
+    return {
+      ...route,
+      method: route.method.toUpperCase(),
+      matcher: /^\/$/
+    };
+  }
+
+  const pattern = normalizedPath
+    .split("/")
+    .filter(Boolean)
+    .map((segment) =>
+      segment.startsWith(":")
+        ? `(?<${segment.slice(1)}>[^/]+)`
+        : escapeRegexLiteral(segment)
+    )
+    .join("/");
+
+  return {
+    ...route,
+    method: route.method.toUpperCase(),
+    matcher: new RegExp(`^/${pattern}$`)
+  };
+}
+
+function resolveTargetPath(route, params) {
+  if (typeof route.targetPath === "function") {
+    return route.targetPath(params);
+  }
+  return route.targetPath;
 }
 
 function success(data, meta) {
@@ -87,7 +224,20 @@ function error(errorMessage, code, details) {
 }
 
 function getRoute(req) {
-  return routesByKey.get(routeKey(req.method, req.path));
+  const normalizedPath = normalizePath(req.path);
+  for (const route of compiledRoutes) {
+    if (route.method !== req.method.toUpperCase()) continue;
+
+    const match = route.matcher.exec(normalizedPath);
+    if (match) {
+      return {
+        route,
+        params: match.groups || {}
+      };
+    }
+  }
+
+  return null;
 }
 
 function parseBearerToken(authorizationHeader) {
@@ -123,13 +273,14 @@ app.get("/ready", (_req, res) => {
 });
 
 app.use((req, res, next) => {
-  const route = getRoute(req);
-  if (!route) {
+  const routeMatch = getRoute(req);
+  if (!routeMatch) {
     return res.status(404).json(error("Route not found", "NOT_FOUND"));
   }
 
-  req.matchedRoute = route;
-  if (route.public) return next();
+  req.matchedRoute = routeMatch.route;
+  req.routeParams = routeMatch.params;
+  if (req.matchedRoute.public) return next();
 
   const token = parseBearerToken(req.header("authorization"));
   if (!token) {
@@ -155,9 +306,9 @@ app.use((req, res, next) => {
   }
 
   if (
-    Array.isArray(route.allowedRoles) &&
-    route.allowedRoles.length > 0 &&
-    !route.allowedRoles.includes(authContext.role)
+    Array.isArray(req.matchedRoute.allowedRoles) &&
+    req.matchedRoute.allowedRoles.length > 0 &&
+    !req.matchedRoute.allowedRoles.includes(authContext.role)
   ) {
     return res.status(403).json(error("Forbidden", "FORBIDDEN"));
   }
@@ -172,8 +323,10 @@ app.use(async (req, res) => {
     return route.localHandler(req, res);
   }
 
+  const upstreamBaseUrl = config[route.serviceTarget];
   const incomingUrl = new URL(req.originalUrl, "http://gateway.local");
-  const targetUrl = new URL(route.targetPath, config.identityServiceUrl);
+  const targetPath = resolveTargetPath(route, req.routeParams || {});
+  const targetUrl = new URL(targetPath, upstreamBaseUrl);
   targetUrl.search = incomingUrl.search;
 
   const headers = {
@@ -182,6 +335,9 @@ app.use(async (req, res) => {
 
   if (req.header("content-type")) {
     headers["content-type"] = req.header("content-type");
+  }
+  if (req.header("idempotency-key")) {
+    headers["idempotency-key"] = req.header("idempotency-key");
   }
 
   if (req.auth) {
@@ -227,4 +383,3 @@ app.listen(config.port, () => {
     `[${config.serviceName}] listening on port ${config.port}`
   );
 });
-

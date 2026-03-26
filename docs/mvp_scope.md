@@ -1,4 +1,19 @@
-pui# Perimetre MVP Microservices - Plateforme Evenements
+---
+title: Perimetre MVP et architecture cible
+description: Cadrage fonctionnel et technique du projet Evenements, de P1 a P4.
+docKind: catalog
+domain: product
+phase: P1-P4
+owner: Mourad
+status: DONE
+tags:
+  - mvp
+  - scope
+  - architecture
+slug: mvp-scope
+---
+
+# Perimetre MVP Microservices - Plateforme Evenements
 
 ## Resume
 

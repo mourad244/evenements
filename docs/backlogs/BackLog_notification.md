@@ -1,3 +1,19 @@
+---
+title: Backlog Notification
+description: Backlog des emails, retries, templates et logs de notification.
+docKind: backlog
+domain: notification
+phase: P2
+owner: Mourad
+status: TODO
+priority: P1
+tags:
+  - notification
+  - email
+  - retries
+slug: notification
+---
+
 # BackLog Notification
 
 Ce backlog couvre les notifications email, la simulation SMS, les rappels,

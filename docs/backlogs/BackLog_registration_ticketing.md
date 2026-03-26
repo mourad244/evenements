@@ -1,3 +1,19 @@
+---
+title: Backlog Registration & Ticketing
+description: Backlog inscriptions, waitlist, billets et historique participant.
+docKind: backlog
+domain: registration-ticketing
+phase: P1-P2
+owner: Mourad
+status: TODO
+priority: P0
+tags:
+  - registration
+  - waitlist
+  - tickets
+slug: registration-ticketing
+---
+
 # BackLog Registration & Ticketing
 
 Ce backlog couvre les inscriptions, la capacite, la liste d'attente, la

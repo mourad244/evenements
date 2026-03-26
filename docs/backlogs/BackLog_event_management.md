@@ -1,3 +1,19 @@
+---
+title: Backlog Event Management
+description: Backlog du domaine creation, publication et gestion du cycle de vie evenement.
+docKind: backlog
+domain: event-management
+phase: P1
+owner: Mourad
+status: DONE
+priority: P0
+tags:
+  - events
+  - drafts
+  - publish
+slug: event-management
+---
+
 # BackLog Event Management
 
 Ce backlog couvre la creation, l'edition, la publication et le cycle de

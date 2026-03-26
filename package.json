@@ -6,7 +6,11 @@
     "start:identity": "pnpm --filter identity-access-service start",
     "start:gateway": "pnpm --filter api-gateway start",
     "start:event-management": "pnpm --filter event-management-service start",
+    "docs:start": "pnpm --filter docs-portal start",
+    "docs:build": "pnpm --filter docs-portal build",
+    "docs:serve": "pnpm --filter docs-portal serve",
     "test:s1-m01": "node --test tests/s1-m01.smoke.test.js",
+    "test:s1-t02": "node --test tests/s1-t02.gateway-routing.smoke.test.js",
     "test:s1-t05": "node --test tests/s1-t05.event-drafts.smoke.test.js",
     "tracker:show": "node tools/progress-tracker.mjs show",
     "tracker:render": "node tools/progress-tracker.mjs render"

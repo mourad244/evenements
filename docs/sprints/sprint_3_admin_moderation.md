@@ -1,3 +1,19 @@
+---
+title: Sprint 3 - Admin & moderation
+description: Planning du lot moderation, audit, supervision et dashboards metier.
+docKind: sprint
+domain: delivery
+phase: P3
+owner: Ibrahim
+status: TODO
+priority: P1
+tags:
+  - sprint-3
+  - admin
+  - moderation
+slug: sprint-3-admin-moderation
+---
+
 # Sprint 3 - Administration & moderation
 
 Sprint centre sur la gouvernance, la supervision et la moderation.

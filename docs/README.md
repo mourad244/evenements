@@ -1,3 +1,18 @@
+---
+title: Documentation projet
+description: Vue d'ensemble de la documentation Evenements microservices et de son organisation.
+docKind: index
+domain: documentation
+phase: P0-P4
+owner: Mourad
+status: DONE
+tags:
+  - overview
+  - docs
+  - governance
+slug: overview
+---
+
 # Documentation - Plateforme Evenements Microservices
 
 ## Objet

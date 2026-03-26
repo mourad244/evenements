@@ -1,3 +1,18 @@
+---
+title: Workflow frontend portal evenement
+description: Parcours cibles du portail public et des interfaces evenement.
+docKind: workflow
+domain: frontend-event-portal
+phase: P1-P2
+owner: Ibrahim
+status: DONE
+tags:
+  - workflow
+  - portal
+  - events
+slug: frontend-event-portal
+---
+
 # Frontend workflow - parcours evenement cote utilisateur et organisateur
 
 Utiliser ce workflow pour decouper un ecran ou un module frontend du

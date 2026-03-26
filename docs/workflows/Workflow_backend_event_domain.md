@@ -1,3 +1,18 @@
+---
+title: Workflow backend event domain
+description: Mode de delivery backend pour le domaine evenement et ses interfaces.
+docKind: workflow
+domain: event-domain
+phase: P1-P2
+owner: Mourad
+status: DONE
+tags:
+  - workflow
+  - backend
+  - events
+slug: backend-event-domain
+---
+
 # Backend workflow - delivery d'une fonctionnalite evenement en bout en bout
 
 Utiliser ce workflow quand une fonctionnalite impacte un ou plusieurs
