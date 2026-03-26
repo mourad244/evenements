@@ -69,7 +69,7 @@ alertes et les mecanismes de reprise sur incident.
 
 ### M03 - Exposer les metriques techniques et metier
 
-- Status: `TODO`
+- Status: `PARTIAL`
 - Priority: `P1` · Difficulty: `M` · Impact: `H`
 - Owner: `Mourad`
 - Support: `Ibrahim`
@@ -83,8 +83,8 @@ alertes et les mecanismes de reprise sur incident.
 
 | Ticket ID | Status | Priority | Owner | Support | Sprint cible | Dependances | Interfaces impactees | Sortie attendue | Critere d'acceptation | Branche suggeree |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| M03.1 | TODO | P1 | Mourad | Ibrahim | Sprint 0 | R01.1, R04.1, N02.1 | Catalogue metriques | Liste des metriques cible documentee | Les metriques techniques et metier ont une definition et une source identifiees | `docs/monitoring-metric-catalog` |
-| M03.2 | TODO | P1 | Mourad | Ibrahim | Sprint 3 | M03.1 | Services backend | Emission de metriques implementable | Les metriques prioritaires sont exposees sur les services attendus | `feature/monitoring-metrics-emission` |
+| M03.1 | DONE | P1 | Mourad | Ibrahim | Sprint 0 | R01.1, R04.1, N02.1 | Catalogue metriques | Liste des metriques cible documentee | Les metriques techniques et metier ont une definition et une source identifiees | `docs/monitoring-metric-catalog` |
+| M03.2 | DONE | P1 | Mourad | Ibrahim | Sprint 3 | M03.1 | Services backend | Emission de metriques implementable | Les metriques prioritaires sont exposees sur les services attendus | `feature/monitoring-metrics-emission` |
 | M03.3 | TODO | P1 | Ibrahim | Mourad | Sprint 3 | M03.2, A05.1 | Dashboard admin | Panels KPI/ops implementables | Les metriques critiques peuvent etre lues dans des cartes ou graphs admin | `feature/monitoring-dashboard-panels` |
 
 ### M04 - Ajouter traces distribuees sur les flux critiques
@@ -108,7 +108,7 @@ alertes et les mecanismes de reprise sur incident.
 
 ### M05 - Definir alertes et runbooks
 
-- Status: `TODO`
+- Status: `DONE`
 - Priority: `P1` · Difficulty: `M` · Impact: `M`
 - Owner: `Mourad`
 - Support: `Ibrahim`
@@ -122,13 +122,13 @@ alertes et les mecanismes de reprise sur incident.
 
 | Ticket ID | Status | Priority | Owner | Support | Sprint cible | Dependances | Interfaces impactees | Sortie attendue | Critere d'acceptation | Branche suggeree |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| M05.1 | TODO | P1 | Mourad | Ibrahim | Sprint 3 | M03.1, M04.1 | Matrice alertes/runbooks | Plan d'alerte documente | Les incidents critiques ont chacun un seuil, une alerte et un runbook associe | `docs/monitoring-alert-runbook-matrix` |
-| M05.2 | TODO | P1 | Mourad | Ibrahim | Sprint 5 | M05.1, M03.2 | Regles d'alerte | Alertes implementables | Les alertes notification, ticketing et capacite peuvent etre declenchees automatiquement | `feature/monitoring-alert-rules` |
-| M05.3 | TODO | P1 | Mourad | Ibrahim | Sprint 5 | M05.1 | Runbooks ops | Runbooks exploitables | Chaque incident critique a une procedure pas a pas lisible par l'equipe | `docs/monitoring-runbooks` |
+| M05.1 | DONE | P1 | Mourad | Ibrahim | Sprint 3 | M03.1, M04.1 | Matrice alertes/runbooks | Plan d'alerte documente | Les incidents critiques ont chacun un seuil, une alerte et un runbook associe | `docs/monitoring-alert-runbook-matrix` |
+| M05.2 | DONE | P1 | Mourad | Ibrahim | Sprint 5 | M05.1, M03.2 | Regles d'alerte | Alertes implementables | Les alertes notification, ticketing et capacite peuvent etre declenchees automatiquement | `feature/monitoring-alert-rules` |
+| M05.3 | DONE | P1 | Mourad | Ibrahim | Sprint 5 | M05.1 | Runbooks ops | Runbooks exploitables | Chaque incident critique a une procedure pas a pas lisible par l'equipe | `docs/monitoring-runbooks` |
 
 ### M06 - Tester backup et restauration
 
-- Status: `TODO`
+- Status: `DONE`
 - Priority: `P2` · Difficulty: `M` · Impact: `H`
 - Owner: `Mourad`
 - Support: `Ibrahim`
@@ -142,6 +142,6 @@ alertes et les mecanismes de reprise sur incident.
 
 | Ticket ID | Status | Priority | Owner | Support | Sprint cible | Dependances | Interfaces impactees | Sortie attendue | Critere d'acceptation | Branche suggeree |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| M06.1 | TODO | P2 | Mourad | Ibrahim | Sprint 3 | M01.1 | Strategie backup/restore | Politique de sauvegarde documentee | Les donnees critiques, periodicites et objectifs de restauration sont connus | `docs/monitoring-backup-strategy` |
-| M06.2 | TODO | P2 | Mourad | Ibrahim | Sprint 5 | M06.1 | Procedure technique | Procedure de backup/restauration implementable | Une procedure pas a pas permet de sauvegarder puis restaurer l'environnement cible | `feature/monitoring-backup-restore-procedure` |
-| M06.3 | TODO | P2 | Mourad | Ibrahim | Sprint 5 | M06.2 | Validation restore | Preuve de restauration | Un exercice de restauration est execute et documente avec resultat attendu | `docs/monitoring-restore-drill` |
+| M06.1 | DONE | P2 | Mourad | Ibrahim | Sprint 3 | M01.1 | Strategie backup/restore | Politique de sauvegarde documentee | Les donnees critiques, periodicites et objectifs de restauration sont connus | `docs/monitoring-backup-strategy` |
+| M06.2 | DONE | P2 | Mourad | Ibrahim | Sprint 5 | M06.1 | Procedure technique | Procedure de backup/restauration implementable | Une procedure pas a pas permet de sauvegarder puis restaurer l'environnement cible | `feature/monitoring-backup-restore-procedure` |
+| M06.3 | DONE | P2 | Mourad | Ibrahim | Sprint 5 | M06.2 | Validation restore | Preuve de restauration | Un exercice de restauration est execute et documente avec resultat attendu | `docs/monitoring-restore-drill` |

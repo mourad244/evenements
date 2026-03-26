@@ -14,8 +14,10 @@ const config = {
   port: Number(process.env.PORT || 4002),
   databaseUrl:
     process.env.DATABASE_URL ||
-    "postgres://postgres:postgres@127.0.0.1:5432/evenements_event_management",
-  dbAutoMigrate: process.env.DB_AUTO_MIGRATE !== "false"
+    "postgres://postgres:postgres@127.0.0.1:55432/evenements_s1_m01",
+  dbAutoMigrate: process.env.DB_AUTO_MIGRATE !== "false",
+  registrationServiceUrl:
+    process.env.REGISTRATION_SERVICE_URL || "http://127.0.0.1:4003"
 };
 
 const allowedVisibility = new Set(["PUBLIC", "PRIVATE"]);
@@ -47,13 +49,17 @@ function nowIso() {
 
 function toEventResponse(event) {
   return {
+    id: event.eventId,
     eventId: event.eventId,
     organizerId: event.organizerId,
     title: event.title,
     description: event.description,
     theme: event.theme,
+    venue: event.venueName,
     venueName: event.venueName,
     city: event.city,
+    eventDate: event.startAt,
+    eventStartAt: event.startAt,
     startAt: event.startAt,
     endAt: event.endAt,
     timezone: event.timezone,
@@ -62,9 +68,35 @@ function toEventResponse(event) {
     pricingType: event.pricingType,
     status: event.status,
     coverImageRef: event.coverImageRef,
+    imageUrl: event.coverImageRef,
     publishedAt: event.publishedAt,
     createdAt: event.createdAt,
     updatedAt: event.updatedAt
+  };
+}
+
+function toCatalogEventSummary(event) {
+  return {
+    id: event.eventId,
+    eventId: event.eventId,
+    title: event.title,
+    description: event.description,
+    theme: event.theme,
+    city: event.city,
+    venue: event.venueName,
+    venueName: event.venueName,
+    eventDate: event.startAt,
+    eventStartAt: event.startAt,
+    startAt: event.startAt,
+    endAt: event.endAt,
+    timezone: event.timezone,
+    capacity: event.capacity,
+    visibility: event.visibility,
+    pricingType: event.pricingType,
+    status: event.status,
+    coverImageRef: event.coverImageRef,
+    imageUrl: event.coverImageRef,
+    publishedAt: event.publishedAt
   };
 }
 
@@ -72,6 +104,12 @@ function parsePositiveInt(value, fallback) {
   const parsed = Number.parseInt(String(value ?? fallback), 10);
   if (!Number.isFinite(parsed) || parsed <= 0) return null;
   return parsed;
+}
+
+function isUuid(value) {
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
+    value
+  );
 }
 
 function validateDraftPayload(payload, { partial = false } = {}) {
@@ -203,6 +241,25 @@ function canAccessEvent(context, event) {
   return event.organizerId === context.userId;
 }
 
+async function emitNotification(path, payload, context) {
+  try {
+    await fetch(`${config.registrationServiceUrl}${path}`, {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+        "x-user-id": context.userId,
+        "x-user-role": context.role,
+        "x-session-id": context.sessionId,
+        "x-correlation-id": context.correlationId || ""
+      },
+      body: JSON.stringify(payload)
+    });
+  } catch (err) {
+    // eslint-disable-next-line no-console
+    console.warn("[event-management-service] notification emit failed", err);
+  }
+}
+
 app.get("/health", (_req, res) => {
   res.status(200).json(
     success({
@@ -226,6 +283,67 @@ app.get("/ready", async (_req, res) => {
   }
 });
 
+app.get("/catalog/events", async (req, res) => {
+  const page = parsePositiveInt(req.query.page, 1);
+  const pageSize = parsePositiveInt(req.query.pageSize, 20);
+  if (!page || !pageSize || pageSize > 100) {
+    return res
+      .status(400)
+      .json(error("Validation failed", "VALIDATION_ERROR", [
+        "page and pageSize must be positive integers and pageSize <= 100"
+      ]));
+  }
+
+  const from = req.query.from ? new Date(String(req.query.from)).toISOString() : null;
+  const to = req.query.to ? new Date(String(req.query.to)).toISOString() : null;
+  if ((req.query.from && Number.isNaN(Date.parse(String(req.query.from)))) ||
+      (req.query.to && Number.isNaN(Date.parse(String(req.query.to))))) {
+    return res
+      .status(400)
+      .json(error("Validation failed", "VALIDATION_ERROR", [
+        "from and to must be valid ISO datetimes"
+      ]));
+  }
+
+  const result = await repository.listPublicEvents({
+    q: String(req.query.q || "").trim() || null,
+    theme: String(req.query.theme || "").trim() || null,
+    city: String(req.query.city || "").trim() || null,
+    from,
+    to,
+    page,
+    pageSize
+  });
+
+  return res.status(200).json(
+    success({
+      items: result.items.map(toCatalogEventSummary),
+      page,
+      pageSize,
+      total: result.total
+    })
+  );
+});
+
+app.get("/catalog/events/:eventId", async (req, res) => {
+  const eventId = String(req.params.eventId || "").trim();
+  if (!isUuid(eventId)) {
+    return res
+      .status(400)
+      .json(error("Validation failed", "VALIDATION_ERROR", ["eventId is invalid"]));
+  }
+
+  try {
+    const event = await repository.findPublicById(eventId);
+    if (!event) {
+      return res.status(404).json(error("Event not found", "EVENT_NOT_FOUND"));
+    }
+    return res.status(200).json(success(toCatalogEventSummary(event)));
+  } catch {
+    return res.status(500).json(error("Failed to load event", "EVENT_LOOKUP_FAILED"));
+  }
+});
+
 app.use("/events", (req, res, next) => {
   const context = authContext(req);
   if (!context) {
@@ -236,6 +354,46 @@ app.use("/events", (req, res, next) => {
   }
   req.auth = context;
   return next();
+});
+
+app.use("/admin", (req, res, next) => {
+  const context = authContext(req);
+  if (!context) {
+    return res.status(401).json(error("Unauthorized", "MISSING_AUTH_CONTEXT"));
+  }
+  if (context.role !== "ADMIN") {
+    return res.status(403).json(error("Forbidden", "FORBIDDEN"));
+  }
+  req.auth = context;
+  return next();
+});
+
+app.get("/admin/events", async (req, res) => {
+  const page = parsePositiveInt(req.query.page, 1);
+  const pageSize = parsePositiveInt(req.query.pageSize, 20);
+  if (!page || !pageSize || pageSize > 100) {
+    return res
+      .status(400)
+      .json(error("Validation failed", "VALIDATION_ERROR", [
+        "page and pageSize must be positive integers and pageSize <= 100"
+      ]));
+  }
+
+  const result = await repository.listManagedEvents({
+    organizerId: req.auth.userId,
+    isAdmin: true,
+    page,
+    pageSize
+  });
+
+  return res.status(200).json(
+    success({
+      items: result.items.map(toEventResponse),
+      page,
+      pageSize,
+      total: result.total
+    })
+  );
 });
 
 app.post("/events/drafts", async (req, res) => {
@@ -276,6 +434,34 @@ app.get("/events/drafts", async (req, res) => {
   const result = await repository.listDrafts({
     organizerId: req.auth.userId,
     isAdmin,
+    page,
+    pageSize
+  });
+
+  return res.status(200).json(
+    success({
+      items: result.items.map(toEventResponse),
+      page,
+      pageSize,
+      total: result.total
+    })
+  );
+});
+
+app.get("/events/me", async (req, res) => {
+  const page = parsePositiveInt(req.query.page, 1);
+  const pageSize = parsePositiveInt(req.query.pageSize, 20);
+  if (!page || !pageSize || pageSize > 100) {
+    return res
+      .status(400)
+      .json(error("Validation failed", "VALIDATION_ERROR", [
+        "page and pageSize must be positive integers and pageSize <= 100"
+      ]));
+  }
+
+  const result = await repository.listManagedEvents({
+    organizerId: req.auth.userId,
+    isAdmin: req.auth.role === "ADMIN",
     page,
     pageSize
   });
@@ -355,6 +541,81 @@ app.delete("/events/drafts/:eventId", async (req, res) => {
   return res.status(204).send();
 });
 
+app.post("/events/drafts/:eventId/publish", async (req, res) => {
+  const event = await repository.findById(req.params.eventId);
+  if (!event) {
+    return res.status(404).json(error("Event not found", "EVENT_NOT_FOUND"));
+  }
+  if (!canAccessEvent(req.auth, event)) {
+    return res.status(403).json(error("Forbidden", "FORBIDDEN"));
+  }
+  if (event.status !== "DRAFT") {
+    return res
+      .status(409)
+      .json(error("Only drafts can be published", "EVENT_NOT_PUBLISHABLE"));
+  }
+
+  const timestamp = nowIso();
+  const published = await repository.publishDraft(event.eventId, timestamp, timestamp);
+  await emitNotification(
+    "/notifications/emit",
+    {
+      recipientId: published.organizerId,
+      recipientRole: "ORGANIZER",
+      eventId: published.eventId,
+      notificationType: "EVENT_PUBLISHED",
+      title: "Event published",
+      message: `Your event \"${published.title}\" is now live.`,
+      metadata: {
+        eventTitle: published.title,
+        eventCity: published.city,
+        eventStartAt: published.startAt
+      }
+    },
+    req.auth
+  );
+  return res.status(200).json(success(toEventResponse(published)));
+});
+
+app.post("/events/:eventId/cancel", async (req, res) => {
+  const context = req.auth;
+  if (!context) {
+    return res.status(401).json(error("Unauthorized", "MISSING_AUTH_CONTEXT"));
+  }
+
+  const event = await repository.findById(req.params.eventId);
+  if (!event) {
+    return res.status(404).json(error("Event not found", "EVENT_NOT_FOUND"));
+  }
+  if (!canAccessEvent(context, event)) {
+    return res.status(403).json(error("Forbidden", "FORBIDDEN"));
+  }
+  if (event.status === "CANCELLED") {
+    return res
+      .status(409)
+      .json(error("Event already cancelled", "EVENT_ALREADY_CANCELLED"));
+  }
+
+  const timestamp = nowIso();
+  const cancelled = await repository.cancelEvent(event.eventId, timestamp);
+  await emitNotification(
+    "/notifications/event",
+    {
+      eventId: cancelled.eventId,
+      notificationType: "EVENT_CANCELLED",
+      title: "Event cancelled",
+      message: `The event \"${cancelled.title}\" has been cancelled.`,
+      metadata: {
+        eventTitle: cancelled.title,
+        eventCity: cancelled.city,
+        eventStartAt: cancelled.startAt
+      }
+    },
+    context
+  );
+  return res.status(200).json(success(toEventResponse(cancelled)));
+});
+
 app.use((_req, res) => {
   return res.status(404).json(error("Route not found", "NOT_FOUND"));
 });
@@ -400,4 +661,3 @@ process.on("SIGTERM", () => {
 process.on("SIGINT", () => {
   shutdown().finally(() => process.exit(0));
 });
-

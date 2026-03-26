@@ -3,15 +3,17 @@
 Synthese des jalons de delivery proposes a partir du cahier des charges.
 Les dates ci-dessous sont indicatives au 2026-03-07 et doivent etre
 recalibrees apres estimation equipe.
+Statuts synchronises au 2026-03-11 a partir des fiches sprint.
 
 ## Vue d'ensemble
 
-- Phase 0 - Fondations architecture: `PLANNED`
-- Phase 1 - MVP publication & inscription: `PLANNED`
-- Phase 2 - Ticketing & notifications: `PLANNED`
-- Phase 3 - Administration & moderation: `PLANNED`
-- Phase 4 - Paiement & extensions: `PLANNED`
-- Phase 5 - Industrialisation & observabilite avancee: `PLANNED`
+- Phase 0 - Fondations architecture: `READY TO START`
+- Phase 1 - MVP publication & inscription: `READY TO START`
+- Phase 2 - Ticketing & notifications: `IN_PROGRESS`
+- Phase 3 - Administration & moderation: `IN_PROGRESS`
+- Phase 4 - Paiement & extensions: `IN_PROGRESS`
+- Phase 5 - Industrialisation & observabilite avancee: `DONE`
+- Phase 6 - Experience & ops closure: `PLANNED`
 
 ## Detail par phase
 
@@ -23,6 +25,7 @@ recalibrees apres estimation equipe.
 | 3 | S3 | 2026-05-04 -> 2026-05-22 | Industrialiser moderation, audit et supervision metier | Console admin utilisable, moderation, recherche globale, audit et dashboards initiaux | `docs/sprints/sprint_3_admin_moderation.md` |
 | 4 | S4 | 2026-05-25 -> 2026-06-12 | Ouvrir le lot optionnel paiement et les extensions de monetisation | Paiement pour evenements payants, statuts de transaction, webhooks, garde-fous metier | `docs/sprints/sprint_4_payment_extensions.md` |
 | 5 | S5 | 2026-06-15 -> 2026-07-03 | Renforcer observabilite, CI/CD, securite et readiness production | SLO, dashboards ops, traces distribuees, pipeline qualite et runbooks | backlog monitoring + releases |
+| 6 | S6 | 2026-07-06 -> 2026-07-24 | Fermer les integrations UI/admin encore ouvertes et brancher les panels ops restants | Dashboard participant/organisateur plus complet, statuts notification visibles, panels metriques admin relies au backend | `docs/sprints/sprint_6_experience_ops_closure.md` |
 
 ## Hypotheses de sequencing
 

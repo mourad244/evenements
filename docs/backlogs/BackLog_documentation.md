@@ -21,9 +21,9 @@ du projet evenements.
 
 ## Meta
 
-- Statut global: `IN PROGRESS`
+- Statut global: `DONE`
 - Date debut: `2026-03-07`
-- Derniere mise a jour: `2026-03-08`
+- Derniere mise a jour: `2026-03-11`
 - Lead: `Mourad`
 - Reviewer: `Ibrahim`
 
@@ -132,7 +132,7 @@ du projet evenements.
 
 ### D06 - Maintenir releases et task history au fil du delivery
 
-- Status: `TODO`
+- Status: `DONE`
 - Priority: `P2` · Difficulty: `S` · Impact: `M`
 - Owner: `Mourad`
 - Support: `Ibrahim`
@@ -145,6 +145,6 @@ du projet evenements.
 
 | Ticket ID | Status | Priority | Owner | Support | Sprint cible | Dependances | Interfaces impactees | Sortie attendue | Critere d'acceptation | Branche suggeree |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| D06.1 | TODO | P2 | Mourad | Ibrahim | Sprint 0 | docs/task_history.md | Historique livrables | Routine `task_history` documentee | Les mises a jour majeures du cadrage ou du code ont une place claire dans l'historique | `docs/task-history-routine` |
+| D06.1 | DONE | P2 | Mourad | Ibrahim | Sprint 0 | docs/task_history.md | Historique livrables | Routine `task_history` documentee | Les mises a jour majeures du cadrage ou du code ont une place claire dans l'historique | `docs/task-history-routine` |
 | D06.2 | DONE | P2 | Mourad | Ibrahim | Sprint 0 | docs/README.md | Activation releases/deployments | Regle d'activation deja formalisee | La doc explique clairement quand activer `releases/` et `deployments/` | `docs/release-activation-rule` |
-| D06.3 | TODO | P2 | Mourad | Ibrahim | Sprint 1 | docs/planning/team_work_split.md | Gouvernance documentaire | Rituel de revue doc defini | L'equipe a une regle simple de revue et mise a jour documentaire a chaque sprint | `docs/documentation-review-cadence` |
+| D06.3 | DONE | P2 | Mourad | Ibrahim | Sprint 1 | docs/planning/team_work_split.md | Gouvernance documentaire | Rituel de revue doc defini | L'equipe a une regle simple de revue et mise a jour documentaire a chaque sprint | `docs/documentation-review-cadence` |
