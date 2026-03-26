@@ -1,0 +1,24 @@
+{
+  "id": "planning/team_work_split",
+  "title": "Repartition des taches - Mourad & Ibrahim",
+  "description": "Repartition initiale de travail pour une equipe de 2 personnes.",
+  "source": "@site/../../docs/planning/team_work_split.md",
+  "sourceDirName": "planning",
+  "slug": "/planning/team_work_split",
+  "permalink": "/reference/planning/team_work_split",
+  "draft": false,
+  "unlisted": false,
+  "editUrl": "https://github.com/mourad244/evenements/tree/main/../../docs/planning/team_work_split.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {},
+  "sidebar": "referenceSidebar",
+  "previous": {
+    "title": "Roadmap - Phases & Sprints du Projet Evenements",
+    "permalink": "/reference/planning/roadmap_sprints"
+  },
+  "next": {
+    "title": "Release - YYYY-MM-DD",
+    "permalink": "/reference/releases/release_TEMPLATE"
+  }
+}

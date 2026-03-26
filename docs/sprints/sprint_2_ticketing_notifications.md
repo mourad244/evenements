@@ -1,3 +1,19 @@
+---
+title: Sprint 2 - Ticketing & notifications
+description: Planning du lot billets electroniques, QR code et notifications.
+docKind: sprint
+domain: delivery
+phase: P2
+owner: Mourad
+status: TODO
+priority: P1
+tags:
+  - sprint-2
+  - ticketing
+  - notification
+slug: sprint-2-ticketing-notifications
+---
+
 # Sprint 2 - Ticketing & notifications
 
 Sprint de completion du parcours post-inscription.

@@ -1,0 +1,24 @@
+{
+  "id": "task_history",
+  "title": "Historique des livrables - Projet Evenements",
+  "description": "Journal synthetique des livrables majeurs et des baselines de cadrage.",
+  "source": "@site/../../docs/task_history.md",
+  "sourceDirName": ".",
+  "slug": "/task_history",
+  "permalink": "/reference/task_history",
+  "draft": false,
+  "unlisted": false,
+  "editUrl": "https://github.com/mourad244/evenements/tree/main/../../docs/task_history.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {},
+  "sidebar": "referenceSidebar",
+  "previous": {
+    "title": "Sprint 4 - Paiement & extensions",
+    "permalink": "/reference/sprints/sprint-4-payment-extensions"
+  },
+  "next": {
+    "title": "Backend Service Spec - Template Evenements",
+    "permalink": "/reference/templates/TemplateBackendServiceSpec"
+  }
+}

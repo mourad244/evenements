@@ -1,3 +1,19 @@
+---
+title: Backlog Identity & Access
+description: Backlog du domaine auth, comptes, sessions et controle d'acces.
+docKind: backlog
+domain: identity-access
+phase: P1
+owner: Mourad
+status: DONE
+priority: P0
+tags:
+  - auth
+  - sessions
+  - jwt
+slug: identity-access
+---
+
 # BackLog Identity & Access
 
 Ce backlog couvre le futur service d'authentification, autorisation,

@@ -1,0 +1,55 @@
+{
+  "id": "sprints/sprint_2_ticketing_notifications",
+  "title": "Sprint 2 - Ticketing & notifications",
+  "description": "Planning du lot billets electroniques, QR code et notifications.",
+  "source": "@site/../../docs/sprints/sprint_2_ticketing_notifications.md",
+  "sourceDirName": "sprints",
+  "slug": "/sprints/sprint-2-ticketing-notifications",
+  "permalink": "/reference/sprints/sprint-2-ticketing-notifications",
+  "draft": false,
+  "unlisted": false,
+  "editUrl": "https://github.com/mourad244/evenements/tree/main/../../docs/sprints/sprint_2_ticketing_notifications.md",
+  "tags": [
+    {
+      "inline": true,
+      "label": "sprint-2",
+      "permalink": "/reference/tags/sprint-2"
+    },
+    {
+      "inline": true,
+      "label": "ticketing",
+      "permalink": "/reference/tags/ticketing"
+    },
+    {
+      "inline": true,
+      "label": "notification",
+      "permalink": "/reference/tags/notification"
+    }
+  ],
+  "version": "current",
+  "frontMatter": {
+    "title": "Sprint 2 - Ticketing & notifications",
+    "description": "Planning du lot billets electroniques, QR code et notifications.",
+    "docKind": "sprint",
+    "domain": "delivery",
+    "phase": "P2",
+    "owner": "Mourad",
+    "status": "TODO",
+    "priority": "P1",
+    "tags": [
+      "sprint-2",
+      "ticketing",
+      "notification"
+    ],
+    "slug": "sprint-2-ticketing-notifications"
+  },
+  "sidebar": "referenceSidebar",
+  "previous": {
+    "title": "Sprint 1 - MVP publication & inscription",
+    "permalink": "/reference/sprints/sprint-1-mvp"
+  },
+  "next": {
+    "title": "Sprint 3 - Admin & moderation",
+    "permalink": "/reference/sprints/sprint-3-admin-moderation"
+  }
+}

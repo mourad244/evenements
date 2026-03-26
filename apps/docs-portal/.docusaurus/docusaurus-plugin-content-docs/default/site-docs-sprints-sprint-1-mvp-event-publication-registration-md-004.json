@@ -1,0 +1,55 @@
+{
+  "id": "sprints/sprint_1_mvp_event_publication_registration",
+  "title": "Sprint 1 - MVP publication & inscription",
+  "description": "Premier vertical slice backend pour auth, drafts, publication et registration.",
+  "source": "@site/../../docs/sprints/sprint_1_mvp_event_publication_registration.md",
+  "sourceDirName": "sprints",
+  "slug": "/sprints/sprint-1-mvp",
+  "permalink": "/reference/sprints/sprint-1-mvp",
+  "draft": false,
+  "unlisted": false,
+  "editUrl": "https://github.com/mourad244/evenements/tree/main/../../docs/sprints/sprint_1_mvp_event_publication_registration.md",
+  "tags": [
+    {
+      "inline": true,
+      "label": "sprint-1",
+      "permalink": "/reference/tags/sprint-1"
+    },
+    {
+      "inline": true,
+      "label": "mvp",
+      "permalink": "/reference/tags/mvp"
+    },
+    {
+      "inline": true,
+      "label": "registration",
+      "permalink": "/reference/tags/registration"
+    }
+  ],
+  "version": "current",
+  "frontMatter": {
+    "title": "Sprint 1 - MVP publication & inscription",
+    "description": "Premier vertical slice backend pour auth, drafts, publication et registration.",
+    "docKind": "sprint",
+    "domain": "delivery",
+    "phase": "P1",
+    "owner": "Mourad",
+    "status": "IN_PROGRESS",
+    "priority": "P0",
+    "tags": [
+      "sprint-1",
+      "mvp",
+      "registration"
+    ],
+    "slug": "sprint-1-mvp"
+  },
+  "sidebar": "referenceSidebar",
+  "previous": {
+    "title": "Sprint 1 - Execution tracker",
+    "permalink": "/reference/sprints/sprint-1-tracker"
+  },
+  "next": {
+    "title": "Sprint 2 - Ticketing & notifications",
+    "permalink": "/reference/sprints/sprint-2-ticketing-notifications"
+  }
+}

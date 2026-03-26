@@ -1,0 +1,54 @@
+{
+  "id": "workflows/Workflow_backend_event_domain",
+  "title": "Workflow backend event domain",
+  "description": "Mode de delivery backend pour le domaine evenement et ses interfaces.",
+  "source": "@site/../../docs/workflows/Workflow_backend_event_domain.md",
+  "sourceDirName": "workflows",
+  "slug": "/workflows/backend-event-domain",
+  "permalink": "/reference/workflows/backend-event-domain",
+  "draft": false,
+  "unlisted": false,
+  "editUrl": "https://github.com/mourad244/evenements/tree/main/../../docs/workflows/Workflow_backend_event_domain.md",
+  "tags": [
+    {
+      "inline": true,
+      "label": "workflow",
+      "permalink": "/reference/tags/workflow"
+    },
+    {
+      "inline": true,
+      "label": "backend",
+      "permalink": "/reference/tags/backend"
+    },
+    {
+      "inline": true,
+      "label": "events",
+      "permalink": "/reference/tags/events"
+    }
+  ],
+  "version": "current",
+  "frontMatter": {
+    "title": "Workflow backend event domain",
+    "description": "Mode de delivery backend pour le domaine evenement et ses interfaces.",
+    "docKind": "workflow",
+    "domain": "event-domain",
+    "phase": "P1-P2",
+    "owner": "Mourad",
+    "status": "DONE",
+    "tags": [
+      "workflow",
+      "backend",
+      "events"
+    ],
+    "slug": "backend-event-domain"
+  },
+  "sidebar": "referenceSidebar",
+  "previous": {
+    "title": "Workflow backend",
+    "permalink": "/reference/workflows/backend"
+  },
+  "next": {
+    "title": "Workflow frontend",
+    "permalink": "/reference/workflows/frontend"
+  }
+}

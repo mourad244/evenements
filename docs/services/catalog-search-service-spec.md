@@ -1,3 +1,19 @@
+---
+title: Spec Catalog Search Service
+description: Specification backend du read model public de recherche et catalogue.
+docKind: spec
+domain: catalog-search
+phase: P1
+owner: Mourad
+status: DONE
+priority: P0
+tags:
+  - spec
+  - catalog
+  - search
+slug: catalog-search-service
+---
+
 # Catalog & Search Service - Spec P1
 
 > Lire `docs/workflows/Workflow_backend.md` avant implementation.

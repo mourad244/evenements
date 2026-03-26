@@ -1,0 +1,258 @@
+{
+  "docusaurus-plugin-content-docs": {
+    "default": {
+      "path": "/reference",
+      "versions": [
+        {
+          "name": "current",
+          "label": "Next",
+          "isLast": true,
+          "path": "/reference",
+          "mainDocId": "CONTRIBUTING",
+          "docs": [
+            {
+              "id": "api-contracts-p1",
+              "path": "/reference/api-contracts-p1",
+              "sidebar": "referenceSidebar"
+            },
+            {
+              "id": "async-events-p1",
+              "path": "/reference/async-events-p1",
+              "sidebar": "referenceSidebar"
+            },
+            {
+              "id": "backlogs/BackLog_admin_moderation",
+              "path": "/reference/backlogs/admin-moderation",
+              "sidebar": "referenceSidebar"
+            },
+            {
+              "id": "backlogs/BackLog_documentation",
+              "path": "/reference/backlogs/documentation",
+              "sidebar": "referenceSidebar"
+            },
+            {
+              "id": "backlogs/BackLog_event_management",
+              "path": "/reference/backlogs/event-management",
+              "sidebar": "referenceSidebar"
+            },
+            {
+              "id": "backlogs/BackLog_frontend",
+              "path": "/reference/backlogs/frontend",
+              "sidebar": "referenceSidebar"
+            },
+            {
+              "id": "backlogs/BackLog_identity_access",
+              "path": "/reference/backlogs/identity-access",
+              "sidebar": "referenceSidebar"
+            },
+            {
+              "id": "backlogs/BackLog_monitoring",
+              "path": "/reference/backlogs/monitoring",
+              "sidebar": "referenceSidebar"
+            },
+            {
+              "id": "backlogs/BackLog_notification",
+              "path": "/reference/backlogs/notification",
+              "sidebar": "referenceSidebar"
+            },
+            {
+              "id": "backlogs/BackLog_payment",
+              "path": "/reference/backlogs/payment",
+              "sidebar": "referenceSidebar"
+            },
+            {
+              "id": "backlogs/BackLog_registration_ticketing",
+              "path": "/reference/backlogs/registration-ticketing",
+              "sidebar": "referenceSidebar"
+            },
+            {
+              "id": "CONTRIBUTING",
+              "path": "/reference/CONTRIBUTING",
+              "sidebar": "referenceSidebar"
+            },
+            {
+              "id": "data-dictionary-p1",
+              "path": "/reference/data-dictionary-p1",
+              "sidebar": "referenceSidebar"
+            },
+            {
+              "id": "diagrams/architecture_global",
+              "path": "/reference/diagrams/architecture-global",
+              "sidebar": "referenceSidebar"
+            },
+            {
+              "id": "diagrams/flow_event_publication",
+              "path": "/reference/diagrams/event-publication-flow",
+              "sidebar": "referenceSidebar"
+            },
+            {
+              "id": "diagrams/flow_registration_waitlist",
+              "path": "/reference/diagrams/registration-waitlist-flow",
+              "sidebar": "referenceSidebar"
+            },
+            {
+              "id": "diagrams/README",
+              "path": "/reference/diagrams/readme",
+              "sidebar": "referenceSidebar"
+            },
+            {
+              "id": "DOCUMENTATION_INDEX",
+              "path": "/reference/navigation",
+              "sidebar": "referenceSidebar"
+            },
+            {
+              "id": "ideas/README",
+              "path": "/reference/ideas/ideas",
+              "sidebar": "referenceSidebar"
+            },
+            {
+              "id": "mvp_scope",
+              "path": "/reference/mvp-scope",
+              "sidebar": "referenceSidebar"
+            },
+            {
+              "id": "planning/release_plan",
+              "path": "/reference/planning/release_plan",
+              "sidebar": "referenceSidebar"
+            },
+            {
+              "id": "planning/roadmap_sprints",
+              "path": "/reference/planning/roadmap_sprints",
+              "sidebar": "referenceSidebar"
+            },
+            {
+              "id": "planning/team_work_split",
+              "path": "/reference/planning/team_work_split",
+              "sidebar": "referenceSidebar"
+            },
+            {
+              "id": "QUICK_START",
+              "path": "/reference/QUICK_START",
+              "sidebar": "referenceSidebar"
+            },
+            {
+              "id": "README",
+              "path": "/reference/overview",
+              "sidebar": "referenceSidebar"
+            },
+            {
+              "id": "releases/release_TEMPLATE",
+              "path": "/reference/releases/release_TEMPLATE",
+              "sidebar": "referenceSidebar"
+            },
+            {
+              "id": "services/catalog-search-service-spec",
+              "path": "/reference/services/catalog-search-service",
+              "sidebar": "referenceSidebar"
+            },
+            {
+              "id": "services/event-management-service-spec",
+              "path": "/reference/services/event-management-service",
+              "sidebar": "referenceSidebar"
+            },
+            {
+              "id": "services/identity-access-service-spec",
+              "path": "/reference/services/identity-access-service",
+              "sidebar": "referenceSidebar"
+            },
+            {
+              "id": "services/registration-service-spec",
+              "path": "/reference/services/registration-service",
+              "sidebar": "referenceSidebar"
+            },
+            {
+              "id": "sprints/sprint_0_architecture_foundation",
+              "path": "/reference/sprints/sprint-0-architecture-foundation",
+              "sidebar": "referenceSidebar"
+            },
+            {
+              "id": "sprints/sprint_1_execution_tracker",
+              "path": "/reference/sprints/sprint-1-tracker",
+              "sidebar": "referenceSidebar"
+            },
+            {
+              "id": "sprints/sprint_1_mvp_event_publication_registration",
+              "path": "/reference/sprints/sprint-1-mvp",
+              "sidebar": "referenceSidebar"
+            },
+            {
+              "id": "sprints/sprint_2_ticketing_notifications",
+              "path": "/reference/sprints/sprint-2-ticketing-notifications",
+              "sidebar": "referenceSidebar"
+            },
+            {
+              "id": "sprints/sprint_3_admin_moderation",
+              "path": "/reference/sprints/sprint-3-admin-moderation",
+              "sidebar": "referenceSidebar"
+            },
+            {
+              "id": "sprints/sprint_4_payment_extensions",
+              "path": "/reference/sprints/sprint-4-payment-extensions",
+              "sidebar": "referenceSidebar"
+            },
+            {
+              "id": "task_history",
+              "path": "/reference/task_history",
+              "sidebar": "referenceSidebar"
+            },
+            {
+              "id": "templates/TemplateBackendServiceSpec",
+              "path": "/reference/templates/TemplateBackendServiceSpec",
+              "sidebar": "referenceSidebar"
+            },
+            {
+              "id": "test-plan-acceptance-matrix",
+              "path": "/reference/test-plan-acceptance-matrix",
+              "sidebar": "referenceSidebar"
+            },
+            {
+              "id": "test-plan-role-regression",
+              "path": "/reference/test-plan-role-regression",
+              "sidebar": "referenceSidebar"
+            },
+            {
+              "id": "test-plan-smoke-mvp",
+              "path": "/reference/test-plan-smoke-mvp",
+              "sidebar": "referenceSidebar"
+            },
+            {
+              "id": "user_stories/user_stories_table",
+              "path": "/reference/user_stories/user_stories_table",
+              "sidebar": "referenceSidebar"
+            },
+            {
+              "id": "workflows/Workflow_backend",
+              "path": "/reference/workflows/backend",
+              "sidebar": "referenceSidebar"
+            },
+            {
+              "id": "workflows/Workflow_backend_event_domain",
+              "path": "/reference/workflows/backend-event-domain",
+              "sidebar": "referenceSidebar"
+            },
+            {
+              "id": "workflows/Workflow_frontend",
+              "path": "/reference/workflows/frontend",
+              "sidebar": "referenceSidebar"
+            },
+            {
+              "id": "workflows/Workflow_frontend_event_portal",
+              "path": "/reference/workflows/frontend-event-portal",
+              "sidebar": "referenceSidebar"
+            }
+          ],
+          "draftIds": [],
+          "sidebars": {
+            "referenceSidebar": {
+              "link": {
+                "path": "/reference/CONTRIBUTING",
+                "label": "CONTRIBUTING"
+              }
+            }
+          }
+        }
+      ],
+      "breadcrumbs": true
+    }
+  }
+}

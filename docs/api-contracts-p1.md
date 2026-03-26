@@ -1,3 +1,18 @@
+---
+title: Catalogue REST P1
+description: Routes Gateway MVP, ACL, payloads et erreurs principales par domaine.
+docKind: catalog
+domain: api
+phase: P1
+owner: Mourad
+status: DONE
+tags:
+  - api
+  - gateway
+  - rest
+slug: api-contracts-p1
+---
+
 # Catalogue REST P1 - MVP publication & inscription
 
 ## Objet

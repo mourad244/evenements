@@ -1,3 +1,19 @@
+---
+title: Backlog Payment
+description: Backlog monetisation, transactions, providers et webhooks.
+docKind: backlog
+domain: payment
+phase: P4
+owner: Mourad
+status: TODO
+priority: P2
+tags:
+  - payment
+  - webhooks
+  - transactions
+slug: payment
+---
+
 # BackLog Payment
 
 Ce backlog couvre le lot optionnel de monetisation pour les evenements

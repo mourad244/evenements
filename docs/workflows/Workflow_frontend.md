@@ -1,3 +1,18 @@
+---
+title: Workflow frontend
+description: Conventions frontend sur les shells, ACL, etats UI et responsive.
+docKind: workflow
+domain: frontend
+phase: P1-P3
+owner: Ibrahim
+status: DONE
+tags:
+  - workflow
+  - frontend
+  - acl
+slug: frontend
+---
+
 # Frontend workflow - portail public, espace participant et back-offices
 
 Ce document fixe les conventions frontend transverses du projet

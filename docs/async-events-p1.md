@@ -279,3 +279,17 @@ Payload minimal reserve:
 - les events critiques `event.published`, `registration.confirmed` et
   `registration.promoted` doivent etre retrouvables via
   `correlationId`.
+---
+title: Catalogue d'evenements async P1
+description: Producteurs, consommateurs et payloads minimaux des evenements metier critiques.
+docKind: catalog
+domain: async-events
+phase: P1
+owner: Mourad
+status: DONE
+tags:
+  - events
+  - async
+  - bus
+slug: async-events-p1
+---

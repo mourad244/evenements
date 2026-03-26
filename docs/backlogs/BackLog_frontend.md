@@ -1,3 +1,19 @@
+---
+title: Backlog Frontend
+description: Backlog des surfaces UI, integration front/back et experience utilisateur.
+docKind: backlog
+domain: frontend
+phase: P1-P3
+owner: Ibrahim
+status: DONE
+priority: P0
+tags:
+  - frontend
+  - portal
+  - ux
+slug: frontend
+---
+
 # BackLog Frontend - Portail public, espace participant et back-offices
 
 ## Meta

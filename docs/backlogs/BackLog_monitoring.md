@@ -1,3 +1,19 @@
+---
+title: Backlog Monitoring
+description: Backlog observabilite, health checks, logs et readiness.
+docKind: backlog
+domain: monitoring
+phase: P1-P5
+owner: Mourad
+status: PARTIAL
+priority: P1
+tags:
+  - monitoring
+  - logs
+  - readiness
+slug: monitoring
+---
+
 # BackLog Monitoring & Exploitation
 
 Ce backlog couvre l'observabilite, les health checks, les traces, les

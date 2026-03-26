@@ -1,0 +1,24 @@
+{
+  "id": "planning/roadmap_sprints",
+  "title": "Roadmap - Phases & Sprints du Projet Evenements",
+  "description": "Synthese des jalons de delivery proposes a partir du cahier des charges.",
+  "source": "@site/../../docs/planning/roadmap_sprints.md",
+  "sourceDirName": "planning",
+  "slug": "/planning/roadmap_sprints",
+  "permalink": "/reference/planning/roadmap_sprints",
+  "draft": false,
+  "unlisted": false,
+  "editUrl": "https://github.com/mourad244/evenements/tree/main/../../docs/planning/roadmap_sprints.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {},
+  "sidebar": "referenceSidebar",
+  "previous": {
+    "title": "Release Plan - Projet Evenements",
+    "permalink": "/reference/planning/release_plan"
+  },
+  "next": {
+    "title": "Repartition des taches - Mourad & Ibrahim",
+    "permalink": "/reference/planning/team_work_split"
+  }
+}

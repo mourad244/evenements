@@ -1,0 +1,55 @@
+{
+  "id": "backlogs/BackLog_identity_access",
+  "title": "Backlog Identity & Access",
+  "description": "Backlog du domaine auth, comptes, sessions et controle d'acces.",
+  "source": "@site/../../docs/backlogs/BackLog_identity_access.md",
+  "sourceDirName": "backlogs",
+  "slug": "/backlogs/identity-access",
+  "permalink": "/reference/backlogs/identity-access",
+  "draft": false,
+  "unlisted": false,
+  "editUrl": "https://github.com/mourad244/evenements/tree/main/../../docs/backlogs/BackLog_identity_access.md",
+  "tags": [
+    {
+      "inline": true,
+      "label": "auth",
+      "permalink": "/reference/tags/auth"
+    },
+    {
+      "inline": true,
+      "label": "sessions",
+      "permalink": "/reference/tags/sessions"
+    },
+    {
+      "inline": true,
+      "label": "jwt",
+      "permalink": "/reference/tags/jwt"
+    }
+  ],
+  "version": "current",
+  "frontMatter": {
+    "title": "Backlog Identity & Access",
+    "description": "Backlog du domaine auth, comptes, sessions et controle d'acces.",
+    "docKind": "backlog",
+    "domain": "identity-access",
+    "phase": "P1",
+    "owner": "Mourad",
+    "status": "DONE",
+    "priority": "P0",
+    "tags": [
+      "auth",
+      "sessions",
+      "jwt"
+    ],
+    "slug": "identity-access"
+  },
+  "sidebar": "referenceSidebar",
+  "previous": {
+    "title": "Backlog Frontend",
+    "permalink": "/reference/backlogs/frontend"
+  },
+  "next": {
+    "title": "Backlog Monitoring",
+    "permalink": "/reference/backlogs/monitoring"
+  }
+}

@@ -1,0 +1,54 @@
+{
+  "id": "diagrams/flow_registration_waitlist",
+  "title": "Diagramme registration waitlist",
+  "description": "Rendu Mermaid du flux d'inscription, attente et promotion.",
+  "source": "@site/../../docs/diagrams/flow_registration_waitlist.md",
+  "sourceDirName": "diagrams",
+  "slug": "/diagrams/registration-waitlist-flow",
+  "permalink": "/reference/diagrams/registration-waitlist-flow",
+  "draft": false,
+  "unlisted": false,
+  "editUrl": "https://github.com/mourad244/evenements/tree/main/../../docs/diagrams/flow_registration_waitlist.md",
+  "tags": [
+    {
+      "inline": true,
+      "label": "diagram",
+      "permalink": "/reference/tags/diagram"
+    },
+    {
+      "inline": true,
+      "label": "registration",
+      "permalink": "/reference/tags/registration"
+    },
+    {
+      "inline": true,
+      "label": "waitlist",
+      "permalink": "/reference/tags/waitlist"
+    }
+  ],
+  "version": "current",
+  "frontMatter": {
+    "title": "Diagramme registration waitlist",
+    "description": "Rendu Mermaid du flux d'inscription, attente et promotion.",
+    "docKind": "diagram",
+    "domain": "registration",
+    "phase": "P1-P2",
+    "owner": "Ibrahim",
+    "status": "DONE",
+    "tags": [
+      "diagram",
+      "registration",
+      "waitlist"
+    ],
+    "slug": "registration-waitlist-flow"
+  },
+  "sidebar": "referenceSidebar",
+  "previous": {
+    "title": "Diagramme publication evenement",
+    "permalink": "/reference/diagrams/event-publication-flow"
+  },
+  "next": {
+    "title": "Idees produit et techniques",
+    "permalink": "/reference/ideas/ideas"
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "id": "test-plan-role-regression",
+  "title": "Plan de non-regression ACL et roles",
+  "description": "Objet",
+  "source": "@site/../../docs/test-plan-role-regression.md",
+  "sourceDirName": ".",
+  "slug": "/test-plan-role-regression",
+  "permalink": "/reference/test-plan-role-regression",
+  "draft": false,
+  "unlisted": false,
+  "editUrl": "https://github.com/mourad244/evenements/tree/main/../../docs/test-plan-role-regression.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {},
+  "sidebar": "referenceSidebar",
+  "previous": {
+    "title": "Matrice de recette et d'acceptation par phase",
+    "permalink": "/reference/test-plan-acceptance-matrix"
+  },
+  "next": {
+    "title": "Plan de smoke tests MVP - P1",
+    "permalink": "/reference/test-plan-smoke-mvp"
+  }
+}

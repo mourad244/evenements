@@ -1,0 +1,55 @@
+{
+  "id": "services/event-management-service-spec",
+  "title": "Spec Event Management Service",
+  "description": "Specification backend du service de gestion des evenements et de leur cycle de vie.",
+  "source": "@site/../../docs/services/event-management-service-spec.md",
+  "sourceDirName": "services",
+  "slug": "/services/event-management-service",
+  "permalink": "/reference/services/event-management-service",
+  "draft": false,
+  "unlisted": false,
+  "editUrl": "https://github.com/mourad244/evenements/tree/main/../../docs/services/event-management-service-spec.md",
+  "tags": [
+    {
+      "inline": true,
+      "label": "spec",
+      "permalink": "/reference/tags/spec"
+    },
+    {
+      "inline": true,
+      "label": "events",
+      "permalink": "/reference/tags/events"
+    },
+    {
+      "inline": true,
+      "label": "drafts",
+      "permalink": "/reference/tags/drafts"
+    }
+  ],
+  "version": "current",
+  "frontMatter": {
+    "title": "Spec Event Management Service",
+    "description": "Specification backend du service de gestion des evenements et de leur cycle de vie.",
+    "docKind": "spec",
+    "domain": "event-management",
+    "phase": "P1",
+    "owner": "Mourad",
+    "status": "DONE",
+    "priority": "P0",
+    "tags": [
+      "spec",
+      "events",
+      "drafts"
+    ],
+    "slug": "event-management-service"
+  },
+  "sidebar": "referenceSidebar",
+  "previous": {
+    "title": "Spec Catalog Search Service",
+    "permalink": "/reference/services/catalog-search-service"
+  },
+  "next": {
+    "title": "Spec Identity Access Service",
+    "permalink": "/reference/services/identity-access-service"
+  }
+}

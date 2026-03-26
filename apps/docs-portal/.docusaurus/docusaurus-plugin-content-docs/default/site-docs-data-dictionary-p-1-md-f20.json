@@ -1,0 +1,24 @@
+{
+  "id": "data-dictionary-p1",
+  "title": "Dictionnaire de donnees P1 - MVP publication & inscription",
+  "description": "Objet",
+  "source": "@site/../../docs/data-dictionary-p1.md",
+  "sourceDirName": ".",
+  "slug": "/data-dictionary-p1",
+  "permalink": "/reference/data-dictionary-p1",
+  "draft": false,
+  "unlisted": false,
+  "editUrl": "https://github.com/mourad244/evenements/tree/main/../../docs/data-dictionary-p1.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {},
+  "sidebar": "referenceSidebar",
+  "previous": {
+    "title": "Backlog Registration & Ticketing",
+    "permalink": "/reference/backlogs/registration-ticketing"
+  },
+  "next": {
+    "title": "Index des diagrammes",
+    "permalink": "/reference/diagrams/readme"
+  }
+}

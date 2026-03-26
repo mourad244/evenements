@@ -1,0 +1,54 @@
+{
+  "id": "mvp_scope",
+  "title": "Perimetre MVP et architecture cible",
+  "description": "Cadrage fonctionnel et technique du projet Evenements, de P1 a P4.",
+  "source": "@site/../../docs/mvp_scope.md",
+  "sourceDirName": ".",
+  "slug": "/mvp-scope",
+  "permalink": "/reference/mvp-scope",
+  "draft": false,
+  "unlisted": false,
+  "editUrl": "https://github.com/mourad244/evenements/tree/main/../../docs/mvp_scope.md",
+  "tags": [
+    {
+      "inline": true,
+      "label": "mvp",
+      "permalink": "/reference/tags/mvp"
+    },
+    {
+      "inline": true,
+      "label": "scope",
+      "permalink": "/reference/tags/scope"
+    },
+    {
+      "inline": true,
+      "label": "architecture",
+      "permalink": "/reference/tags/architecture"
+    }
+  ],
+  "version": "current",
+  "frontMatter": {
+    "title": "Perimetre MVP et architecture cible",
+    "description": "Cadrage fonctionnel et technique du projet Evenements, de P1 a P4.",
+    "docKind": "catalog",
+    "domain": "product",
+    "phase": "P1-P4",
+    "owner": "Mourad",
+    "status": "DONE",
+    "tags": [
+      "mvp",
+      "scope",
+      "architecture"
+    ],
+    "slug": "mvp-scope"
+  },
+  "sidebar": "referenceSidebar",
+  "previous": {
+    "title": "Idees produit et techniques",
+    "permalink": "/reference/ideas/ideas"
+  },
+  "next": {
+    "title": "Release Plan - Projet Evenements",
+    "permalink": "/reference/planning/release_plan"
+  }
+}

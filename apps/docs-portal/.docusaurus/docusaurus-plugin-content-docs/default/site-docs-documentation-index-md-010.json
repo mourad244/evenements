@@ -1,0 +1,54 @@
+{
+  "id": "DOCUMENTATION_INDEX",
+  "title": "Index de documentation",
+  "description": "Navigation rapide vers tous les documents structurants du projet Evenements.",
+  "source": "@site/../../docs/DOCUMENTATION_INDEX.md",
+  "sourceDirName": ".",
+  "slug": "/navigation",
+  "permalink": "/reference/navigation",
+  "draft": false,
+  "unlisted": false,
+  "editUrl": "https://github.com/mourad244/evenements/tree/main/../../docs/DOCUMENTATION_INDEX.md",
+  "tags": [
+    {
+      "inline": true,
+      "label": "navigation",
+      "permalink": "/reference/tags/navigation"
+    },
+    {
+      "inline": true,
+      "label": "docs",
+      "permalink": "/reference/tags/docs"
+    },
+    {
+      "inline": true,
+      "label": "portal",
+      "permalink": "/reference/tags/portal"
+    }
+  ],
+  "version": "current",
+  "frontMatter": {
+    "title": "Index de documentation",
+    "description": "Navigation rapide vers tous les documents structurants du projet Evenements.",
+    "docKind": "index",
+    "domain": "documentation",
+    "phase": "P0-P4",
+    "owner": "Mourad",
+    "status": "DONE",
+    "tags": [
+      "navigation",
+      "docs",
+      "portal"
+    ],
+    "slug": "navigation"
+  },
+  "sidebar": "referenceSidebar",
+  "previous": {
+    "title": "Guide de Contribution - Projet Evenements",
+    "permalink": "/reference/CONTRIBUTING"
+  },
+  "next": {
+    "title": "Guide de Demarrage Rapide - Projet Evenements",
+    "permalink": "/reference/QUICK_START"
+  }
+}

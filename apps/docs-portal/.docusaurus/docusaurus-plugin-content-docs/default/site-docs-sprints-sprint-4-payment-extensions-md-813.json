@@ -1,0 +1,55 @@
+{
+  "id": "sprints/sprint_4_payment_extensions",
+  "title": "Sprint 4 - Paiement & extensions",
+  "description": "Planning du lot monetisation, transactions et extensions produit.",
+  "source": "@site/../../docs/sprints/sprint_4_payment_extensions.md",
+  "sourceDirName": "sprints",
+  "slug": "/sprints/sprint-4-payment-extensions",
+  "permalink": "/reference/sprints/sprint-4-payment-extensions",
+  "draft": false,
+  "unlisted": false,
+  "editUrl": "https://github.com/mourad244/evenements/tree/main/../../docs/sprints/sprint_4_payment_extensions.md",
+  "tags": [
+    {
+      "inline": true,
+      "label": "sprint-4",
+      "permalink": "/reference/tags/sprint-4"
+    },
+    {
+      "inline": true,
+      "label": "payment",
+      "permalink": "/reference/tags/payment"
+    },
+    {
+      "inline": true,
+      "label": "extensions",
+      "permalink": "/reference/tags/extensions"
+    }
+  ],
+  "version": "current",
+  "frontMatter": {
+    "title": "Sprint 4 - Paiement & extensions",
+    "description": "Planning du lot monetisation, transactions et extensions produit.",
+    "docKind": "sprint",
+    "domain": "delivery",
+    "phase": "P4",
+    "owner": "Mourad",
+    "status": "TODO",
+    "priority": "P2",
+    "tags": [
+      "sprint-4",
+      "payment",
+      "extensions"
+    ],
+    "slug": "sprint-4-payment-extensions"
+  },
+  "sidebar": "referenceSidebar",
+  "previous": {
+    "title": "Sprint 3 - Admin & moderation",
+    "permalink": "/reference/sprints/sprint-3-admin-moderation"
+  },
+  "next": {
+    "title": "Historique des livrables - Projet Evenements",
+    "permalink": "/reference/task_history"
+  }
+}

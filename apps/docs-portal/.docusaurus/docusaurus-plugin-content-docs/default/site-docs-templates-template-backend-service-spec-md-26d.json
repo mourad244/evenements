@@ -1,0 +1,24 @@
+{
+  "id": "templates/TemplateBackendServiceSpec",
+  "title": "Backend Service Spec - Template Evenements",
+  "description": "Lire docs/workflows/Workflow_backend.md avant de remplir ce template.",
+  "source": "@site/../../docs/templates/TemplateBackendServiceSpec.md",
+  "sourceDirName": "templates",
+  "slug": "/templates/TemplateBackendServiceSpec",
+  "permalink": "/reference/templates/TemplateBackendServiceSpec",
+  "draft": false,
+  "unlisted": false,
+  "editUrl": "https://github.com/mourad244/evenements/tree/main/../../docs/templates/TemplateBackendServiceSpec.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {},
+  "sidebar": "referenceSidebar",
+  "previous": {
+    "title": "Historique des livrables - Projet Evenements",
+    "permalink": "/reference/task_history"
+  },
+  "next": {
+    "title": "Matrice de recette et d'acceptation par phase",
+    "permalink": "/reference/test-plan-acceptance-matrix"
+  }
+}

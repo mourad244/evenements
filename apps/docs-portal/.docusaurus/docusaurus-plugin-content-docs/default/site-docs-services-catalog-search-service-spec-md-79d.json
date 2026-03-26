@@ -1,0 +1,55 @@
+{
+  "id": "services/catalog-search-service-spec",
+  "title": "Spec Catalog Search Service",
+  "description": "Specification backend du read model public de recherche et catalogue.",
+  "source": "@site/../../docs/services/catalog-search-service-spec.md",
+  "sourceDirName": "services",
+  "slug": "/services/catalog-search-service",
+  "permalink": "/reference/services/catalog-search-service",
+  "draft": false,
+  "unlisted": false,
+  "editUrl": "https://github.com/mourad244/evenements/tree/main/../../docs/services/catalog-search-service-spec.md",
+  "tags": [
+    {
+      "inline": true,
+      "label": "spec",
+      "permalink": "/reference/tags/spec"
+    },
+    {
+      "inline": true,
+      "label": "catalog",
+      "permalink": "/reference/tags/catalog"
+    },
+    {
+      "inline": true,
+      "label": "search",
+      "permalink": "/reference/tags/search"
+    }
+  ],
+  "version": "current",
+  "frontMatter": {
+    "title": "Spec Catalog Search Service",
+    "description": "Specification backend du read model public de recherche et catalogue.",
+    "docKind": "spec",
+    "domain": "catalog-search",
+    "phase": "P1",
+    "owner": "Mourad",
+    "status": "DONE",
+    "priority": "P0",
+    "tags": [
+      "spec",
+      "catalog",
+      "search"
+    ],
+    "slug": "catalog-search-service"
+  },
+  "sidebar": "referenceSidebar",
+  "previous": {
+    "title": "Release - YYYY-MM-DD",
+    "permalink": "/reference/releases/release_TEMPLATE"
+  },
+  "next": {
+    "title": "Spec Event Management Service",
+    "permalink": "/reference/services/event-management-service"
+  }
+}

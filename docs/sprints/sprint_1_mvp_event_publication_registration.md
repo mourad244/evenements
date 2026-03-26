@@ -1,3 +1,19 @@
+---
+title: Sprint 1 - MVP publication & inscription
+description: Premier vertical slice backend pour auth, drafts, publication et registration.
+docKind: sprint
+domain: delivery
+phase: P1
+owner: Mourad
+status: IN_PROGRESS
+priority: P0
+tags:
+  - sprint-1
+  - mvp
+  - registration
+slug: sprint-1-mvp
+---
+
 # Sprint 1 - MVP publication & inscription
 
 Sprint centre sur la livraison du premier vertical slice executable du
@@ -58,15 +74,15 @@ Ibrahim d'integrer les ecrans MVP sans contrat bloquant sur:
 Les references ci-dessous deviennent la source de verite a ne pas
 re-ouvrir implicitement pendant l'implementation:
 
-- [`docs/api-contracts-p1.md`](../api-contracts-p1.md)
-- [`docs/async-events-p1.md`](../async-events-p1.md)
-- [`docs/services/identity-access-service-spec.md`](../services/identity-access-service-spec.md)
-- [`docs/services/event-management-service-spec.md`](../services/event-management-service-spec.md)
-- [`docs/services/catalog-search-service-spec.md`](../services/catalog-search-service-spec.md)
-- [`docs/services/registration-service-spec.md`](../services/registration-service-spec.md)
-- [`docs/diagrams/architecture_global.mmd`](../diagrams/architecture_global.mmd)
-- [`docs/diagrams/flow_event_publication.mmd`](../diagrams/flow_event_publication.mmd)
-- [`docs/diagrams/flow_registration_waitlist.mmd`](../diagrams/flow_registration_waitlist.mmd)
+- [`docs/api-contracts-p1.md`](/reference/api-contracts-p1)
+- [`docs/async-events-p1.md`](/reference/async-events-p1)
+- [`docs/services/identity-access-service-spec.md`](/reference/services/identity-access-service)
+- [`docs/services/event-management-service-spec.md`](/reference/services/event-management-service)
+- [`docs/services/catalog-search-service-spec.md`](/reference/services/catalog-search-service)
+- [`docs/services/registration-service-spec.md`](/reference/services/registration-service)
+- [`docs/diagrams/architecture_global.mmd`](/reference/diagrams/architecture-global)
+- [`docs/diagrams/flow_event_publication.mmd`](/reference/diagrams/event-publication-flow)
+- [`docs/diagrams/flow_registration_waitlist.mmd`](/reference/diagrams/registration-waitlist-flow)
 
 Regle de sprint:
 

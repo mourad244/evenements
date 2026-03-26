@@ -1,0 +1,55 @@
+{
+  "id": "backlogs/BackLog_admin_moderation",
+  "title": "Backlog Admin & Moderation",
+  "description": "Backlog moderation, audit, supervision et recherche transverse.",
+  "source": "@site/../../docs/backlogs/BackLog_admin_moderation.md",
+  "sourceDirName": "backlogs",
+  "slug": "/backlogs/admin-moderation",
+  "permalink": "/reference/backlogs/admin-moderation",
+  "draft": false,
+  "unlisted": false,
+  "editUrl": "https://github.com/mourad244/evenements/tree/main/../../docs/backlogs/BackLog_admin_moderation.md",
+  "tags": [
+    {
+      "inline": true,
+      "label": "admin",
+      "permalink": "/reference/tags/admin"
+    },
+    {
+      "inline": true,
+      "label": "moderation",
+      "permalink": "/reference/tags/moderation"
+    },
+    {
+      "inline": true,
+      "label": "audit",
+      "permalink": "/reference/tags/audit"
+    }
+  ],
+  "version": "current",
+  "frontMatter": {
+    "title": "Backlog Admin & Moderation",
+    "description": "Backlog moderation, audit, supervision et recherche transverse.",
+    "docKind": "backlog",
+    "domain": "admin-moderation",
+    "phase": "P3",
+    "owner": "Ibrahim",
+    "status": "TODO",
+    "priority": "P1",
+    "tags": [
+      "admin",
+      "moderation",
+      "audit"
+    ],
+    "slug": "admin-moderation"
+  },
+  "sidebar": "referenceSidebar",
+  "previous": {
+    "title": "Catalogue d'evenements async P1",
+    "permalink": "/reference/async-events-p1"
+  },
+  "next": {
+    "title": "Backlog Documentation",
+    "permalink": "/reference/backlogs/documentation"
+  }
+}

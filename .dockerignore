@@ -1,0 +1,10 @@
+.codex
+.git
+.idea
+.pnpm-store
+.vscode
+**/node_modules
+**/build
+coverage
+dist
+tmp

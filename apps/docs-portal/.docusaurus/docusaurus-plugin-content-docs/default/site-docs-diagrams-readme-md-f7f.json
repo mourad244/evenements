@@ -1,0 +1,54 @@
+{
+  "id": "diagrams/README",
+  "title": "Index des diagrammes",
+  "description": "Regles, sources et liste des diagrammes Mermaid du projet.",
+  "source": "@site/../../docs/diagrams/README.md",
+  "sourceDirName": "diagrams",
+  "slug": "/diagrams/readme",
+  "permalink": "/reference/diagrams/readme",
+  "draft": false,
+  "unlisted": false,
+  "editUrl": "https://github.com/mourad244/evenements/tree/main/../../docs/diagrams/README.md",
+  "tags": [
+    {
+      "inline": true,
+      "label": "diagrams",
+      "permalink": "/reference/tags/diagrams"
+    },
+    {
+      "inline": true,
+      "label": "mermaid",
+      "permalink": "/reference/tags/mermaid"
+    },
+    {
+      "inline": true,
+      "label": "architecture",
+      "permalink": "/reference/tags/architecture"
+    }
+  ],
+  "version": "current",
+  "frontMatter": {
+    "title": "Index des diagrammes",
+    "description": "Regles, sources et liste des diagrammes Mermaid du projet.",
+    "docKind": "index",
+    "domain": "architecture",
+    "phase": "P1-P4",
+    "owner": "Ibrahim",
+    "status": "DONE",
+    "tags": [
+      "diagrams",
+      "mermaid",
+      "architecture"
+    ],
+    "slug": "readme"
+  },
+  "sidebar": "referenceSidebar",
+  "previous": {
+    "title": "Dictionnaire de donnees P1 - MVP publication & inscription",
+    "permalink": "/reference/data-dictionary-p1"
+  },
+  "next": {
+    "title": "Diagramme architecture globale",
+    "permalink": "/reference/diagrams/architecture-global"
+  }
+}

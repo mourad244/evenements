@@ -1,0 +1,24 @@
+{
+  "id": "async-events-p1",
+  "title": "Catalogue d'evenements async P1",
+  "description": "Objet",
+  "source": "@site/../../docs/async-events-p1.md",
+  "sourceDirName": ".",
+  "slug": "/async-events-p1",
+  "permalink": "/reference/async-events-p1",
+  "draft": false,
+  "unlisted": false,
+  "editUrl": "https://github.com/mourad244/evenements/tree/main/../../docs/async-events-p1.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {},
+  "sidebar": "referenceSidebar",
+  "previous": {
+    "title": "Catalogue REST P1",
+    "permalink": "/reference/api-contracts-p1"
+  },
+  "next": {
+    "title": "Backlog Admin & Moderation",
+    "permalink": "/reference/backlogs/admin-moderation"
+  }
+}

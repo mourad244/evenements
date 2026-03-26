@@ -1,3 +1,19 @@
+---
+title: Backlog Documentation
+description: Backlog de gouvernance documentaire, diagrammes, matrices et plans de test.
+docKind: backlog
+domain: documentation
+phase: P0-P1
+owner: Mourad
+status: IN_PROGRESS
+priority: P1
+tags:
+  - documentation
+  - diagrams
+  - governance
+slug: documentation
+---
+
 # BackLog Documentation
 
 Ce backlog suit les travaux transverses de documentation et de gouvernance

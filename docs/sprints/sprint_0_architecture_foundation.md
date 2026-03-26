@@ -1,3 +1,19 @@
+---
+title: Sprint 0 - Fondations architecture
+description: Cadrage des services, contrats, statuts metier et backlog executable.
+docKind: sprint
+domain: delivery
+phase: P0
+owner: Mourad
+status: DONE
+priority: P0
+tags:
+  - sprint-0
+  - architecture
+  - contracts
+slug: sprint-0-architecture-foundation
+---
+
 # Sprint 0 - Fondations architecture & contrats
 
 Sprint de preparation du projet microservices evenements.

@@ -1,0 +1,55 @@
+{
+  "id": "sprints/sprint_0_architecture_foundation",
+  "title": "Sprint 0 - Fondations architecture",
+  "description": "Cadrage des services, contrats, statuts metier et backlog executable.",
+  "source": "@site/../../docs/sprints/sprint_0_architecture_foundation.md",
+  "sourceDirName": "sprints",
+  "slug": "/sprints/sprint-0-architecture-foundation",
+  "permalink": "/reference/sprints/sprint-0-architecture-foundation",
+  "draft": false,
+  "unlisted": false,
+  "editUrl": "https://github.com/mourad244/evenements/tree/main/../../docs/sprints/sprint_0_architecture_foundation.md",
+  "tags": [
+    {
+      "inline": true,
+      "label": "sprint-0",
+      "permalink": "/reference/tags/sprint-0"
+    },
+    {
+      "inline": true,
+      "label": "architecture",
+      "permalink": "/reference/tags/architecture"
+    },
+    {
+      "inline": true,
+      "label": "contracts",
+      "permalink": "/reference/tags/contracts"
+    }
+  ],
+  "version": "current",
+  "frontMatter": {
+    "title": "Sprint 0 - Fondations architecture",
+    "description": "Cadrage des services, contrats, statuts metier et backlog executable.",
+    "docKind": "sprint",
+    "domain": "delivery",
+    "phase": "P0",
+    "owner": "Mourad",
+    "status": "DONE",
+    "priority": "P0",
+    "tags": [
+      "sprint-0",
+      "architecture",
+      "contracts"
+    ],
+    "slug": "sprint-0-architecture-foundation"
+  },
+  "sidebar": "referenceSidebar",
+  "previous": {
+    "title": "Spec Registration Service",
+    "permalink": "/reference/services/registration-service"
+  },
+  "next": {
+    "title": "Sprint 1 - Execution tracker",
+    "permalink": "/reference/sprints/sprint-1-tracker"
+  }
+}

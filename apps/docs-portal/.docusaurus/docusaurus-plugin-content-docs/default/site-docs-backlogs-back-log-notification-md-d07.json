@@ -1,0 +1,55 @@
+{
+  "id": "backlogs/BackLog_notification",
+  "title": "Backlog Notification",
+  "description": "Backlog des emails, retries, templates et logs de notification.",
+  "source": "@site/../../docs/backlogs/BackLog_notification.md",
+  "sourceDirName": "backlogs",
+  "slug": "/backlogs/notification",
+  "permalink": "/reference/backlogs/notification",
+  "draft": false,
+  "unlisted": false,
+  "editUrl": "https://github.com/mourad244/evenements/tree/main/../../docs/backlogs/BackLog_notification.md",
+  "tags": [
+    {
+      "inline": true,
+      "label": "notification",
+      "permalink": "/reference/tags/notification"
+    },
+    {
+      "inline": true,
+      "label": "email",
+      "permalink": "/reference/tags/email"
+    },
+    {
+      "inline": true,
+      "label": "retries",
+      "permalink": "/reference/tags/retries"
+    }
+  ],
+  "version": "current",
+  "frontMatter": {
+    "title": "Backlog Notification",
+    "description": "Backlog des emails, retries, templates et logs de notification.",
+    "docKind": "backlog",
+    "domain": "notification",
+    "phase": "P2",
+    "owner": "Mourad",
+    "status": "TODO",
+    "priority": "P1",
+    "tags": [
+      "notification",
+      "email",
+      "retries"
+    ],
+    "slug": "notification"
+  },
+  "sidebar": "referenceSidebar",
+  "previous": {
+    "title": "Backlog Monitoring",
+    "permalink": "/reference/backlogs/monitoring"
+  },
+  "next": {
+    "title": "Backlog Payment",
+    "permalink": "/reference/backlogs/payment"
+  }
+}

@@ -1,3 +1,19 @@
+---
+title: Backlog Admin & Moderation
+description: Backlog moderation, audit, supervision et recherche transverse.
+docKind: backlog
+domain: admin-moderation
+phase: P3
+owner: Ibrahim
+status: TODO
+priority: P1
+tags:
+  - admin
+  - moderation
+  - audit
+slug: admin-moderation
+---
+
 # BackLog Admin & Moderation
 
 Ce backlog couvre la console d'administration, la moderation des

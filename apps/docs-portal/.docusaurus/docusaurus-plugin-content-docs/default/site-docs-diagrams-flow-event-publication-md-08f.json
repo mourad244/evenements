@@ -1,0 +1,54 @@
+{
+  "id": "diagrams/flow_event_publication",
+  "title": "Diagramme publication evenement",
+  "description": "Rendu Mermaid du flux de publication evenement pour le MVP.",
+  "source": "@site/../../docs/diagrams/flow_event_publication.md",
+  "sourceDirName": "diagrams",
+  "slug": "/diagrams/event-publication-flow",
+  "permalink": "/reference/diagrams/event-publication-flow",
+  "draft": false,
+  "unlisted": false,
+  "editUrl": "https://github.com/mourad244/evenements/tree/main/../../docs/diagrams/flow_event_publication.md",
+  "tags": [
+    {
+      "inline": true,
+      "label": "diagram",
+      "permalink": "/reference/tags/diagram"
+    },
+    {
+      "inline": true,
+      "label": "publish",
+      "permalink": "/reference/tags/publish"
+    },
+    {
+      "inline": true,
+      "label": "mermaid",
+      "permalink": "/reference/tags/mermaid"
+    }
+  ],
+  "version": "current",
+  "frontMatter": {
+    "title": "Diagramme publication evenement",
+    "description": "Rendu Mermaid du flux de publication evenement pour le MVP.",
+    "docKind": "diagram",
+    "domain": "event-management",
+    "phase": "P1",
+    "owner": "Ibrahim",
+    "status": "DONE",
+    "tags": [
+      "diagram",
+      "publish",
+      "mermaid"
+    ],
+    "slug": "event-publication-flow"
+  },
+  "sidebar": "referenceSidebar",
+  "previous": {
+    "title": "Diagramme architecture globale",
+    "permalink": "/reference/diagrams/architecture-global"
+  },
+  "next": {
+    "title": "Diagramme registration waitlist",
+    "permalink": "/reference/diagrams/registration-waitlist-flow"
+  }
+}
