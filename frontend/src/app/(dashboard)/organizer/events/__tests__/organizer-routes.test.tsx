@@ -242,7 +242,7 @@ describe("organizer routes", () => {
 
     const html = render(<OrganizerEventDetailsPage />);
 
-    expect(html).toContain("Draft actions");
+    expect(html).toContain("Event state");
     expect(html).toContain("Publish");
     expect(html).toContain("Delete draft");
     expect(html).toContain("event-form:Update event");

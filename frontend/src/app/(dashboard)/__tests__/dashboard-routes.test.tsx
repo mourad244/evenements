@@ -139,8 +139,8 @@ describe("dashboard routes", () => {
   it("/dashboard participant mode shows empty state and summary content", () => {
     const html = render(<DashboardPage />);
 
-    expect(html).toContain("Recent participations");
-    expect(html).toContain("No participations yet");
+    expect(html).toContain("Recent activity");
+    expect(html).toContain("No activity yet");
     expect(html).toContain("Browse events");
   });
 
@@ -203,7 +203,7 @@ describe("dashboard routes", () => {
 
     const html = render(<DashboardPage />);
 
-    expect(html).toContain("Temporary overview");
+    expect(html).toContain("Platform operations at a glance");
     expect(html).toContain("User oversight");
     expect(html).toContain("Awaiting backend support");
   });

@@ -195,7 +195,7 @@ describe("Sprint 3 organizer polish", () => {
 
     expect(html).toContain("Draft events");
     expect(html).toContain("Published events");
-    expect(html).toContain("Total managed events");
+    expect(html).toContain("Needs attention");
     expect(html).toContain("Drafts to finish");
     expect(html).toContain("Published events");
     expect(html).toContain("Other event states");

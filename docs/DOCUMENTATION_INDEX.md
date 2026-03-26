@@ -16,7 +16,7 @@ slug: navigation
 # Index de Documentation - Projet Evenements
 
 > Public cible: produit, architecte, dev backend, dev frontend, ops  
-> Derniere mise a jour: 2026-03-11
+> Derniere mise a jour: 2026-03-26
 
 ## Demarrage rapide
 
@@ -143,9 +143,9 @@ deployable.
 
 ## Notes
 
-- Le depot ne contient pas encore la base de code d'execution.
-- Les documents de ce dossier sont donc des references de cadrage et de
-  pilotage, a convertir ensuite en implementation dans les futurs dossiers
-  `services/`, `frontend/`, `infra/` et `shared/`.
-- Il n'est donc pas necessaire, pour l'instant, de maintenir des notes de
-  release ou un suivi "changes since last push".
+- Le depot contient la base de code d'execution dans `services/`,
+  `frontend/`, `tests/` et les fichiers Docker associes.
+- Les backlogs et workflows de ce dossier doivent etre synchronises avec
+  le code reel et les verifications runtime effectuees.
+- Maintenir `docs/task_history.md` et les backlogs de domaine quand un
+  ticket passe `DONE`, `PARTIAL` ou `BLOCKED`.

@@ -1059,6 +1059,36 @@ Journal synthetique des livrables majeurs et des baselines de cadrage.
   `v1.2-experience-closure`.
 - Ajout de la reference dans `docs/DOCUMENTATION_INDEX.md`.
 
+## 2026-03-26 - Synchronisation backlog frontend/runtime
+
+- Verification du frontend applicatif apres alignement des tests de
+  routes: build OK, `pnpm test:run` OK et parcours Docker verifies avec
+  comptes demo participant, organisateur et admin.
+- Correction de `docs/backlogs/BackLog_frontend.md` pour refleter
+  l'etat reel:
+  `F01`, `F02`, `F03` et `F05` passent a `DONE`,
+  `F04` passe a `PARTIAL`,
+  `F06` reste `PARTIAL`,
+  `F07.2` passe a `DONE` et `F07.3` reste `PARTIAL`.
+- Restes frontend explicites apres verification:
+  ecran `forbidden` non branche pour les roles refuses (`F04.2`),
+  gestion refresh/session non complete (`F04.3`),
+  action de telechargement billet non branchee dans la vraie UI
+  (`F06.3` / `R05.3`),
+  action export organisateur non branchee dans la vraie UI (`R06.3`),
+  passe accessibilite finale encore ouverte (`F07.3`).
+- Correction de `docs/backlogs/BackLog_registration_ticketing.md` pour
+  refleter l'etat reel:
+  `R01.2`, `R01.3` et `R03.2` passent a `DONE`,
+  `R02.2`, `R03.3`, `R05.3` et `R06.3` passent a `PARTIAL`.
+- Correction de `docs/backlogs/BackLog_event_management.md` pour
+  refleter l'etat reel:
+  `E02.2` et `E02.3` passent a `DONE`,
+  `E03.2`, `E05.2`, `E05.3` et `E06.2` passent a `PARTIAL`.
+- Mise a jour de `docs/DOCUMENTATION_INDEX.md` pour retirer la note
+  obsolete indiquant que le depot ne contenait pas encore de code
+  d'execution.
+
 ## A completer ensuite
 
 - Ajouter les livraisons techniques reellement implementees
