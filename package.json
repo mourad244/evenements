@@ -19,6 +19,7 @@
     "test:s1-t04": "node --test tests/s1-t04.observability.unit.test.js",
     "test:s1-t05": "node --test tests/s1-t05.event-drafts.smoke.test.js",
     "test:s1-t06": "node --test tests/s1-t06.gateway-events.smoke.test.js",
+    "test:s1-t07": "node --test tests/s1-t07.auth-security-audit.smoke.test.js",
     "test:s2-t03": "node --test tests/s2-t03.frontend-blob-download-helper.unit.test.js",
     "test:s2-t04": "node --test tests/s2-t04.ticket-download-ux.unit.test.js",
     "test:s2-t05": "node --test tests/s2-t05.notification-status-ux.unit.test.js",

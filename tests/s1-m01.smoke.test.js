@@ -178,7 +178,8 @@ test("boot services for S1-M01", async () => {
   });
 
   await waitForReady(`http://127.0.0.1:${identityPort}/ready`);
-  await waitForReady(`http://127.0.0.1:${gatewayPort}/ready`);
+  // S1-M01 only boots identity + gateway, so use gateway /health here.
+  await waitForReady(`http://127.0.0.1:${gatewayPort}/health`);
 
   assert.ok(true);
 });
