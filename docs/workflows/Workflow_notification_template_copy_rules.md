@@ -29,8 +29,8 @@ afin que `N01.2` puisse implementer les templates sans ambiguite.
 
 Regles de redaction:
 
-- sujet <= 70 caracteres
-- preheader <= 120 caracteres
+- sujet `<= 70 caracteres`
+- preheader `<= 120 caracteres`
 - bloc principal structure: contexte -> statut -> action -> aide
 - heure/date affichees dans le fuseau evenement quand connu
 

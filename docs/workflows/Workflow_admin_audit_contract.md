@@ -40,7 +40,7 @@ Champs obligatoires:
 Champs optionnels:
 
 - `reasonCode` (string)
-- `reasonNote` (string <= 500)
+- `reasonNote` (string `<= 500`)
 - `metadata` (object json, bornes de taille)
 - `ipAddress` (string)
 - `userAgent` (string)
