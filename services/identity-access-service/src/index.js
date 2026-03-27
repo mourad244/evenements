@@ -4,6 +4,7 @@ import { setTimeout as delay } from "node:timers/promises";
 
 import bcrypt from "bcryptjs";
 import express from "express";
+import helmet from "helmet";
 import jwt from "jsonwebtoken";
 import pg from "pg";
 import {
@@ -12,12 +13,13 @@ import {
   createRequestCompletionLogger
 } from "../../shared/observability.js";
 
-import { ensureSchema } from "./db/schema.js";
+import { runMigrations } from "./db/schema.js";
 import {
   identityAuthLogFields,
   isIdentityAuthPath
 } from "./observabilityConfig.js";
 import { createAuthRepository } from "./repositories/authRepository.js";
+import { sendPasswordResetEmail } from "./email.js";
 
 const { Pool } = pg;
 
@@ -56,16 +58,7 @@ function resolveJwtSecret(envKey, fallbackValue) {
     return fallbackValue;
   }
 
-  if (String(process.env.NODE_ENV || "").toLowerCase() === "production") {
-    throw new Error(`${envKey} is required in production`);
-  }
-
-  const generated = crypto.randomBytes(32).toString("hex");
-  log("warn", "auth.jwt.secret.generated", {
-    envKey,
-    message: "Generated ephemeral secret; set env for stable sessions."
-  });
-  return generated;
+  throw new Error(`FATAL: ${envKey} is required. Set ALLOW_INSECURE_JWT_DEFAULTS=true to bypass.`);
 }
 
 config.jwtAccessSecret = resolveJwtSecret(
@@ -86,7 +79,8 @@ const pool = new Pool({
 const repository = createAuthRepository(pool);
 
 const app = express();
-app.use(express.json());
+app.use(helmet());
+app.use(express.json({ limit: "100kb" }));
 
 function success(data, meta) {
   if (meta) {
@@ -400,6 +394,11 @@ app.post("/auth/forgot-password", async (req, res) => {
       createdAt: nowIso()
     });
     debugResetToken = rawResetToken;
+
+    // Send email asynchronously
+    sendPasswordResetEmail(user.email, rawResetToken, log).catch(() => {
+      // Errors are logged inside the email module
+    });
   }
 
   const meta =
@@ -682,10 +681,20 @@ app.get("/admin/users", async (req, res) => {
     return res.status(403).json(error("Forbidden", "FORBIDDEN"));
   }
 
-  const users = await repository.listUsers();
+  const page = parseInt(req.query.page, 10) || 1;
+  const pageSize = parseInt(req.query.pageSize, 10) || 20;
+
+  if (page < 1 || pageSize < 1 || pageSize > 100) {
+    return res.status(400).json(error("Invalid pagination", "VALIDATION_ERROR"));
+  }
+
+  const result = await repository.listUsers({ page, pageSize });
   return res.status(200).json(
     success({
-      items: users.map(toUserView)
+      items: result.items.map(toUserView),
+      total: result.total,
+      page: result.page,
+      pageSize: result.pageSize
     })
   );
 });
@@ -699,7 +708,7 @@ async function boot() {
   for (let attempt = 1; attempt <= maxDbBootAttempts; attempt += 1) {
     try {
       if (config.dbAutoMigrate) {
-        await ensureSchema(pool);
+        await runMigrations(config.databaseUrl);
       } else {
         await repository.checkConnection();
       }

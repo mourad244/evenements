@@ -1,7 +1,9 @@
 import crypto from "node:crypto";
 
 import express from "express";
+import helmet from "helmet";
 import jwt from "jsonwebtoken";
+import rateLimit from "express-rate-limit";
 import {
   createCorrelationIdMiddleware,
   createJsonLogger,
@@ -50,16 +52,7 @@ function resolveJwtSecret(envKey, fallbackValue) {
     return fallbackValue;
   }
 
-  if (String(process.env.NODE_ENV || "").toLowerCase() === "production") {
-    throw new Error(`${envKey} is required in production`);
-  }
-
-  const generated = crypto.randomBytes(32).toString("hex");
-  log("warn", "auth.jwt.secret.generated", {
-    envKey,
-    message: "Generated ephemeral secret; set env for stable sessions."
-  });
-  return generated;
+  throw new Error(`FATAL: ${envKey} is required. Set ALLOW_INSECURE_JWT_DEFAULTS=true to bypass.`);
 }
 
 config.jwtAccessSecret = resolveJwtSecret(
@@ -68,7 +61,18 @@ config.jwtAccessSecret = resolveJwtSecret(
 );
 
 const app = express();
-app.use(express.json());
+app.use(helmet());
+app.use(express.json({ limit: "100kb" }));
+
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 20, // Limit each IP to 20 requests per window
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { success: false, error: "Too many authentication requests, please try again later." }
+});
+
+app.use("/api/v1/auth/", authLimiter);
 
 const corsOrigins = String(process.env.CORS_ORIGINS || "http://localhost:3000")
   .split(",")
@@ -102,7 +106,7 @@ const routeTable = [
   ...buildRouteTable(config),
   {
     method: "GET",
-    path: "/api/organizer/ping",
+    path: "/api/v1/organizer/ping",
     public: false,
     allowedRoles: ["ORGANIZER", "ADMIN"],
     localHandler: (req, res) =>
@@ -183,7 +187,20 @@ app.use(
   })
 );
 
-app.get("/health", (_req, res) => {
+const internalNetworkGuard = (req, res, next) => {
+  const ip = req.ip || (req.connection && req.connection.remoteAddress) || "";
+  if (
+    ip === "127.0.0.1" || ip === "::1" || ip === "::ffff:127.0.0.1" ||
+    ip.startsWith("10.") || ip.startsWith("::ffff:10.") ||
+    ip.startsWith("172.") || ip.startsWith("::ffff:172.") ||
+    ip.startsWith("192.168.") || ip.startsWith("::ffff:192.168.")
+  ) {
+    return next();
+  }
+  return res.status(403).json(error("Target is internal only", "FORBIDDEN"));
+};
+
+app.get("/health", internalNetworkGuard, (_req, res) => {
   res.status(200).json(
     success({
       status: "ok",
@@ -192,7 +209,7 @@ app.get("/health", (_req, res) => {
   );
 });
 
-app.get("/ready", async (_req, res) => {
+app.get("/ready", internalNetworkGuard, async (_req, res) => {
   const upstreamChecks = await Promise.all([
     checkUpstreamReadiness(config.identityServiceUrl),
     checkUpstreamReadiness(config.eventManagementServiceUrl),

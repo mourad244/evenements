@@ -2,9 +2,10 @@ import { randomUUID } from "node:crypto";
 import { setTimeout as delay } from "node:timers/promises";
 
 import express from "express";
+import helmet from "helmet";
 import pg from "pg";
 
-import { ensureSchema } from "./db/schema.js";
+import { runMigrations } from "./db/schema.js";
 import { createEventRepository } from "./repositories/eventRepository.js";
 
 const { Pool } = pg;
@@ -29,7 +30,8 @@ const pool = new Pool({
 const repository = createEventRepository(pool);
 
 const app = express();
-app.use(express.json());
+app.use(helmet());
+app.use(express.json({ limit: "100kb" }));
 
 function success(data, meta) {
   if (meta) return { success: true, data, meta };
@@ -242,21 +244,36 @@ function canAccessEvent(context, event) {
 }
 
 async function emitNotification(path, payload, context) {
-  try {
-    await fetch(`${config.registrationServiceUrl}${path}`, {
-      method: "POST",
-      headers: {
-        "content-type": "application/json",
-        "x-user-id": context.userId,
-        "x-user-role": context.role,
-        "x-session-id": context.sessionId,
-        "x-correlation-id": context.correlationId || ""
-      },
-      body: JSON.stringify(payload)
-    });
-  } catch (err) {
-    // eslint-disable-next-line no-console
-    console.warn("[event-management-service] notification emit failed", err);
+  const maxRetries = 3;
+  let attempt = 0;
+
+  while (attempt <= maxRetries) {
+    try {
+      const response = await fetch(`${config.registrationServiceUrl}${path}`, {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+          "x-user-id": context.userId,
+          "x-user-role": context.role,
+          "x-session-id": context.sessionId,
+          "x-correlation-id": context.correlationId || ""
+        },
+        body: JSON.stringify(payload)
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+      return; // Success
+    } catch (err) {
+      attempt++;
+      if (attempt > maxRetries) {
+        // eslint-disable-next-line no-console
+        console.warn("[event-management-service] notification emit failed after retries", err.message);
+        break;
+      }
+      await delay(250 * Math.pow(2, attempt)); // 500ms, 1000ms, 2000ms
+    }
   }
 }
 
@@ -625,7 +642,7 @@ async function boot() {
   for (let attempt = 1; attempt <= maxDbBootAttempts; attempt += 1) {
     try {
       if (config.dbAutoMigrate) {
-        await ensureSchema(pool);
+        await runMigrations(config.databaseUrl);
       } else {
         await repository.checkConnection();
       }

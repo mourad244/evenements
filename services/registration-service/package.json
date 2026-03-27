@@ -4,10 +4,14 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "start": "node src/index.js"
+    "start": "node src/index.js",
+    "migration:up": "node-pg-migrate -m migrations -d DATABASE_URL up",
+    "migration:create": "node-pg-migrate -m migrations create"
   },
   "dependencies": {
     "express": "^4.21.2",
+    "helmet": "^8.1.0",
+    "node-pg-migrate": "^8.0.4",
     "pg": "^8.13.1"
   }
 }

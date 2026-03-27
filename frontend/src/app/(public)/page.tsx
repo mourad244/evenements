@@ -8,7 +8,7 @@ import { ROUTES } from "@/lib/constants/routes";
 export default function HomePage() {
   return (
     <div className="grid gap-10">
-      <Card className="grid gap-8 bg-white/95 p-8 sm:p-12">
+      <Card className="grid gap-8 surface-premium p-8 sm:p-12">
         <PageTitle
           eyebrow="Event management"
           title="Run public events, registrations, and back-office flows from one frontend shell."
@@ -27,7 +27,7 @@ export default function HomePage() {
         ].map(([title, description]) => (
           <Card key={title} className="grid gap-3">
             <h2 className="text-xl font-semibold text-ink">{title}</h2>
-            <p className="text-sm text-slate-600">{description}</p>
+            <p className="text-sm text-[var(--text-secondary)]">{description}</p>
           </Card>
         ))}
       </div>

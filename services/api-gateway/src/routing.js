@@ -6,42 +6,42 @@ export function buildRouteTable(config) {
   return [
     {
       method: "POST",
-      path: "/api/auth/register",
+      path: "/api/v1/auth/register",
       public: true,
       targetBaseUrl: config.identityServiceUrl,
       targetPath: "/auth/register"
     },
     {
       method: "POST",
-      path: "/api/auth/login",
+      path: "/api/v1/auth/login",
       public: true,
       targetBaseUrl: config.identityServiceUrl,
       targetPath: "/auth/login"
     },
     {
       method: "POST",
-      path: "/api/auth/refresh",
+      path: "/api/v1/auth/refresh",
       public: true,
       targetBaseUrl: config.identityServiceUrl,
       targetPath: "/auth/refresh"
     },
     {
       method: "POST",
-      path: "/api/auth/forgot-password",
+      path: "/api/v1/auth/forgot-password",
       public: true,
       targetBaseUrl: config.identityServiceUrl,
       targetPath: "/auth/forgot-password"
     },
     {
       method: "POST",
-      path: "/api/auth/reset-password",
+      path: "/api/v1/auth/reset-password",
       public: true,
       targetBaseUrl: config.identityServiceUrl,
       targetPath: "/auth/reset-password"
     },
     {
       method: "GET",
-      path: "/api/auth/me",
+      path: "/api/v1/auth/me",
       public: false,
       allowedRoles: authenticatedRoles,
       targetBaseUrl: config.identityServiceUrl,
@@ -49,7 +49,7 @@ export function buildRouteTable(config) {
     },
     {
       method: "GET",
-      path: "/api/profile",
+      path: "/api/v1/profile",
       public: false,
       allowedRoles: authenticatedRoles,
       targetBaseUrl: config.identityServiceUrl,
@@ -57,7 +57,7 @@ export function buildRouteTable(config) {
     },
     {
       method: "PATCH",
-      path: "/api/profile",
+      path: "/api/v1/profile",
       public: false,
       allowedRoles: authenticatedRoles,
       targetBaseUrl: config.identityServiceUrl,
@@ -65,7 +65,7 @@ export function buildRouteTable(config) {
     },
     {
       method: "GET",
-      path: "/api/admin/users",
+      path: "/api/v1/admin/users",
       public: false,
       allowedRoles: ["ADMIN"],
       targetBaseUrl: config.identityServiceUrl,
@@ -73,7 +73,7 @@ export function buildRouteTable(config) {
     },
     {
       method: "GET",
-      path: "/api/admin/events",
+      path: "/api/v1/admin/events",
       public: false,
       allowedRoles: ["ADMIN"],
       targetBaseUrl: config.eventManagementServiceUrl,
@@ -81,21 +81,21 @@ export function buildRouteTable(config) {
     },
     {
       method: "GET",
-      path: "/api/catalog/events",
+      path: "/api/v1/catalog/events",
       public: true,
       targetBaseUrl: config.eventManagementServiceUrl,
       targetPath: "/catalog/events"
     },
     {
       method: "GET",
-      path: "/api/catalog/events/:eventId",
+      path: "/api/v1/catalog/events/:eventId",
       public: true,
       targetBaseUrl: config.eventManagementServiceUrl,
       targetPath: "/catalog/events/:eventId"
     },
     {
       method: "POST",
-      path: "/api/events/drafts",
+      path: "/api/v1/events/drafts",
       public: false,
       allowedRoles: organizerOrAdmin,
       targetBaseUrl: config.eventManagementServiceUrl,
@@ -103,7 +103,7 @@ export function buildRouteTable(config) {
     },
     {
       method: "GET",
-      path: "/api/events/drafts",
+      path: "/api/v1/events/drafts",
       public: false,
       allowedRoles: organizerOrAdmin,
       targetBaseUrl: config.eventManagementServiceUrl,
@@ -111,7 +111,7 @@ export function buildRouteTable(config) {
     },
     {
       method: "GET",
-      path: "/api/events/drafts/:eventId",
+      path: "/api/v1/events/drafts/:eventId",
       public: false,
       allowedRoles: organizerOrAdmin,
       targetBaseUrl: config.eventManagementServiceUrl,
@@ -119,7 +119,7 @@ export function buildRouteTable(config) {
     },
     {
       method: "PATCH",
-      path: "/api/events/drafts/:eventId",
+      path: "/api/v1/events/drafts/:eventId",
       public: false,
       allowedRoles: organizerOrAdmin,
       targetBaseUrl: config.eventManagementServiceUrl,
@@ -127,7 +127,7 @@ export function buildRouteTable(config) {
     },
     {
       method: "DELETE",
-      path: "/api/events/drafts/:eventId",
+      path: "/api/v1/events/drafts/:eventId",
       public: false,
       allowedRoles: organizerOrAdmin,
       targetBaseUrl: config.eventManagementServiceUrl,
@@ -135,7 +135,7 @@ export function buildRouteTable(config) {
     },
     {
       method: "POST",
-      path: "/api/events/drafts/:eventId/publish",
+      path: "/api/v1/events/drafts/:eventId/publish",
       public: false,
       allowedRoles: organizerOrAdmin,
       targetBaseUrl: config.eventManagementServiceUrl,
@@ -143,7 +143,7 @@ export function buildRouteTable(config) {
     },
     {
       method: "POST",
-      path: "/api/events/:eventId/cancel",
+      path: "/api/v1/events/:eventId/cancel",
       public: false,
       allowedRoles: organizerOrAdmin,
       targetBaseUrl: config.eventManagementServiceUrl,
@@ -151,7 +151,7 @@ export function buildRouteTable(config) {
     },
     {
       method: "GET",
-      path: "/api/events/me",
+      path: "/api/v1/events/me",
       public: false,
       allowedRoles: organizerOrAdmin,
       targetBaseUrl: config.eventManagementServiceUrl,
@@ -159,7 +159,7 @@ export function buildRouteTable(config) {
     },
     {
       method: "GET",
-      path: "/api/organizer/events/:eventId/registrations",
+      path: "/api/v1/organizer/events/:eventId/registrations",
       public: false,
       allowedRoles: organizerOrAdmin,
       targetBaseUrl: config.registrationServiceUrl,
@@ -167,7 +167,7 @@ export function buildRouteTable(config) {
     },
     {
       method: "GET",
-      path: "/api/organizer/events/:eventId/registrations/export",
+      path: "/api/v1/organizer/events/:eventId/registrations/export",
       public: false,
       allowedRoles: organizerOrAdmin,
       targetBaseUrl: config.registrationServiceUrl,
@@ -175,7 +175,7 @@ export function buildRouteTable(config) {
     },
     {
       method: "POST",
-      path: "/api/registrations",
+      path: "/api/v1/registrations",
       public: false,
       allowedRoles: participantOnly,
       targetBaseUrl: config.registrationServiceUrl,
@@ -183,7 +183,7 @@ export function buildRouteTable(config) {
     },
     {
       method: "POST",
-      path: "/api/registrations/:registrationId/cancel",
+      path: "/api/v1/registrations/:registrationId/cancel",
       public: false,
       allowedRoles: participantOnly,
       targetBaseUrl: config.registrationServiceUrl,
@@ -191,7 +191,7 @@ export function buildRouteTable(config) {
     },
     {
       method: "GET",
-      path: "/api/tickets/:ticketId",
+      path: "/api/v1/tickets/:ticketId",
       public: false,
       allowedRoles: participantOnly,
       targetBaseUrl: config.registrationServiceUrl,
@@ -199,7 +199,7 @@ export function buildRouteTable(config) {
     },
     {
       method: "GET",
-      path: "/api/notifications",
+      path: "/api/v1/notifications",
       public: false,
       allowedRoles: authenticatedRoles,
       targetBaseUrl: config.registrationServiceUrl,
@@ -207,7 +207,7 @@ export function buildRouteTable(config) {
     },
     {
       method: "PATCH",
-      path: "/api/notifications/:notificationId/read",
+      path: "/api/v1/notifications/:notificationId/read",
       public: false,
       allowedRoles: authenticatedRoles,
       targetBaseUrl: config.registrationServiceUrl,
@@ -215,7 +215,7 @@ export function buildRouteTable(config) {
     },
     {
       method: "POST",
-      path: "/api/payments/session",
+      path: "/api/v1/payments/session",
       public: false,
       allowedRoles: participantOnly,
       targetBaseUrl: config.registrationServiceUrl,
@@ -223,14 +223,14 @@ export function buildRouteTable(config) {
     },
     {
       method: "POST",
-      path: "/api/payments/webhook",
+      path: "/api/v1/payments/webhook",
       public: true,
       targetBaseUrl: config.registrationServiceUrl,
       targetPath: "/payments/webhook"
     },
     {
       method: "GET",
-      path: "/api/profile/participations",
+      path: "/api/v1/profile/participations",
       public: false,
       allowedRoles: participantOnly,
       targetBaseUrl: config.registrationServiceUrl,

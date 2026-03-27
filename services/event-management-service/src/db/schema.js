@@ -1,32 +1,16 @@
-export async function ensureSchema(pool) {
-  await pool.query(`
-    CREATE TABLE IF NOT EXISTS events (
-      event_id UUID PRIMARY KEY,
-      organizer_id TEXT NOT NULL,
-      title TEXT NOT NULL,
-      description TEXT NOT NULL,
-      theme TEXT NOT NULL,
-      venue_name TEXT NOT NULL,
-      city TEXT NOT NULL,
-      start_at TIMESTAMPTZ NOT NULL,
-      end_at TIMESTAMPTZ,
-      timezone TEXT NOT NULL,
-      capacity INTEGER NOT NULL CHECK (capacity > 0),
-      visibility TEXT NOT NULL,
-      pricing_type TEXT NOT NULL,
-      status TEXT NOT NULL,
-      cover_image_ref TEXT,
-      published_at TIMESTAMPTZ,
-      created_at TIMESTAMPTZ NOT NULL,
-      updated_at TIMESTAMPTZ NOT NULL,
-      deleted_at TIMESTAMPTZ
-    );
-  `);
+import { runner } from "node-pg-migrate";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 
-  await pool.query(`
-    CREATE INDEX IF NOT EXISTS idx_events_organizer_status
-      ON events (organizer_id, status)
-      WHERE deleted_at IS NULL;
-  `);
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
+export async function runMigrations(databaseUrl) {
+  await runner({
+    databaseUrl,
+    dir: path.join(__dirname, "../../migrations"),
+    direction: "up",
+    migrationsTable: "pgmigrations_event",
+    verbose: true
+  });
 }
 

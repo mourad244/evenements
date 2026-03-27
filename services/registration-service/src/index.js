@@ -2,9 +2,10 @@ import { randomUUID } from "node:crypto";
 import { setTimeout as delay } from "node:timers/promises";
 
 import express from "express";
+import helmet from "helmet";
 import pg from "pg";
 
-import { ensureSchema } from "./db/schema.js";
+import { runMigrations } from "./db/schema.js";
 import { createRegistrationRepository } from "./repositories/registrationRepository.js";
 
 const { Pool } = pg;
@@ -42,7 +43,8 @@ const pool = new Pool({
 const repository = createRegistrationRepository(pool);
 
 const app = express();
-app.use(express.json());
+app.use(helmet());
+app.use(express.json({ limit: "100kb" }));
 
 function success(data, meta) {
   if (meta) return { success: true, data, meta };
@@ -1020,7 +1022,7 @@ async function boot() {
   for (let attempt = 1; attempt <= maxDbBootAttempts; attempt += 1) {
     try {
       if (config.dbAutoMigrate) {
-        await ensureSchema(pool);
+        await runMigrations(config.databaseUrl);
       } else {
         await repository.checkConnection();
       }

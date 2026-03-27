@@ -1,18 +1,37 @@
 "use client";
 
+import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 
-export default function GlobalError({ reset }: { error: Error; reset: () => void }) {
+export default function GlobalError({
+  error,
+  reset,
+}: {
+  error: Error & { digest?: string };
+  reset: () => void;
+}) {
+  useEffect(() => {
+    // Log the error to an error reporting service if present
+    console.error("Global Error Boundary caught an error:", error);
+  }, [error]);
+
   return (
-    <div className="mx-auto max-w-xl py-16">
-      <Card className="grid gap-4 text-center">
-        <h1 className="text-2xl font-semibold text-ink">Something went wrong</h1>
-        <p className="text-sm text-slate-600">The frontend shell hit an unexpected state. Try the route again.</p>
-        <div>
-          <Button onClick={reset}>Retry</Button>
+    <div className="flex min-h-[50vh] flex-col items-center justify-center p-6 text-center">
+      <div className="grid max-w-md gap-4">
+        <h1 className="text-3xl font-bold tracking-tight text-ink">Something went wrong!</h1>
+        <p className="text-sm text-[var(--text-secondary)]">
+          We encountered an unexpected error while trying to load this page. 
+          Please try again.
+        </p>
+        <div className="mt-4 flex flex-wrap justify-center gap-4">
+          <Button onClick={() => reset()} variant="default">
+            Try again
+          </Button>
+          <Button onClick={() => window.location.href = '/'} variant="outline">
+            Return to Home
+          </Button>
         </div>
-      </Card>
+      </div>
     </div>
   );
 }

@@ -3,7 +3,7 @@
     "sprint_id": "S1",
     "name": "Sprint 1 - MVP publication & inscription",
     "source": "docs/sprints/sprint_1_mvp_event_publication_registration.md",
-    "last_updated": "2026-03-09T00:45:47.781Z"
+    "last_updated": "2026-03-25T15:43:46.280Z"
   },
   "tasks": [
     {
@@ -102,7 +102,7 @@
         "structured logs",
         "correlation id tracing auth path"
       ],
-      "updated_at": "2026-03-09T00:45:47.779Z",
+      "updated_at": "2026-03-25T15:43:46.278Z",
       "notes": [
         {
           "date": "2026-03-08T13:30:00Z",
@@ -123,6 +123,11 @@
           "date": "2026-03-09T00:45:47.781Z",
           "status": "DONE",
           "text": "Refactored observability into testable middleware modules, enforced correlation-id middleware and structured auth-path completion logging for Gateway + Identity, and added passing unit coverage in tests/s1-t04.observability.unit.test.js; smoke assertions for x-correlation-id remain in tests/s1-m01.smoke.test.js."
+        },
+        {
+          "date": "2026-03-25T15:43:46.280Z",
+          "status": "DONE",
+          "text": "Added password reset email transport"
         }
       ]
     },

@@ -24,8 +24,8 @@ services:
     environment:
       PORT: 4001
       DATABASE_URL: postgres://postgres:postgres@postgres:5432/evenements_s1_m01
-      JWT_ACCESS_SECRET: dev-access-secret-change-me-6a9f2d7cf6f748c9b8b5a5c1f0c2b7b1
-      JWT_REFRESH_SECRET: dev-refresh-secret-change-me-9a3f7c2d5b4f48f2b2f99b1d5c8e4a6c
+      JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET:-dev-access-secret-change-me-6a9f2d7cf6f748c9b8b5a5c1f0c2b7b1}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:-dev-refresh-secret-change-me-9a3f7c2d5b4f48f2b2f99b1d5c8e4a6c}
       DB_AUTO_MIGRATE: "true"
     depends_on:
       postgres:
@@ -92,7 +92,7 @@ services:
       IDENTITY_SERVICE_URL: http://identity-access-service:4001
       EVENT_MANAGEMENT_SERVICE_URL: http://event-management-service:4002
       REGISTRATION_SERVICE_URL: http://registration-service:4003
-      JWT_ACCESS_SECRET: dev-access-secret-change-me-6a9f2d7cf6f748c9b8b5a5c1f0c2b7b1
+      JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET:-dev-access-secret-change-me-6a9f2d7cf6f748c9b8b5a5c1f0c2b7b1}
       CORS_ORIGINS: http://localhost:3000
     depends_on:
       identity-access-service:

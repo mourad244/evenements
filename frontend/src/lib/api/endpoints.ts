@@ -11,40 +11,42 @@ export const SERVICE_URLS = {
 
 export const ENDPOINTS = {
   auth: {
-    login: "/api/auth/login",
-    register: "/api/auth/register",
-    me: "/api/auth/me",
-    profile: "/api/profile",
-    forgotPassword: "/api/auth/forgot-password",
-    resetPassword: "/api/auth/reset-password"
+    login: "/api/v1/auth/login",
+    register: "/api/v1/auth/register",
+    me: "/api/v1/auth/me",
+    profile: "/api/v1/profile",
+    forgotPassword: "/api/v1/auth/forgot-password",
+    resetPassword: "/api/v1/auth/reset-password"
   },
   admin: {
-    users: "/api/admin/users"
+    users: "/api/v1/admin/users"
   },
   events: {
-    list: "/api/catalog/events",
-    details: (eventId: string) => `/api/catalog/events/${eventId}`,
-    organizerList: "/api/events/me",
-    organizerCreate: "/api/events/drafts",
-    organizerDetails: (eventId: string) => `/api/events/drafts/${eventId}`,
-    organizerPublish: (eventId: string) => `/api/events/drafts/${eventId}/publish`
+    list: "/api/v1/catalog/events",
+    details: (eventId: string) => `/api/v1/catalog/events/${eventId}`,
+    organizerList: "/api/v1/events/me",
+    organizerCreate: "/api/v1/events/drafts",
+    organizerDetails: (eventId: string) => `/api/v1/events/drafts/${eventId}`,
+    organizerPublish: (eventId: string) => `/api/v1/events/drafts/${eventId}/publish`
   },
   registrations: {
-    create: "/api/registrations",
-    mine: "/api/profile/participations",
-    cancel: (registrationId: string) => `/api/registrations/${registrationId}/cancel`,
+    create: "/api/v1/registrations",
+    mine: "/api/v1/profile/participations",
+    cancel: (registrationId: string) => `/api/v1/registrations/${registrationId}/cancel`,
     organizerEventRegistrations: (eventId: string) =>
-      `/api/organizer/events/${eventId}/registrations`
+      `/api/v1/organizer/events/${eventId}/registrations`,
+    organizerEventRegistrationsExport: (eventId: string) =>
+      `/api/v1/organizer/events/${eventId}/registrations/export`
   },
   tickets: {
-    details: (ticketId: string) => `/api/tickets/${ticketId}`
+    details: (ticketId: string) => `/api/v1/tickets/${ticketId}`
   },
   notifications: {
-    list: "/api/notifications",
+    list: "/api/v1/notifications",
     markRead: (notificationId: string) =>
-      `/api/notifications/${notificationId}/read`
+      `/api/v1/notifications/${notificationId}/read`
   },
   payments: {
-    session: "/api/payments/session"
+    session: "/api/v1/payments/session"
   }
 } as const;

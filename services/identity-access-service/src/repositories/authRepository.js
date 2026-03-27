@@ -106,16 +106,26 @@ export function createAuthRepository(pool) {
       return mapUser(rows[0]);
     },
 
-    async listUsers() {
+    async listUsers({ page = 1, pageSize = 20 } = {}) {
+      const offset = (page - 1) * pageSize;
+      const countResult = await pool.query("SELECT COUNT(*) as total FROM auth_users");
+      const total = parseInt(countResult.rows[0].total, 10);
       const { rows } = await pool.query(
         `
           SELECT
             ${userColumns}
           FROM auth_users
           ORDER BY created_at DESC
-        `
+          LIMIT $1 OFFSET $2
+        `,
+        [pageSize, offset]
       );
-      return rows.map(mapUser);
+      return {
+        items: rows.map(mapUser),
+        total,
+        page,
+        pageSize
+      };
     },
 
     async createUser(user) {
