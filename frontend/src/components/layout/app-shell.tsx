@@ -9,13 +9,17 @@ type AppShellProps = {
 
 export function AppShell({ children }: AppShellProps) {
   return (
-    <div className="relative min-h-screen overflow-hidden bg-app text-ink">
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-[420px] bg-[radial-gradient(circle_at_top_left,_rgba(255,122,58,0.16),_transparent_42%),radial-gradient(circle_at_top_right,_rgba(17,24,39,0.1),_transparent_30%)]" />
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-white/60" />
+    <div className="relative min-h-screen bg-app text-ink">
+      {/* Global stable background elements */}
+      <div className="pointer-events-none fixed inset-0 z-0 bg-[radial-gradient(circle_at_top_left,rgba(65,93,255,0.08),transparent_40%)]" />
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-[420px] bg-[radial-gradient(circle_at_top_left,_rgba(255,122,58,0.12),_transparent_42%),radial-gradient(circle_at_top_right,_rgba(17,24,39,0.08),_transparent_30%)]" />
+      
       <Navbar />
-      <main className="relative mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 lg:px-8 lg:py-10">
+      
+      <main className="relative z-10 mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 lg:px-8 lg:py-12">
         {children}
       </main>
+      
       <Footer />
     </div>
   );

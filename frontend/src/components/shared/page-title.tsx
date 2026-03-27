@@ -8,14 +8,14 @@ type PageTitleProps = {
 
 export function PageTitle({ eyebrow, title, description }: PageTitleProps) {
   return (
-    <div className="grid gap-4">
-      {eyebrow ? <Badge>{eyebrow}</Badge> : null}
-      <div className="grid gap-3">
-        <h1 className="text-3xl font-semibold tracking-tight text-[var(--text-primary)] sm:text-4xl lg:text-5xl">
+    <div className="grid gap-6 px-1">
+      {eyebrow ? <Badge variant="secondary" className="w-fit">{eyebrow}</Badge> : null}
+      <div className="grid gap-3.5">
+        <h1 className="text-4xl font-bold tracking-tight text-[var(--text-primary)] sm:text-5xl lg:text-6xl">
           {title}
         </h1>
         {description ? (
-          <p className="max-w-3xl text-sm leading-7 text-[var(--text-secondary)] sm:text-base">
+          <p className="max-w-3xl text-sm leading-8 text-[var(--text-secondary)] sm:text-base lg:text-lg">
             {description}
           </p>
         ) : null}

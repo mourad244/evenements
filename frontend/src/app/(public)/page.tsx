@@ -8,7 +8,7 @@ import { ROUTES } from "@/lib/constants/routes";
 export default function HomePage() {
   return (
     <div className="grid gap-10">
-      <Card className="grid gap-8 surface-premium p-8 sm:p-12">
+      <Card className="grid gap-8 surface-premium">
         <PageTitle
           eyebrow="Event management"
           title="Run public events, registrations, and back-office flows from one frontend shell."

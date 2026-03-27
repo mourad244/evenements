@@ -95,27 +95,28 @@ export function Navbar() {
   }
 
   return (
-    <header className="sticky top-0 z-40 border-b border-[var(--line-soft)] bg-[linear-gradient(180deg,rgba(5,7,13,0.96),rgba(9,15,26,0.88))] shadow-[0_18px_48px_rgba(0,0,0,0.34)] backdrop-blur-xl">
-      <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-4 sm:px-6 lg:px-8">
+    <header className="sticky top-0 z-50 h-20 w-full border-b border-[var(--line-soft)] bg-[rgba(5,7,13,0.92)] shadow-[0_12px_40px_rgba(0,0,0,0.28)] backdrop-blur-xl transition-all duration-300">
+      <div className="mx-auto flex h-full max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
         <Link
           href={ROUTES.home}
           aria-label="EventOS home"
-          className="group flex min-w-0 items-center gap-3 rounded-2xl transition-transform duration-200 ease-out motion-safe:hover:-translate-y-px focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring-brand)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--surface-1)]"
+          className="group flex min-w-0 shrink-0 items-center gap-3 rounded-2xl transition-transform duration-200 ease-out active:scale-95"
         >
-          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-[var(--line-strong)] bg-[linear-gradient(135deg,rgba(88,116,255,0.96),rgba(65,93,255,0.78))] text-[var(--text-primary)] shadow-[0_16px_34px_rgba(65,93,255,0.32)] transition-[transform,box-shadow] duration-300 ease-out motion-safe:group-hover:scale-105">
+          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-[var(--line-strong)] bg-[linear-gradient(135deg,rgba(88,116,255,0.96),rgba(65,93,255,0.78))] text-[var(--text-primary)] shadow-[0_12px_28px_rgba(65,93,255,0.24)]">
             <Sparkles className="h-5 w-5" />
           </span>
-          <span className="grid min-w-0">
-            <span className="truncate text-sm font-semibold uppercase tracking-[0.24em] text-[var(--accent-primary-strong)]">
+          <span className="hidden min-w-0 sm:grid">
+            <span className="truncate text-[10px] font-bold uppercase tracking-[0.28em] text-[var(--accent-primary-strong)]">
               EventOS
             </span>
-            <span className="truncate text-sm text-[var(--text-secondary)]">
-              Event platform control surface
+            <span className="truncate text-xs font-medium text-[var(--text-secondary)]">
+              Control surface
             </span>
           </span>
         </Link>
 
-        <nav aria-label="Primary navigation" className="hidden items-center gap-2 lg:flex">
+        {/* Desktop Nav - Center stabilized */}
+        <nav aria-label="Primary navigation" className="hidden flex-1 items-center justify-center gap-1 lg:flex">
           {visibleNavItems.map((item) => {
             const active = pathname === item.href || pathname.startsWith(`${item.href}/`);
             return (
@@ -124,10 +125,10 @@ export function Navbar() {
                 href={item.href}
                 aria-current={active ? "page" : undefined}
                 className={cn(
-                  "rounded-full border px-4 py-2 text-sm font-medium transition-[transform,box-shadow,border-color,background-color,color] duration-200 ease-out motion-safe:hover:-translate-y-px active:translate-y-0 active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring-brand)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--surface-1)]",
+                  "rounded-full px-4 py-2 text-sm font-medium transition-all duration-200",
                   active
-                    ? "border-[rgba(88,116,255,0.4)] bg-[linear-gradient(135deg,rgba(88,116,255,0.3),rgba(65,93,255,0.12))] text-[var(--text-primary)] shadow-[0_14px_28px_rgba(65,93,255,0.2)]"
-                    : "border-transparent text-[var(--text-secondary)] hover:border-[var(--line-soft)] hover:bg-[rgba(18,29,48,0.78)] hover:text-[var(--text-primary)]"
+                    ? "bg-[rgba(88,116,255,0.12)] text-[var(--accent-primary-strong)]"
+                    : "text-[var(--text-secondary)] hover:bg-white/5 hover:text-[var(--text-primary)]"
                 )}
               >
                 {item.label}
@@ -136,12 +137,13 @@ export function Navbar() {
           })}
         </nav>
 
-        <div className="hidden items-center gap-3 lg:flex">
+        <div className="flex items-center gap-3">
+          {/* Section Indicator - Stable width to prevent jumps */}
           <div
             aria-live="polite"
-            className="hidden rounded-full border border-[var(--line-soft)] bg-[rgba(16,26,45,0.82)] px-4 py-2 text-sm text-[var(--text-secondary)] shadow-[0_10px_24px_rgba(0,0,0,0.22)] xl:block"
+            className="hidden min-w-[140px] justify-center rounded-full border border-[var(--line-soft)] bg-white/5 px-4 py-1.5 text-center text-xs font-medium text-[var(--text-muted)] xl:flex"
           >
-            <span className="font-medium text-[var(--text-primary)]">{currentSection}</span>
+            {currentSection}
           </div>
           {isAuthenticated ? (
             <>

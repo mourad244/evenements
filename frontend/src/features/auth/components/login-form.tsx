@@ -26,16 +26,22 @@ export function LoginForm() {
   });
 
   const onSubmit = form.handleSubmit(async (values) => {
-    const session = await mutation.mutateAsync(values);
-    if (session.user.role === "ADMIN") {
-      router.push(ROUTES.adminEvents);
-      return;
+    try {
+      const session = await mutation.mutateAsync(values);
+      if (session.user.role === "ADMIN") {
+        router.push(ROUTES.adminEvents);
+        return;
+      }
+      if (session.user.role === "ORGANIZER") {
+        router.push(ROUTES.organizerEvents);
+        return;
+      }
+      router.push(ROUTES.dashboard);
+    } catch (err) {
+      // Error is already handled by the mutation's state (mutation.error)
+      // We just need to catch it here to prevent it from bubbling up to Next.js
+      console.error("Login failed:", err);
     }
-    if (session.user.role === "ORGANIZER") {
-      router.push(ROUTES.organizerEvents);
-      return;
-    }
-    router.push(ROUTES.dashboard);
   });
 
   return (

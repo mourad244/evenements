@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 
 import { Card } from "@/components/ui/card";
+import { cn } from "@/lib/utils/cn";
 
 type SectionPanelProps = {
   eyebrow?: string;
@@ -25,10 +26,10 @@ export function SectionPanel({
     <Card
       role="region"
       aria-labelledby={titleId}
-      className={
-        className ||
-        "grid gap-6 border-[var(--line-soft)] bg-[linear-gradient(180deg,rgba(18,28,46,0.94),rgba(10,17,30,0.98))] shadow-[0_28px_60px_rgba(0,0,0,0.34)]"
-      }
+      className={cn(
+        "grid gap-6 border-[var(--line-soft)] bg-[linear-gradient(180deg,rgba(18,28,46,0.94),rgba(10,17,30,0.98))] p-6 shadow-[0_28px_60px_rgba(0,0,0,0.34)] sm:p-8",
+        className
+      )}
     >
       <div className="grid gap-5 border-b border-[var(--line-soft)] pb-5 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
         <div className="grid gap-2">
