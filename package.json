@@ -41,5 +41,9 @@
     "test:s5-t06": "node --test tests/s5-t06.monitoring-backup-restore-procedure.unit.test.js",
     "tracker:show": "node tools/progress-tracker.mjs show",
     "tracker:render": "node tools/progress-tracker.mjs render"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "pg": "^8.20.0"
   }
 }
