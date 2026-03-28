@@ -1,3 +1,19 @@
+---
+title: Backlog Notification
+description: Backlog des emails, retries, templates et logs de notification.
+docKind: backlog
+domain: notification
+phase: P2
+owner: Mourad
+status: TODO
+priority: P1
+tags:
+  - notification
+  - email
+  - retries
+slug: notification
+---
+
 # BackLog Notification
 
 Ce backlog couvre les notifications email, la simulation SMS, les rappels,
@@ -15,7 +31,7 @@ les retries et la journalisation des envois.
 
 ### N01 - Definir les templates transactionnels
 
-- Status: `TODO`
+- Status: `PARTIAL`
 - Priority: `P0` · Difficulty: `S` · Impact: `H`
 - Owner: `Mourad`
 - Support: `Ibrahim`
@@ -31,13 +47,13 @@ les retries et la journalisation des envois.
 
 | Ticket ID | Status | Priority | Owner | Support | Sprint cible | Dependances | Interfaces impactees | Sortie attendue | Critere d'acceptation | Branche suggeree |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| N01.1 | TODO | P0 | Mourad | Ibrahim | Sprint 0 | R01.1, R03.1 | Catalogue de templates | Liste des templates transactionnels documentee | Chaque evenement metier critique a un template email et un set de variables associees | `docs/notification-template-catalog` |
+| N01.1 | DONE | P0 | Mourad | Ibrahim | Sprint 0 | R01.1, R03.1 | Catalogue de templates | Liste des templates transactionnels documentee | Chaque evenement metier critique a un template email et un set de variables associees | `docs/notification-template-catalog` |
 | N01.2 | TODO | P0 | Mourad | Ibrahim | Sprint 2 | N01.1 | Templates email | Templates implementables | Les templates confirmation, attente, promotion, rappel et annulation sont redigeables sans question ouverte | `feature/notification-email-templates` |
-| N01.3 | TODO | P1 | Ibrahim | Mourad | Sprint 2 | N01.1 | Copywriting et fallback UI | Regles de contenu documentees | Les templates definissent objet, corps, ton, placeholders et fallback en cas de donnees manquantes | `docs/notification-template-copy-rules` |
+| N01.3 | DONE | P1 | Ibrahim | Mourad | Sprint 2 | N01.1 | Copywriting et fallback UI | Regles de contenu documentees | Les templates definissent objet, corps, ton, placeholders et fallback en cas de donnees manquantes | `docs/notification-template-copy-rules` |
 
 ### N02 - Construire le pipeline asynchrone d'envoi
 
-- Status: `TODO`
+- Status: `PARTIAL`
 - Priority: `P0` · Difficulty: `M` · Impact: `H`
 - Owner: `Mourad`
 - Support: `Ibrahim`
@@ -51,9 +67,9 @@ les retries et la journalisation des envois.
 
 | Ticket ID | Status | Priority | Owner | Support | Sprint cible | Dependances | Interfaces impactees | Sortie attendue | Critere d'acceptation | Branche suggeree |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| N02.1 | TODO | P0 | Mourad | Ibrahim | Sprint 0 | N01.1, E03.1, R03.1 | Events async -> notification | Contrat des consumers async documente | Les evenements sources, le mapping template et les statuts `PENDING/SENT/FAILED` sont valides | `docs/notification-consumer-contract` |
-| N02.2 | TODO | P0 | Mourad | Ibrahim | Sprint 2 | N02.1 | Worker email | Pipeline d'envoi implementable | Le worker consomme les evenements attendus et cree un envoi tracable | `feature/notification-email-worker` |
-| N02.3 | TODO | P0 | Mourad | Ibrahim | Sprint 2 | N02.1, N02.2 | Journal `NotificationLog` | Persistence des statuts implementable | Chaque tentative d'envoi ecrit un statut technique, une date et un motif d'erreur si applicable | `feature/notification-delivery-log` |
+| N02.1 | DONE | P0 | Mourad | Ibrahim | Sprint 0 | N01.1, E03.1, R03.1 | Events async -> notification | Contrat des consumers async documente | Les evenements sources, le mapping template et les statuts `PENDING/SENT/FAILED` sont valides | `docs/notification-consumer-contract` |
+| N02.2 | DONE | P0 | Mourad | Ibrahim | Sprint 2 | N02.1 | Worker email | Pipeline d'envoi implementable | Le worker consomme les evenements attendus et cree un envoi tracable | `feature/notification-email-worker` |
+| N02.3 | DONE | P0 | Mourad | Ibrahim | Sprint 2 | N02.1, N02.2 | Journal `NotificationLog` | Persistence des statuts implementable | Chaque tentative d'envoi ecrit un statut technique, une date et un motif d'erreur si applicable | `feature/notification-delivery-log` |
 
 ### N03 - Simuler le canal SMS en premiere version
 
@@ -72,7 +88,7 @@ les retries et la journalisation des envois.
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | N03.1 | TODO | P1 | Mourad | Ibrahim | Sprint 2 | N01.1 | Payload SMS simule | Contrat SMS simulation documente | Les champs utiles, le canal et les cas d'usage rappels/confirmations sont definis | `docs/notification-sms-sim-contract` |
 | N03.2 | TODO | P1 | Mourad | Ibrahim | Sprint 2 | N03.1 | Service notification | Simulation SMS implementable | Une demande SMS n'envoie rien au monde exterieur mais genere un log exploitable | `feature/notification-sms-simulator` |
-| N03.3 | TODO | P1 | Ibrahim | Mourad | Sprint 2 | N03.2 | Lecture d'etat UI/admin | Traces SMS visibles | Le statut `SIMULATED` est affichable ou filtrable dans les vues admin prevues | `feature/notification-sms-status-ui` |
+| N03.3 | PARTIAL | P1 | Ibrahim | Mourad | Sprint 2 | N03.2 | Lecture d'etat UI/admin | Traces SMS visibles | Le statut `SIMULATED` est affichable ou filtrable dans les vues admin prevues | `feature/notification-sms-status-ui` |
 
 ### N04 - Gerer retries, dead-letter et reprise manuelle
 

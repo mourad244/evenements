@@ -1,3 +1,19 @@
+---
+title: Spec Identity Access Service
+description: Specification backend du service Identity & Access pour le MVP P1.
+docKind: spec
+domain: identity-access
+phase: P1
+owner: Mourad
+status: DONE
+priority: P0
+tags:
+  - spec
+  - auth
+  - users
+slug: identity-access-service
+---
+
 # Identity Access Service - Spec P1
 
 > Lire `docs/workflows/Workflow_backend.md` avant implementation.

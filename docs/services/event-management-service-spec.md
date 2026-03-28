@@ -1,3 +1,19 @@
+---
+title: Spec Event Management Service
+description: Specification backend du service de gestion des evenements et de leur cycle de vie.
+docKind: spec
+domain: event-management
+phase: P1
+owner: Mourad
+status: DONE
+priority: P0
+tags:
+  - spec
+  - events
+  - drafts
+slug: event-management-service
+---
+
 # Event Management Service - Spec P1
 
 > Lire `docs/workflows/Workflow_backend.md` avant implementation.

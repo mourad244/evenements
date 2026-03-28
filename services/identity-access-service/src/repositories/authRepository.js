@@ -37,6 +37,27 @@ function mapResetToken(row) {
   };
 }
 
+function mapSecurityAuditLog(row) {
+  if (!row) return null;
+  return {
+    auditId: row.audit_id,
+    occurredAt: row.occurred_at,
+    sourceService: row.source_service,
+    actorId: row.actor_id,
+    actorRole: row.actor_role,
+    action: row.action,
+    targetType: row.target_type,
+    targetId: row.target_id,
+    result: row.result,
+    correlationId: row.correlation_id,
+    reasonCode: row.reason_code,
+    reasonNote: row.reason_note,
+    metadata: row.metadata || {},
+    ipAddress: row.ip_address,
+    userAgent: row.user_agent
+  };
+}
+
 export function createAuthRepository(pool) {
   async function withTransaction(fn) {
     const client = await pool.connect();
@@ -100,6 +121,26 @@ export function createAuthRepository(pool) {
         [userId]
       );
       return mapUser(rows[0]);
+    },
+
+    async listUsers() {
+      const { rows } = await pool.query(
+        `
+          SELECT
+            user_id,
+            email,
+            password_hash,
+            display_name,
+            role,
+            account_status,
+            created_at,
+            updated_at,
+            last_login_at
+          FROM auth_users
+          ORDER BY created_at DESC
+        `
+      );
+      return rows.map(mapUser);
     },
 
     async createUser(user) {
@@ -301,6 +342,69 @@ export function createAuthRepository(pool) {
       return mapResetToken(rows[0]);
     },
 
+    async createSecurityAuditLog(auditLog, queryable = pool) {
+      const { rows } = await queryable.query(
+        `
+          INSERT INTO auth_security_audit_logs (
+            audit_id,
+            occurred_at,
+            source_service,
+            actor_id,
+            actor_role,
+            action,
+            target_type,
+            target_id,
+            result,
+            correlation_id,
+            reason_code,
+            reason_note,
+            metadata,
+            ip_address,
+            user_agent
+          )
+          VALUES (
+            $1, $2, $3, $4, $5,
+            $6, $7, $8, $9, $10,
+            $11, $12, $13, $14, $15
+          )
+          RETURNING
+            audit_id,
+            occurred_at,
+            source_service,
+            actor_id,
+            actor_role,
+            action,
+            target_type,
+            target_id,
+            result,
+            correlation_id,
+            reason_code,
+            reason_note,
+            metadata,
+            ip_address,
+            user_agent
+        `,
+        [
+          auditLog.auditId,
+          auditLog.occurredAt,
+          auditLog.sourceService,
+          auditLog.actorId,
+          auditLog.actorRole,
+          auditLog.action,
+          auditLog.targetType,
+          auditLog.targetId,
+          auditLog.result,
+          auditLog.correlationId,
+          auditLog.reasonCode,
+          auditLog.reasonNote,
+          JSON.stringify(auditLog.metadata || {}),
+          auditLog.ipAddress,
+          auditLog.userAgent
+        ]
+      );
+      return mapSecurityAuditLog(rows[0]);
+    },
+
     async findResetTokenByDigest(client, tokenDigest, forUpdate = false) {
       const lockClause = forUpdate ? "FOR UPDATE" : "";
       const { rows } = await client.query(
@@ -345,4 +449,3 @@ export function createAuthRepository(pool) {
     withTransaction
   };
 }
-

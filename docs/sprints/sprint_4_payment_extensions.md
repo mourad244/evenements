@@ -1,8 +1,24 @@
+---
+title: Sprint 4 - Paiement & extensions
+description: Planning du lot monetisation, transactions et extensions produit.
+docKind: sprint
+domain: delivery
+phase: P4
+owner: Mourad
+status: TODO
+priority: P2
+tags:
+  - sprint-4
+  - payment
+  - extensions
+slug: sprint-4-payment-extensions
+---
+
 # Sprint 4 - Paiement & extensions
 
 Sprint optionnel selon priorite metier des evenements payants.
 
-**Statut:** `PLANNED`  
+**Statut:** `IN_PROGRESS`  
 **Periode indicative:** 2026-05-25 -> 2026-06-12
 
 ## Objectifs

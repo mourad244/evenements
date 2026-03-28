@@ -3,7 +3,7 @@
     "sprint_id": "S1",
     "name": "Sprint 1 - MVP publication & inscription",
     "source": "docs/sprints/sprint_1_mvp_event_publication_registration.md",
-    "last_updated": "2026-03-08T13:26:25.288Z"
+    "last_updated": "2026-03-26T21:27:06.589Z"
   },
   "tasks": [
     {
@@ -32,7 +32,7 @@
     {
       "id": "S1-T02",
       "title": "Add gateway proxies + ACL matrix for next Sprint 1 routes (/api/events/*, /api/registrations/*).",
-      "status": "TODO",
+      "status": "DONE",
       "priority": "P0",
       "refs": [
         "S1-M02",
@@ -44,13 +44,24 @@
         "acl matrix events routes",
         "api/events api/registrations in gateway"
       ],
-      "updated_at": "2026-03-08T13:30:00Z",
-      "notes": []
+      "updated_at": "2026-03-08T20:31:42.203Z",
+      "notes": [
+        {
+          "date": "2026-03-08T19:06:34.357Z",
+          "status": "IN_PROGRESS",
+          "text": "Started Sprint 1 step 2: complete gateway proxies and ACL matrix coverage for events/registrations/profile routes."
+        },
+        {
+          "date": "2026-03-08T20:31:42.204Z",
+          "status": "DONE",
+          "text": "Introduced explicit gateway ACL/proxy route matrix for /api/events/*, /api/registrations/*, and /api/profile/participations via routing module; added and passed unit tests in tests/s1-t02.gateway-acl-matrix.unit.test.js."
+        }
+      ]
     },
     {
       "id": "S1-T03",
       "title": "Add docker-compose and CI job to run test:s1-m01 automatically.",
-      "status": "TODO",
+      "status": "DONE",
       "priority": "P1",
       "refs": [
         "S1-M01",
@@ -62,13 +73,54 @@
         "ci test s1-m01",
         "automation smoke s1-m01"
       ],
-      "updated_at": "2026-03-08T13:30:00Z",
-      "notes": []
+      "updated_at": "2026-03-26T21:27:06.588Z",
+      "notes": [
+        {
+          "date": "2026-03-08T21:12:41.777Z",
+          "status": "PARTIAL",
+          "text": "Added docker-compose.s1-m01.yml and GitHub Actions workflow to run test:s1-m01 automatically; updated s1-m01 smoke test for portable repo paths and external Postgres mode. Local end-to-end run remains blocked in this environment due missing pnpm/runtime dependencies."
+        },
+        {
+          "date": "2026-03-08T22:19:37.518Z",
+          "status": "DONE",
+          "text": "S1-M01 automation is in place: dedicated docker-compose Postgres stack and CI workflow running pnpm test:s1-m01 automatically on PR/push with deterministic setup/teardown."
+        },
+        {
+          "date": "2026-03-26T21:05:13.345Z",
+          "status": "IN_PROGRESS",
+          "text": "Fixing GitHub Actions s1-m01-smoke install failure caused by pnpm-lock.yaml being out of date with apps/docs-portal/package.json."
+        },
+        {
+          "date": "2026-03-26T21:11:17.185Z",
+          "status": "DONE",
+          "text": "Updated the workspace lockfile for the docs portal and frontend manifests, pinned packageManager to pnpm 10.33.0, and verified corepack pnpm install --frozen-lockfile --ignore-scripts succeeds locally."
+        },
+        {
+          "date": "2026-03-26T21:19:03.082Z",
+          "status": "IN_PROGRESS",
+          "text": "Fixing GitHub Actions pnpm setup failure caused by duplicate pnpm version declaration in workflow and package.json."
+        },
+        {
+          "date": "2026-03-26T21:22:28.800Z",
+          "status": "DONE",
+          "text": "Removed the explicit pnpm version from the s1-m01-smoke workflow so pnpm/action-setup uses the packageManager-pinned version from package.json; validated the workflow with actionlint."
+        },
+        {
+          "date": "2026-03-26T21:26:28.461Z",
+          "status": "IN_PROGRESS",
+          "text": "Fixing S1-M01 smoke startup probe after api-gateway /ready began requiring event-management and registration upstreams in addition to identity."
+        },
+        {
+          "date": "2026-03-26T21:27:06.589Z",
+          "status": "DONE",
+          "text": "Adjusted the S1-M01 smoke test to wait on api-gateway /health instead of /ready because /ready now depends on event-management and registration upstreams; verified corepack pnpm test:s1-m01 passes with docker-compose.s1-m01.yml external Postgres."
+        }
+      ]
     },
     {
       "id": "S1-T04",
       "title": "S1-M06 hardening on current services: structured logs + guaranteed x-correlation-id tracing on every auth path (Gateway + Identity), plus smoke assertions.",
-      "status": "PARTIAL",
+      "status": "DONE",
       "priority": "P1",
       "refs": [
         "S1-M06",
@@ -80,12 +132,27 @@
         "structured logs",
         "correlation id tracing auth path"
       ],
-      "updated_at": "2026-03-08T13:30:00Z",
+      "updated_at": "2026-03-26T21:16:40.354Z",
       "notes": [
         {
           "date": "2026-03-08T13:30:00Z",
           "status": "PARTIAL",
           "text": "Gateway propagates x-correlation-id and smoke validates one auth flow; structured log format is not implemented yet."
+        },
+        {
+          "date": "2026-03-08T21:24:13.917Z",
+          "status": "IN_PROGRESS",
+          "text": "Started Sprint 1 step 4: structured logs and guaranteed x-correlation-id tracing on Gateway + Identity auth paths."
+        },
+        {
+          "date": "2026-03-08T21:26:58.582Z",
+          "status": "PARTIAL",
+          "text": "Added structured JSON request logs for auth paths in api-gateway and identity-access-service, enforced x-correlation-id header propagation middleware in identity, and extended s1-m01 smoke assertions to require x-correlation-id on auth responses. Local full smoke execution remains blocked in this environment because services cannot boot without installed runtime dependencies."
+        },
+        {
+          "date": "2026-03-09T00:45:47.781Z",
+          "status": "DONE",
+          "text": "Refactored observability into testable middleware modules, enforced correlation-id middleware and structured auth-path completion logging for Gateway + Identity, and added passing unit coverage in tests/s1-t04.observability.unit.test.js; smoke assertions for x-correlation-id remain in tests/s1-m01.smoke.test.js."
         }
       ]
     },
@@ -122,7 +189,7 @@
     {
       "id": "S1-T06",
       "title": "Wire Gateway routes for events and extend role guards (ORGANIZER, ADMIN) with the same contract style as S1-M01.",
-      "status": "TODO",
+      "status": "DONE",
       "priority": "P0",
       "refs": [
         "S1-M02",
@@ -133,8 +200,57 @@
         "wire gateway routes events",
         "contract style s1-m01"
       ],
-      "updated_at": "2026-03-08T13:30:00Z",
-      "notes": []
+      "updated_at": "2026-03-08T22:16:43.669Z",
+      "notes": [
+        {
+          "date": "2026-03-08T18:40:41.591Z",
+          "status": "IN_PROGRESS",
+          "text": "Started Sprint 1 step 1: gateway event route wiring and role guards."
+        },
+        {
+          "date": "2026-03-08T18:53:02.692Z",
+          "status": "PARTIAL",
+          "text": "Gateway routes added for /api/events/* plus participant route ACL skeleton for /api/registrations/* and /api/profile/participations; smoke test added. Runtime verification is pending because this environment lacks docker and installed service dependencies (express)."
+        },
+        {
+          "date": "2026-03-08T21:31:34.185Z",
+          "status": "IN_PROGRESS",
+          "text": "Step 5: finalize S1-T06 by strengthening route/ACL contract verification for event gateway paths."
+        },
+        {
+          "date": "2026-03-08T22:16:43.670Z",
+          "status": "DONE",
+          "text": "Gateway event routes are fully wired with organizer/admin guards in shared routing matrix; exact target-path contracts and ACL expectations are covered by passing unit tests (tests/s1-t02.gateway-acl-matrix.unit.test.js)."
+        }
+      ]
+    },
+    {
+      "id": "S1-T07",
+      "title": "Implement auth security audit events for login, reset, forgot-password, and lockout denials in identity-access-service.",
+      "status": "DONE",
+      "priority": "P1",
+      "refs": [
+        "S1-M07",
+        "I05.2"
+      ],
+      "aliases": [
+        "auth security audit events",
+        "identity audit login reset lockout",
+        "i05.2 auth audit"
+      ],
+      "updated_at": "2026-03-26T21:24:33.658Z",
+      "notes": [
+        {
+          "date": "2026-03-26T21:16:40.355Z",
+          "status": "IN_PROGRESS",
+          "text": "Started I05.2: add persistent auth security audit events for login success/failure, password reset flows, and lockout denials with correlation metadata."
+        },
+        {
+          "date": "2026-03-26T21:24:33.658Z",
+          "status": "DONE",
+          "text": "Implemented persistent auth security audit events in identity-access-service for login success/failure, forgot/reset flows, and lockout denials; verified with npm run test:s1-t07 plus S1_M01_USE_EXTERNAL_POSTGRES=true regression smoke."
+        }
+      ]
     }
   ]
 }

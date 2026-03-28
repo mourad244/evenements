@@ -1,0 +1,57 @@
+name: s1-m01-smoke
+
+on:
+  pull_request:
+    paths:
+      - "services/api-gateway/**"
+      - "services/identity-access-service/**"
+      - "tests/s1-m01.smoke.test.js"
+      - "package.json"
+      - "pnpm-lock.yaml"
+      - "docker-compose.s1-m01.yml"
+      - ".github/workflows/s1-m01-smoke.yml"
+  push:
+    branches:
+      - "main"
+    paths:
+      - "services/api-gateway/**"
+      - "services/identity-access-service/**"
+      - "tests/s1-m01.smoke.test.js"
+      - "package.json"
+      - "pnpm-lock.yaml"
+      - "docker-compose.s1-m01.yml"
+      - ".github/workflows/s1-m01-smoke.yml"
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Start Postgres for S1-M01
+        run: docker compose -f docker-compose.s1-m01.yml up -d --wait
+
+      - name: Run S1-M01 smoke
+        env:
+          S1_M01_USE_EXTERNAL_POSTGRES: "true"
+          S1_M01_DATABASE_URL: "postgres://postgres:postgres@127.0.0.1:55432/evenements_s1_m01"
+        run: pnpm test:s1-m01
+
+      - name: Stop Postgres
+        if: always()
+        run: docker compose -f docker-compose.s1-m01.yml down -v

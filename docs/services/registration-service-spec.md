@@ -1,3 +1,19 @@
+---
+title: Spec Registration Service
+description: Specification backend du service d'inscription, waitlist et historique participant.
+docKind: spec
+domain: registration
+phase: P1
+owner: Mourad
+status: DONE
+priority: P0
+tags:
+  - spec
+  - registration
+  - waitlist
+slug: registration-service
+---
+
 # Registration Service - Spec P1
 
 > Lire `docs/workflows/Workflow_backend.md` avant implementation.

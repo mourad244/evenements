@@ -6,8 +6,18 @@ import bcrypt from "bcryptjs";
 import express from "express";
 import jwt from "jsonwebtoken";
 import pg from "pg";
+import {
+  createCorrelationIdMiddleware,
+  createJsonLogger,
+  createRequestCompletionLogger
+} from "../../shared/observability.js";
+import { buildAuthSecurityAuditRecord } from "./authSecurityAudit.js";
 
 import { ensureSchema } from "./db/schema.js";
+import {
+  identityAuthLogFields,
+  isIdentityAuthPath
+} from "./observabilityConfig.js";
 import { createAuthRepository } from "./repositories/authRepository.js";
 
 const { Pool } = pg;
@@ -17,16 +27,56 @@ const config = {
   port: Number(process.env.PORT || 4001),
   databaseUrl:
     process.env.DATABASE_URL ||
-    "postgres://postgres:postgres@127.0.0.1:5432/evenements_identity",
+    "postgres://postgres:postgres@127.0.0.1:55432/evenements_s1_m01",
   dbAutoMigrate: process.env.DB_AUTO_MIGRATE !== "false",
-  jwtAccessSecret: process.env.JWT_ACCESS_SECRET || "dev-access-secret",
-  jwtRefreshSecret: process.env.JWT_REFRESH_SECRET || "dev-refresh-secret",
   accessTokenTtlSec: Number(process.env.ACCESS_TOKEN_TTL_SEC || 900),
   refreshTokenTtlSec: Number(process.env.REFRESH_TOKEN_TTL_SEC || 604800),
   resetTokenTtlSec: Number(process.env.RESET_TOKEN_TTL_SEC || 900),
   bcryptSaltRounds: Number(process.env.BCRYPT_SALT_ROUNDS || 10),
   exposeDebugResetToken: process.env.DEBUG_EXPOSE_RESET_TOKEN === "true"
 };
+const log = createJsonLogger(config.serviceName);
+
+function resolveJwtSecret(envKey, fallbackValue) {
+  const configured = String(process.env[envKey] || "").trim();
+  if (configured) {
+    if (configured.length < 32) {
+      log("warn", "auth.jwt.secret.weak", {
+        envKey,
+        length: configured.length
+      });
+    }
+    return configured;
+  }
+
+  if (process.env.ALLOW_INSECURE_JWT_DEFAULTS === "true") {
+    log("warn", "auth.jwt.secret.insecure_default", {
+      envKey,
+      message: "Using insecure default secret; set env to harden."
+    });
+    return fallbackValue;
+  }
+
+  if (String(process.env.NODE_ENV || "").toLowerCase() === "production") {
+    throw new Error(`${envKey} is required in production`);
+  }
+
+  const generated = crypto.randomBytes(32).toString("hex");
+  log("warn", "auth.jwt.secret.generated", {
+    envKey,
+    message: "Generated ephemeral secret; set env for stable sessions."
+  });
+  return generated;
+}
+
+config.jwtAccessSecret = resolveJwtSecret(
+  "JWT_ACCESS_SECRET",
+  "dev-insecure-access-secret"
+);
+config.jwtRefreshSecret = resolveJwtSecret(
+  "JWT_REFRESH_SECRET",
+  "dev-insecure-refresh-secret"
+);
 
 const allowedSelfServiceRoles = new Set(["PARTICIPANT", "ORGANIZER"]);
 const activeAccountStatuses = new Set(["ACTIVE"]);
@@ -63,11 +113,17 @@ function nowIso() {
 
 function toUserView(user) {
   return {
+    id: user.userId,
     userId: user.userId,
     email: user.email,
+    name: user.displayName,
+    fullName: user.displayName,
     displayName: user.displayName,
     role: user.role,
-    accountStatus: user.accountStatus
+    accountStatus: user.accountStatus,
+    createdAt: user.createdAt || null,
+    updatedAt: user.updatedAt || null,
+    lastLoginAt: user.lastLoginAt || null
   };
 }
 
@@ -76,6 +132,8 @@ function signAccessToken(user, sessionId) {
     {
       sub: user.userId,
       sid: sessionId,
+      email: user.email,
+      name: user.displayName,
       role: user.role,
       account_status: user.accountStatus
     },
@@ -103,6 +161,62 @@ function tokenDigest(token) {
 function hasExpired(value) {
   return Date.now() >= new Date(value).getTime();
 }
+
+function resolveAuditSubject({ user, email, fallbackId }) {
+  const userId = String(user?.userId || "").trim();
+  const role = String(user?.role || "").trim().toUpperCase();
+  const emailTarget = normalizeEmail(email);
+  const resolvedId = userId || emailTarget || String(fallbackId || "").trim() || "anonymous";
+
+  return {
+    actorId: resolvedId,
+    actorRole: role || "SYSTEM",
+    targetId: resolvedId
+  };
+}
+
+function resolveRequestIp(req) {
+  const forwarded = String(req.header("x-forwarded-for") || "")
+    .split(",")[0]
+    .trim();
+  const direct = String(req.ip || "").trim();
+  return forwarded || direct || null;
+}
+
+function resolveRequestUserAgent(req) {
+  return String(req.header("user-agent") || "").trim() || null;
+}
+
+async function writeSecurityAudit(req, auditFields) {
+  const record = buildAuthSecurityAuditRecord({
+    sourceService: config.serviceName,
+    occurredAt: nowIso(),
+    correlationId: req.correlationId || null,
+    ipAddress: resolveRequestIp(req),
+    userAgent: resolveRequestUserAgent(req),
+    ...auditFields
+  });
+
+  try {
+    await repository.createSecurityAuditLog(record);
+  } catch (err) {
+    log("error", "identity.auth.audit.persist_failed", {
+      action: record.action,
+      correlationId: record.correlationId,
+      message: err.message
+    });
+  }
+}
+
+app.use(createCorrelationIdMiddleware());
+app.use(
+  createRequestCompletionLogger({
+    log,
+    eventName: "identity.auth.request.completed",
+    isObserved: isIdentityAuthPath,
+    buildFields: identityAuthLogFields
+  })
+);
 
 app.get("/health", (_req, res) => {
   res.status(200).json(
@@ -180,6 +294,15 @@ app.post("/auth/login", async (req, res) => {
   const password = String(req.body?.password || "");
 
   if (!email || !password) {
+    await writeSecurityAudit(req, {
+      actorId: email || "anonymous",
+      actorRole: "SYSTEM",
+      action: "USER_LOGIN_FAILED",
+      targetType: "USER",
+      targetId: email || "anonymous",
+      result: "FAILURE",
+      reasonCode: "VALIDATION_ERROR"
+    });
     return res
       .status(400)
       .json(error("Validation failed", "VALIDATION_ERROR", [
@@ -189,6 +312,18 @@ app.post("/auth/login", async (req, res) => {
 
   const user = await repository.findUserByEmail(email);
   if (!user) {
+    await writeSecurityAudit(req, {
+      actorId: email,
+      actorRole: "SYSTEM",
+      action: "USER_LOGIN_FAILED",
+      targetType: "USER",
+      targetId: email,
+      result: "FAILURE",
+      reasonCode: "INVALID_CREDENTIALS",
+      metadata: {
+        email
+      }
+    });
     return res
       .status(401)
       .json(error("Invalid credentials", "INVALID_CREDENTIALS"));
@@ -196,6 +331,17 @@ app.post("/auth/login", async (req, res) => {
 
   const validPassword = await bcrypt.compare(password, user.passwordHash);
   if (!validPassword) {
+    const subject = resolveAuditSubject({ user, email });
+    await writeSecurityAudit(req, {
+      ...subject,
+      action: "USER_LOGIN_FAILED",
+      targetType: "USER",
+      result: "FAILURE",
+      reasonCode: "INVALID_CREDENTIALS",
+      metadata: {
+        email
+      }
+    });
     return res
       .status(401)
       .json(error("Invalid credentials", "INVALID_CREDENTIALS"));
@@ -204,6 +350,17 @@ app.post("/auth/login", async (req, res) => {
   if (!activeAccountStatuses.has(user.accountStatus)) {
     const code =
       user.accountStatus === "LOCKED" ? "ACCOUNT_LOCKED" : "ACCOUNT_DISABLED";
+    const subject = resolveAuditSubject({ user, email });
+    await writeSecurityAudit(req, {
+      ...subject,
+      action: "USER_LOGIN_FAILED",
+      targetType: "USER",
+      result: "DENIED",
+      reasonCode: code,
+      metadata: {
+        accountStatus: user.accountStatus
+      }
+    });
     return res.status(401).json(error("Account is not active", code));
   }
 
@@ -219,6 +376,17 @@ app.post("/auth/login", async (req, res) => {
   });
 
   await repository.touchUserLogin(user.userId, nowIso());
+
+  const subject = resolveAuditSubject({ user, email });
+  await writeSecurityAudit(req, {
+    ...subject,
+    action: "USER_LOGIN_SUCCEEDED",
+    targetType: "USER",
+    result: "SUCCESS",
+    metadata: {
+      sessionId
+    }
+  });
 
   const accessToken = signAccessToken(user, sessionId);
   return res.status(200).json(
@@ -303,6 +471,15 @@ app.post("/auth/refresh", async (req, res) => {
 app.post("/auth/forgot-password", async (req, res) => {
   const email = normalizeEmail(req.body?.email);
   if (!email) {
+    await writeSecurityAudit(req, {
+      actorId: "anonymous",
+      actorRole: "SYSTEM",
+      action: "USER_PASSWORD_RESET_REQUESTED",
+      targetType: "USER",
+      targetId: "anonymous",
+      result: "FAILURE",
+      reasonCode: "VALIDATION_ERROR"
+    });
     return res
       .status(400)
       .json(error("Validation failed", "VALIDATION_ERROR", [
@@ -329,6 +506,17 @@ app.post("/auth/forgot-password", async (req, res) => {
     config.exposeDebugResetToken && debugResetToken
       ? { debugResetToken }
       : undefined;
+
+  const subject = resolveAuditSubject({ user, email });
+  await writeSecurityAudit(req, {
+    ...subject,
+    action: "USER_PASSWORD_RESET_REQUESTED",
+    targetType: "USER",
+    result: "SUCCESS",
+    metadata: {
+      userFound: Boolean(user)
+    }
+  });
 
   return res.status(202).json(
     success(
@@ -361,13 +549,27 @@ app.post("/auth/reset-password", async (req, res) => {
     const transactionResult = await repository.withTransaction(async (client) => {
       const resetToken = await repository.findResetTokenByDigest(client, digest, true);
       if (!resetToken) {
-        return { kind: "INVALID" };
+        return {
+          kind: "INVALID",
+          targetType: "PASSWORD_RESET_TOKEN",
+          targetId: digest.slice(0, 16) || "unknown"
+        };
       }
       if (resetToken.consumedAt) {
-        return { kind: "CONSUMED" };
+        return {
+          kind: "CONSUMED",
+          targetType: "PASSWORD_RESET_TOKEN",
+          targetId: resetToken.resetTokenId,
+          userId: resetToken.userId
+        };
       }
       if (hasExpired(resetToken.expiresAt)) {
-        return { kind: "EXPIRED" };
+        return {
+          kind: "EXPIRED",
+          targetType: "PASSWORD_RESET_TOKEN",
+          targetId: resetToken.resetTokenId,
+          userId: resetToken.userId
+        };
       }
 
       const user = await repository.updateUserPassword(
@@ -377,7 +579,12 @@ app.post("/auth/reset-password", async (req, res) => {
         updatedAt
       );
       if (!user) {
-        return { kind: "USER_NOT_FOUND" };
+        return {
+          kind: "USER_NOT_FOUND",
+          targetType: "USER",
+          targetId: resetToken.userId,
+          userId: resetToken.userId
+        };
       }
 
       await repository.revokeAllSessionsForUser(client, resetToken.userId, consumedAt);
@@ -387,30 +594,85 @@ app.post("/auth/reset-password", async (req, res) => {
         consumedAt
       );
       if (!consumedToken) {
-        return { kind: "CONSUMED" };
+        return {
+          kind: "CONSUMED",
+          targetType: "PASSWORD_RESET_TOKEN",
+          targetId: resetToken.resetTokenId,
+          userId: resetToken.userId
+        };
       }
 
-      return { kind: "OK" };
+      return {
+        kind: "OK",
+        targetType: "USER",
+        targetId: user.userId,
+        user
+      };
     });
 
     if (transactionResult.kind === "INVALID") {
+      await writeSecurityAudit(req, {
+        actorId: transactionResult.targetId,
+        actorRole: "SYSTEM",
+        action: "USER_PASSWORD_RESET_FAILED",
+        targetType: transactionResult.targetType,
+        targetId: transactionResult.targetId,
+        result: "FAILURE",
+        reasonCode: "INVALID_RESET_TOKEN"
+      });
       return res
         .status(401)
         .json(error("Invalid reset token", "INVALID_RESET_TOKEN"));
     }
     if (transactionResult.kind === "EXPIRED") {
+      await writeSecurityAudit(req, {
+        actorId: transactionResult.userId || transactionResult.targetId,
+        actorRole: "SYSTEM",
+        action: "USER_PASSWORD_RESET_FAILED",
+        targetType: transactionResult.targetType,
+        targetId: transactionResult.targetId,
+        result: "FAILURE",
+        reasonCode: "RESET_TOKEN_EXPIRED"
+      });
       return res
         .status(401)
         .json(error("Reset token expired", "RESET_TOKEN_EXPIRED"));
     }
     if (transactionResult.kind === "CONSUMED") {
+      await writeSecurityAudit(req, {
+        actorId: transactionResult.userId || transactionResult.targetId,
+        actorRole: "SYSTEM",
+        action: "USER_PASSWORD_RESET_FAILED",
+        targetType: transactionResult.targetType,
+        targetId: transactionResult.targetId,
+        result: "FAILURE",
+        reasonCode: "RESET_TOKEN_CONSUMED"
+      });
       return res
         .status(422)
         .json(error("Reset token already used", "RESET_TOKEN_CONSUMED"));
     }
     if (transactionResult.kind === "USER_NOT_FOUND") {
+      await writeSecurityAudit(req, {
+        actorId: transactionResult.userId || transactionResult.targetId,
+        actorRole: "SYSTEM",
+        action: "USER_PASSWORD_RESET_FAILED",
+        targetType: transactionResult.targetType,
+        targetId: transactionResult.targetId,
+        result: "FAILURE",
+        reasonCode: "USER_NOT_FOUND"
+      });
       return res.status(404).json(error("User not found", "USER_NOT_FOUND"));
     }
+
+    const subject = resolveAuditSubject({ user: transactionResult.user });
+    await writeSecurityAudit(req, {
+      ...subject,
+      action: "USER_PASSWORD_RESET_SUCCEEDED",
+      targetType: transactionResult.targetType,
+      targetId: transactionResult.targetId,
+      result: "SUCCESS"
+    });
 
     return res.status(200).json(
       success({
@@ -418,6 +680,15 @@ app.post("/auth/reset-password", async (req, res) => {
       })
     );
   } catch {
+    await writeSecurityAudit(req, {
+      actorId: digest.slice(0, 16) || "unknown",
+      actorRole: "SYSTEM",
+      action: "USER_PASSWORD_RESET_FAILED",
+      targetType: "PASSWORD_RESET_TOKEN",
+      targetId: digest.slice(0, 16) || "unknown",
+      result: "FAILURE",
+      reasonCode: "RESET_FAILED"
+    });
     return res
       .status(500)
       .json(error("Could not reset password", "RESET_FAILED"));
@@ -428,12 +699,22 @@ app.get("/auth/me", async (req, res) => {
   const userId = req.header("x-user-id");
   const role = req.header("x-user-role");
   const sessionId = req.header("x-session-id");
-  const correlationId = req.header("x-correlation-id");
+  const correlationId = req.correlationId || null;
 
   if (!userId || !role || !sessionId) {
     return res
       .status(401)
       .json(error("Missing auth context", "MISSING_AUTH_CONTEXT"));
+  }
+
+  const session = await repository.findSessionById(sessionId);
+  if (!session || session.userId !== userId || session.revokedAt) {
+    return res
+      .status(401)
+      .json(error("Session is not active", "SESSION_INVALID"));
+  }
+  if (hasExpired(session.expiresAt)) {
+    return res.status(401).json(error("Session expired", "SESSION_EXPIRED"));
   }
 
   const user = await repository.findUserById(userId);
@@ -450,6 +731,39 @@ app.get("/auth/me", async (req, res) => {
         sessionId,
         correlationId: correlationId || null
       }
+    })
+  );
+});
+
+app.get("/admin/users", async (req, res) => {
+  const role = String(req.header("x-user-role") || "").trim().toUpperCase();
+  const sessionId = String(req.header("x-session-id") || "").trim();
+  const userId = String(req.header("x-user-id") || "").trim();
+
+  if (!userId || !role || !sessionId) {
+    return res
+      .status(401)
+      .json(error("Missing auth context", "MISSING_AUTH_CONTEXT"));
+  }
+
+  const session = await repository.findSessionById(sessionId);
+  if (!session || session.userId !== userId || session.revokedAt) {
+    return res
+      .status(401)
+      .json(error("Session is not active", "SESSION_INVALID"));
+  }
+  if (hasExpired(session.expiresAt)) {
+    return res.status(401).json(error("Session expired", "SESSION_EXPIRED"));
+  }
+
+  if (role !== "ADMIN") {
+    return res.status(403).json(error("Forbidden", "FORBIDDEN"));
+  }
+
+  const users = await repository.listUsers();
+  return res.status(200).json(
+    success({
+      items: users.map(toUserView)
     })
   );
 });
@@ -477,14 +791,16 @@ async function boot() {
   }
 
   app.listen(config.port, () => {
-    // eslint-disable-next-line no-console
-    console.log(`[${config.serviceName}] listening on port ${config.port}`);
+    log("info", "service.started", {
+      port: config.port
+    });
   });
 }
 
 boot().catch((err) => {
-  // eslint-disable-next-line no-console
-  console.error(`[${config.serviceName}] failed to boot`, err);
+  log("error", "service.boot.failed", {
+    message: err.message
+  });
   process.exit(1);
 });
 

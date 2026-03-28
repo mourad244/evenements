@@ -3,8 +3,11 @@ import { spawn } from "node:child_process";
 import path from "node:path";
 import { setTimeout as delay } from "node:timers/promises";
 import test from "node:test";
+import { fileURLToPath } from "node:url";
 
-const repoRoot = "/home/mourad/git_workspace_work/evenements";
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const repoRoot = path.resolve(__dirname, "..");
 const identityCwd = path.join(repoRoot, "services/identity-access-service");
 const gatewayCwd = path.join(repoRoot, "services/api-gateway");
 
@@ -16,6 +19,10 @@ const postgresDb = "evenements_s1_m01";
 const postgresUser = "postgres";
 const postgresPassword = "postgres";
 const postgresImage = "postgres:18";
+const useExternalPostgres = process.env.S1_M01_USE_EXTERNAL_POSTGRES === "true";
+const databaseUrl =
+  process.env.S1_M01_DATABASE_URL ||
+  `postgres://${postgresUser}:${postgresPassword}@127.0.0.1:${postgresPort}/${postgresDb}`;
 
 const sharedEnv = {
   JWT_ACCESS_SECRET: "s1-m01-access-secret",
@@ -131,6 +138,14 @@ async function jsonFetch(url, options = {}) {
   return { res, body };
 }
 
+function assertCorrelationHeader(response, expected = null) {
+  const correlationId = response.headers.get("x-correlation-id");
+  assert.ok(correlationId, "x-correlation-id header must be present");
+  if (expected) {
+    assert.equal(correlationId, expected);
+  }
+}
+
 let identityProcess;
 let gatewayProcess;
 
@@ -144,14 +159,16 @@ let organizerSessionId = "";
 let participantAccessToken = "";
 
 test("boot services for S1-M01", async () => {
-  await startPostgresContainer();
-  await waitForPostgresReady();
+  if (!useExternalPostgres) {
+    await startPostgresContainer();
+    await waitForPostgresReady();
+  }
 
   identityProcess = startService(identityCwd, {
     ...sharedEnv,
     PORT: String(identityPort),
     DEBUG_EXPOSE_RESET_TOKEN: "true",
-    DATABASE_URL: `postgres://${postgresUser}:${postgresPassword}@127.0.0.1:${postgresPort}/${postgresDb}`
+    DATABASE_URL: databaseUrl
   });
 
   gatewayProcess = startService(gatewayCwd, {
@@ -161,7 +178,8 @@ test("boot services for S1-M01", async () => {
   });
 
   await waitForReady(`http://127.0.0.1:${identityPort}/ready`);
-  await waitForReady(`http://127.0.0.1:${gatewayPort}/ready`);
+  // S1-M01 only boots identity + gateway, so use gateway /health here.
+  await waitForReady(`http://127.0.0.1:${gatewayPort}/health`);
 
   assert.ok(true);
 });
@@ -179,6 +197,7 @@ test("register + login organizer through gateway", async () => {
 
   assert.equal(register.res.status, 201);
   assert.equal(register.body.success, true);
+  assertCorrelationHeader(register.res);
   organizerUserId = register.body.data.userId;
 
   const login = await jsonFetch(`http://127.0.0.1:${gatewayPort}/api/auth/login`, {
@@ -191,6 +210,7 @@ test("register + login organizer through gateway", async () => {
 
   assert.equal(login.res.status, 200);
   assert.equal(login.body.success, true);
+  assertCorrelationHeader(login.res);
   organizerAccessToken = login.body.data.accessToken;
   organizerRefreshToken = login.body.data.refreshToken;
   organizerSessionId = login.body.data.sessionId;
@@ -210,6 +230,7 @@ test("gateway propagates auth context and correlation id", async () => {
 
   assert.equal(me.res.status, 200);
   assert.equal(me.body.success, true);
+  assertCorrelationHeader(me.res, correlationId);
   assert.equal(me.body.data.context.userId, organizerUserId);
   assert.equal(me.body.data.context.sessionId, organizerSessionId);
   assert.equal(me.body.data.context.role, "ORGANIZER");
@@ -226,6 +247,7 @@ test("refresh token flow works", async () => {
 
   assert.equal(refresh.res.status, 200);
   assert.equal(refresh.body.success, true);
+  assertCorrelationHeader(refresh.res);
   assert.ok(refresh.body.data.accessToken);
   assert.ok(refresh.body.data.refreshToken);
 });
@@ -243,6 +265,7 @@ test("forgot + reset password flow works", async () => {
 
   assert.equal(forgot.res.status, 202);
   assert.equal(forgot.body.success, true);
+  assertCorrelationHeader(forgot.res);
   const debugResetToken = forgot.body.meta?.debugResetToken;
   assert.ok(debugResetToken);
 
@@ -256,6 +279,7 @@ test("forgot + reset password flow works", async () => {
   });
   assert.equal(reset.res.status, 200);
   assert.equal(reset.body.success, true);
+  assertCorrelationHeader(reset.res);
 
   const oldLogin = await jsonFetch(`http://127.0.0.1:${gatewayPort}/api/auth/login`, {
     method: "POST",
@@ -265,6 +289,7 @@ test("forgot + reset password flow works", async () => {
     })
   });
   assert.equal(oldLogin.res.status, 401);
+  assertCorrelationHeader(oldLogin.res);
 
   const newLogin = await jsonFetch(`http://127.0.0.1:${gatewayPort}/api/auth/login`, {
     method: "POST",
@@ -274,6 +299,7 @@ test("forgot + reset password flow works", async () => {
     })
   });
   assert.equal(newLogin.res.status, 200);
+  assertCorrelationHeader(newLogin.res);
 
   organizerPassword = newPassword;
   organizerAccessToken = newLogin.body.data.accessToken;
@@ -285,6 +311,7 @@ test("gateway returns 401 on missing bearer token for protected route", async ()
   });
   assert.equal(unauthenticated.res.status, 401);
   assert.equal(unauthenticated.body.code, "UNAUTHORIZED");
+  assertCorrelationHeader(unauthenticated.res);
 });
 
 test("gateway returns 403 on role mismatch", async () => {
@@ -304,6 +331,7 @@ test("gateway returns 403 on role mismatch", async () => {
     }
   );
   assert.equal(registerParticipant.res.status, 201);
+  assertCorrelationHeader(registerParticipant.res);
 
   const loginParticipant = await jsonFetch(
     `http://127.0.0.1:${gatewayPort}/api/auth/login`,
@@ -316,6 +344,7 @@ test("gateway returns 403 on role mismatch", async () => {
     }
   );
   assert.equal(loginParticipant.res.status, 200);
+  assertCorrelationHeader(loginParticipant.res);
   participantAccessToken = loginParticipant.body.data.accessToken;
 
   const forbidden = await jsonFetch(`http://127.0.0.1:${gatewayPort}/api/organizer/ping`, {
@@ -327,6 +356,7 @@ test("gateway returns 403 on role mismatch", async () => {
 
   assert.equal(forbidden.res.status, 403);
   assert.equal(forbidden.body.code, "FORBIDDEN");
+  assertCorrelationHeader(forbidden.res);
 
   const organizerAllowed = await jsonFetch(
     `http://127.0.0.1:${gatewayPort}/api/organizer/ping`,
@@ -339,6 +369,7 @@ test("gateway returns 403 on role mismatch", async () => {
   );
   assert.equal(organizerAllowed.res.status, 200);
   assert.equal(organizerAllowed.body.success, true);
+  assertCorrelationHeader(organizerAllowed.res);
 });
 
 test("shutdown services", async () => {
@@ -348,7 +379,9 @@ test("shutdown services", async () => {
   if (identityProcess && !identityProcess.killed) {
     identityProcess.kill("SIGTERM");
   }
-  await runDocker(["rm", "-f", postgresContainerName]).catch(() => {});
+  if (!useExternalPostgres) {
+    await runDocker(["rm", "-f", postgresContainerName]).catch(() => {});
+  }
   await delay(100);
   assert.ok(true);
 });

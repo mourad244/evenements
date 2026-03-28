@@ -1,0 +1,9 @@
+services:
+  docs-portal:
+    container_name: evenements-docs-portal
+    build:
+      context: .
+      dockerfile: apps/docs-portal/Dockerfile
+    image: evenements-docs-portal:local
+    ports:
+      - "${DOCS_PORT:-3000}:3000"

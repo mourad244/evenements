@@ -1,3 +1,18 @@
+---
+title: Idees produit et techniques
+description: Parking lot pour idees futures a transformer en backlog ou en sprint.
+docKind: idea
+domain: ideas
+phase: P2-P5
+owner: Mourad
+status: TODO
+tags:
+  - ideas
+  - product
+  - future
+slug: ideas
+---
+
 # Idees Projet Evenements (proche / moyen / long terme)
 
 ## Objectif

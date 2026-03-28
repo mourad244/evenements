@@ -1,3 +1,18 @@
+---
+title: Index des diagrammes
+description: Regles, sources et liste des diagrammes Mermaid du projet.
+docKind: index
+domain: architecture
+phase: P1-P4
+owner: Ibrahim
+status: DONE
+tags:
+  - diagrams
+  - mermaid
+  - architecture
+slug: readme
+---
+
 # Schemas & Diagrammes - Projet Evenements
 
 Ce dossier doit centraliser les representations visuelles qui completent
