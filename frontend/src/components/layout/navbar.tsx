@@ -26,6 +26,7 @@ const navItems: NavItem[] = [
   { href: ROUTES.events, label: "Events" },
   { href: ROUTES.dashboard, label: "Dashboard", roles: ["PARTICIPANT", "ORGANIZER", "ADMIN"] },
   { href: ROUTES.myRegistrations, label: "My registrations", roles: ["PARTICIPANT"] },
+  { href: ROUTES.notifications, label: "Notifications", roles: ["PARTICIPANT", "ORGANIZER", "ADMIN"] },
   { href: ROUTES.organizerEvents, label: "Organizer", roles: ["ORGANIZER", "ADMIN"] },
   { href: ROUTES.adminEvents, label: "Admin", roles: ["ADMIN"] }
 ];
@@ -55,6 +56,10 @@ function getCurrentSection(pathname: string) {
 
   if (pathname === ROUTES.dashboard || pathname.startsWith(`${ROUTES.dashboard}/`)) {
     return "Dashboard";
+  }
+
+  if (pathname === ROUTES.notifications || pathname.startsWith(`${ROUTES.notifications}/`)) {
+    return "Notifications";
   }
 
   if (pathname === ROUTES.events || pathname.startsWith(`${ROUTES.events}/`)) {

@@ -1,0 +1,382 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Evenements Live Delivery Dashboard</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        --bg: #0a0b11;
+        --panel: #0f1320;
+        --panel-2: #13192b;
+        --border: #1c2540;
+        --text: #e6e9f2;
+        --muted: #9aa3b2;
+        --accent: #5c5cff;
+        --accent-2: #ff9f5a;
+        --good: #43d19e;
+        --warn: #f5c84b;
+        --bad: #ff6b6b;
+        --shadow: 0 20px 60px rgba(6, 9, 20, 0.5);
+        --radius: 18px;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        font-family: "Inter", "Segoe UI", system-ui, sans-serif;
+        background: radial-gradient(circle at top, #0f1831 0%, var(--bg) 45%),
+          var(--bg);
+        color: var(--text);
+      }
+
+      header {
+        padding: 28px 32px 8px;
+      }
+
+      header h1 {
+        margin: 0 0 8px;
+        font-size: 26px;
+        font-weight: 700;
+      }
+
+      header p {
+        margin: 0;
+        color: var(--muted);
+      }
+
+      main {
+        padding: 24px 32px 48px;
+        display: grid;
+        gap: 24px;
+      }
+
+      .grid {
+        display: grid;
+        gap: 20px;
+      }
+
+      .grid.cols-2 {
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      }
+
+      .panel {
+        background: var(--panel);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 20px;
+        box-shadow: var(--shadow);
+      }
+
+      .panel h2 {
+        margin: 0 0 12px;
+        font-size: 18px;
+      }
+
+      .panel small {
+        color: var(--muted);
+      }
+
+      .toolbar {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+      }
+
+      button {
+        background: linear-gradient(135deg, #3e3ed4, #5c5cff);
+        color: #fff;
+        border: 0;
+        padding: 10px 16px;
+        border-radius: 999px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: transform 0.15s ease, box-shadow 0.15s ease;
+      }
+
+      button.secondary {
+        background: #1a2238;
+        color: var(--text);
+        border: 1px solid var(--border);
+      }
+
+      button:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 10px 20px rgba(92, 92, 255, 0.2);
+      }
+
+      .status-list {
+        display: grid;
+        gap: 12px;
+        margin: 12px 0 0;
+      }
+
+      .status-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px 14px;
+        border-radius: 12px;
+        background: var(--panel-2);
+        border: 1px solid var(--border);
+        gap: 12px;
+      }
+
+      .status-item span {
+        font-size: 14px;
+      }
+
+      .badge {
+        padding: 4px 10px;
+        border-radius: 999px;
+        font-size: 12px;
+        font-weight: 600;
+      }
+
+      .badge.good {
+        background: rgba(67, 209, 158, 0.15);
+        color: var(--good);
+      }
+
+      .badge.warn {
+        background: rgba(245, 200, 75, 0.15);
+        color: var(--warn);
+      }
+
+      .badge.bad {
+        background: rgba(255, 107, 107, 0.15);
+        color: var(--bad);
+      }
+
+      .checklist {
+        display: grid;
+        gap: 10px;
+        margin-top: 12px;
+      }
+
+      .checklist label {
+        display: flex;
+        gap: 10px;
+        align-items: flex-start;
+        color: var(--text);
+        font-size: 14px;
+      }
+
+      textarea {
+        width: 100%;
+        min-height: 120px;
+        background: #0f1526;
+        border: 1px solid var(--border);
+        color: var(--text);
+        border-radius: 12px;
+        padding: 12px;
+        resize: vertical;
+      }
+
+      .muted {
+        color: var(--muted);
+        font-size: 13px;
+      }
+
+      footer {
+        padding: 0 32px 32px;
+        color: var(--muted);
+        font-size: 12px;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>Evenements Live Delivery Dashboard</h1>
+      <p>Monitor runtime health + track what remains before delivery.</p>
+    </header>
+    <main>
+      <section class="panel">
+        <div class="toolbar">
+          <div>
+            <h2>Runtime Health</h2>
+            <small>Live reachability checks (refresh every 15s).</small>
+          </div>
+          <div>
+            <button id="refresh">Refresh now</button>
+          </div>
+        </div>
+        <div class="status-list" id="status-list"></div>
+        <p class="muted" id="last-check">Last check: --</p>
+      </section>
+
+      <section class="grid cols-2">
+        <div class="panel">
+          <h2>Delivery Checklist</h2>
+          <small>Track remaining items; saved locally in your browser.</small>
+          <div class="checklist" id="checklist"></div>
+          <div class="toolbar" style="margin-top: 12px;">
+            <span class="muted" id="checklist-progress">0 / 0 done</span>
+            <button class="secondary" id="reset-checklist">Reset</button>
+          </div>
+        </div>
+        <div class="panel">
+          <h2>Release Notes / Next Steps</h2>
+          <small>Use this to track decisions, blockers, and next actions.</small>
+          <textarea id="notes" placeholder="Add today’s notes..."></textarea>
+          <div class="muted" style="margin-top: 8px;">Notes are saved locally.</div>
+        </div>
+      </section>
+    </main>
+    <footer>
+      Status checks are reachability-based by default. If you want strict HTTP status
+      validation, serve this file via a local server and allow its origin in CORS.
+    </footer>
+
+    <script>
+      const services = [
+        { name: "App (frontend)", url: "http://localhost:3000" },
+        { name: "Docs", url: "http://localhost:3001" },
+        { name: "Gateway /ready", url: "http://localhost:4000/ready" },
+        { name: "Identity /ready", url: "http://localhost:4001/ready" },
+        { name: "Event Mgmt /ready", url: "http://localhost:4002/ready" },
+        { name: "Registration /ready", url: "http://localhost:4003/ready" }
+      ];
+
+      const checklistItems = [
+        "Delivery: Update QUICK_START.md with real run commands/ports",
+        "Delivery: Provide one clean local run path (backend + frontend + docs)",
+        "Delivery: Env/secrets hardening with fail-fast validation",
+        "Delivery: Payment UX completion clarity (no fake success)",
+        "Delivery: Admin events limitations explicitly surfaced",
+        "Quality: CI for backend smoke + frontend vitest",
+        "Quality: Authorization negative-path tests (cross-user + roles)",
+        "Quality: Structured logs + correlation ID propagation",
+        "Quality: Reduce local setup fragility (npm/Docker resilience)",
+        "Polish: Notifications pagination UX refinement",
+        "Polish: Profile validation + error UX",
+        "Polish: Accessibility + focus pass on new pages",
+        "Polish: Docs portal build reliability (Docker or local)"
+      ];
+
+      const statusList = document.getElementById("status-list");
+      const lastCheck = document.getElementById("last-check");
+      const refreshButton = document.getElementById("refresh");
+
+      const checklist = document.getElementById("checklist");
+      const checklistProgress = document.getElementById("checklist-progress");
+      const resetChecklist = document.getElementById("reset-checklist");
+      const notes = document.getElementById("notes");
+
+      function loadChecklist() {
+        checklist.innerHTML = "";
+        checklistItems.forEach((text, index) => {
+          const id = `check-${index}`;
+          const wrapper = document.createElement("label");
+          const checkbox = document.createElement("input");
+          checkbox.type = "checkbox";
+          checkbox.id = id;
+          checkbox.checked = localStorage.getItem(id) === "1";
+          checkbox.addEventListener("change", () => {
+            localStorage.setItem(id, checkbox.checked ? "1" : "0");
+            updateChecklistProgress();
+          });
+          const span = document.createElement("span");
+          span.textContent = text;
+          wrapper.appendChild(checkbox);
+          wrapper.appendChild(span);
+          checklist.appendChild(wrapper);
+        });
+        updateChecklistProgress();
+      }
+
+      function updateChecklistProgress() {
+        const total = checklistItems.length;
+        let done = 0;
+        checklistItems.forEach((_, index) => {
+          if (localStorage.getItem(`check-${index}`) === "1") {
+            done += 1;
+          }
+        });
+        checklistProgress.textContent = `${done} / ${total} done`;
+      }
+
+      function loadNotes() {
+        notes.value = localStorage.getItem("dashboard-notes") || "";
+        notes.addEventListener("input", () => {
+          localStorage.setItem("dashboard-notes", notes.value);
+        });
+      }
+
+      function setStatusRow(row, state, label) {
+        const badge = row.querySelector(".badge");
+        badge.className = `badge ${state}`;
+        badge.textContent = label;
+      }
+
+      function renderStatusRows() {
+        statusList.innerHTML = "";
+        services.forEach((service) => {
+          const row = document.createElement("div");
+          row.className = "status-item";
+          row.innerHTML = `
+            <span>${service.name}<br><span class="muted">${service.url}</span></span>
+            <span class="badge warn">Checking</span>
+          `;
+          statusList.appendChild(row);
+          service.row = row;
+        });
+      }
+
+      async function refreshStatus() {
+        renderStatusRows();
+        if (window.location.protocol === "file:") {
+          services.forEach((service) => {
+            setStatusRow(service.row, "warn", "Serve via dashboard server");
+          });
+          lastCheck.textContent = "Last check: run node tools/ops-dashboard-server.js";
+          return;
+        }
+        try {
+          const response = await fetch("/api/status");
+          const data = await response.json();
+          data.services.forEach((service) => {
+            const row = services.find((s) => s.url === service.url)?.row;
+            if (!row) return;
+            if (service.ok) {
+              const label = service.status ? `Healthy (${service.status})` : "Healthy";
+              setStatusRow(row, "good", label);
+            } else if (service.error) {
+              setStatusRow(row, "bad", service.error.toUpperCase());
+            } else {
+              const statusLabel = service.status ? `Down (${service.status})` : "Down";
+              setStatusRow(row, "bad", statusLabel);
+            }
+          });
+          lastCheck.textContent = `Last check: ${new Date(
+            data.checkedAt
+          ).toLocaleTimeString()}`;
+        } catch (error) {
+          services.forEach((service) => {
+            setStatusRow(service.row, "bad", "No response");
+          });
+          lastCheck.textContent = "Last check: dashboard server unreachable";
+        }
+      }
+
+      refreshButton.addEventListener("click", refreshStatus);
+      resetChecklist.addEventListener("click", () => {
+        checklistItems.forEach((_, index) => {
+          localStorage.removeItem(`check-${index}`);
+        });
+        loadChecklist();
+      });
+
+      loadChecklist();
+      loadNotes();
+      refreshStatus();
+      setInterval(refreshStatus, 15000);
+    </script>
+  </body>
+</html>

@@ -41,10 +41,15 @@ function resolveJwtSecret(envKey, fallbackValue) {
   const configured = String(process.env[envKey] || "").trim();
   if (configured) {
     if (configured.length < 32) {
-      log("warn", "auth.jwt.secret.weak", {
-        envKey,
-        length: configured.length
-      });
+      if (process.env.ALLOW_INSECURE_JWT_DEFAULTS === "true") {
+        log("warn", "auth.jwt.secret.weak", {
+          envKey,
+          length: configured.length,
+          message: "Weak secret allowed by ALLOW_INSECURE_JWT_DEFAULTS."
+        });
+        return configured;
+      }
+      throw new Error(`${envKey} must be at least 32 characters`);
     }
     return configured;
   }
@@ -57,16 +62,7 @@ function resolveJwtSecret(envKey, fallbackValue) {
     return fallbackValue;
   }
 
-  if (String(process.env.NODE_ENV || "").toLowerCase() === "production") {
-    throw new Error(`${envKey} is required in production`);
-  }
-
-  const generated = crypto.randomBytes(32).toString("hex");
-  log("warn", "auth.jwt.secret.generated", {
-    envKey,
-    message: "Generated ephemeral secret; set env for stable sessions."
-  });
-  return generated;
+  throw new Error(`${envKey} is required (set env or allow insecure defaults)`);
 }
 
 config.jwtAccessSecret = resolveJwtSecret(

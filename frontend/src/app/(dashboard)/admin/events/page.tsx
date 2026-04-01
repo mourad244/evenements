@@ -22,7 +22,7 @@ export default function AdminEventsPage() {
       <PageTitle
         eyebrow="Admin"
         title="Admin events"
-        description="Review a limited event overview while the broader admin event workspace is still being prepared."
+        description="Review a read-only event overview while the broader admin event workspace is still being prepared."
       />
       <Card className="grid gap-4 border-[rgba(243,154,99,0.22)] bg-[radial-gradient(circle_at_top_right,rgba(243,154,99,0.12),transparent_28%),linear-gradient(180deg,rgba(29,20,13,0.92),rgba(16,13,11,0.98))] shadow-[0_28px_64px_rgba(0,0,0,0.32)]">
         <div className="grid gap-2">
@@ -34,7 +34,7 @@ export default function AdminEventsPage() {
         </div>
         <div className="grid gap-3 rounded-[24px] border border-[rgba(243,154,99,0.16)] bg-[rgba(24,18,14,0.74)] p-4 text-sm text-[var(--text-secondary)]">
           <p>
-            Available now: a basic event list for quick review and high-level lifecycle scanning.
+            Available now: a read-only event list for quick review and high-level lifecycle scanning.
           </p>
           <p>
             Not included here yet: broader admin oversight, metrics, or deeper event controls.

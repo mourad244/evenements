@@ -13,12 +13,18 @@ import { useCancelRegistrationMutation } from "../hooks/use-cancel-registration-
 import type { RegistrationItem } from "../types/registration.types";
 
 function resolveStatusState(registration: RegistrationItem) {
+  const paymentPending =
+    registration.status === "CONFIRMED" &&
+    Boolean(registration.ticketId) &&
+    !registration.canDownloadTicket;
   if (registration.status === "CONFIRMED") {
     return {
       title: "Registration confirmed",
       description: registration.canDownloadTicket
         ? "Your place is secured and the ticket record is already available."
-        : "Your place is secured. Ticket details will appear here as soon as they are ready.",
+        : paymentPending
+            ? "Your place is secured. Payment confirmation is still pending, and ticket access will unlock after it completes."
+            : "Your place is secured. Ticket details will appear here as soon as they are ready.",
       tone: "text-[var(--status-success)]"
     };
   }
@@ -49,6 +55,18 @@ function resolveStatusState(registration: RegistrationItem) {
 }
 
 function resolveTicketState(registration: RegistrationItem) {
+  if (
+    registration.status === "CONFIRMED" &&
+    registration.ticketId &&
+    !registration.canDownloadTicket
+  ) {
+    return {
+      title: "Payment pending",
+      description: "Your ticket will unlock automatically once payment is confirmed.",
+      tone: "text-[var(--status-warning)]"
+    };
+  }
+
   if (registration.canDownloadTicket && registration.ticketId) {
     return {
       title: `${registration.ticketFormat || "Ticket"} available`,
@@ -83,10 +101,16 @@ function resolveTicketState(registration: RegistrationItem) {
 function resolveNextStep(registration: RegistrationItem) {
   if (registration.status === "CONFIRMED") {
     return {
-      title: registration.canDownloadTicket ? "Everything is in place" : "Check back for ticket readiness",
+      title: registration.canDownloadTicket
+        ? "Everything is in place"
+        : registration.ticketId
+            ? "Payment confirmation pending"
+            : "Check back for ticket readiness",
       description: registration.canDownloadTicket
         ? "You can review the event details any time, and your full participant history will keep this record visible."
-        : "Your place is secured. Keep this history view nearby so you can spot the ticket update as soon as it appears."
+        : registration.ticketId
+            ? "Payment confirmation will update your ticket automatically. Return here for the latest status."
+            : "Your place is secured. Keep this history view nearby so you can spot the ticket update as soon as it appears."
     };
   }
 
