@@ -17,6 +17,7 @@ export type RegistrationItem = {
   canDownloadTicket: boolean;
   ticketId: string | null;
   ticketFormat: string | null;
+  ticketStatus?: string | null;
   updatedAt: string | null;
 };
 

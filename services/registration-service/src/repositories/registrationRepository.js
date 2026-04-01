@@ -14,6 +14,8 @@ function mapRegistration(row) {
     waitlistPosition: row.waitlist_position,
     ticketId: row.ticket_id,
     ticketRef: row.ticket_ref,
+    ticketStatus: row.ticket_status || null,
+    ticketFormat: row.ticket_format || null,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
     cancelledAt: row.cancelled_at,
@@ -95,6 +97,32 @@ const BASE_SELECT = `
     cancelled_at,
     promoted_at
   FROM registrations
+`;
+
+const PARTICIPATION_SELECT = `
+  SELECT
+    r.registration_id,
+    r.event_id,
+    r.participant_id,
+    r.participant_name,
+    r.participant_email,
+    r.event_title,
+    r.event_city,
+    r.event_start_at,
+    r.event_capacity,
+    r.registration_status,
+    r.waitlist_position,
+    r.ticket_id,
+    r.ticket_ref,
+    t.ticket_status,
+    t.ticket_format,
+    r.created_at,
+    r.updated_at,
+    r.cancelled_at,
+    r.promoted_at
+  FROM registrations r
+  LEFT JOIN tickets t
+    ON r.ticket_id = t.ticket_id
 `;
 
 const TICKET_SELECT = `
@@ -356,9 +384,9 @@ export function createRegistrationRepository(pool) {
       params.push(offset);
       const { rows } = await pool.query(
         `
-          ${BASE_SELECT}
+          ${PARTICIPATION_SELECT}
           WHERE ${whereSql}
-          ORDER BY updated_at DESC, created_at DESC
+          ORDER BY r.updated_at DESC, r.created_at DESC
           LIMIT $${params.length - 1}
           OFFSET $${params.length}
         `,

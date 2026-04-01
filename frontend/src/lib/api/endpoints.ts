@@ -34,5 +34,10 @@ export const ENDPOINTS = {
     cancel: (registrationId: string) => `/api/registrations/${registrationId}/cancel`,
     organizerEventRegistrations: (eventId: string) =>
       `/api/organizer/events/${eventId}/registrations`
+  },
+  notifications: {
+    list: "/api/notifications",
+    markRead: (notificationId: string) =>
+      `/api/notifications/${notificationId}/read`
   }
 } as const;

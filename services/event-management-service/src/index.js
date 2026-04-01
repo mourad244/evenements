@@ -3,6 +3,11 @@ import { setTimeout as delay } from "node:timers/promises";
 
 import express from "express";
 import pg from "pg";
+import {
+  createCorrelationIdMiddleware,
+  createJsonLogger,
+  createRequestCompletionLogger
+} from "../../shared/observability.js";
 
 import { ensureSchema } from "./db/schema.js";
 import { createEventRepository } from "./repositories/eventRepository.js";
@@ -19,6 +24,7 @@ const config = {
   registrationServiceUrl:
     process.env.REGISTRATION_SERVICE_URL || "http://127.0.0.1:4003"
 };
+const log = createJsonLogger(config.serviceName);
 
 const allowedVisibility = new Set(["PUBLIC", "PRIVATE"]);
 const allowedPricingType = new Set(["FREE", "PAID"]);
@@ -30,6 +36,18 @@ const repository = createEventRepository(pool);
 
 const app = express();
 app.use(express.json());
+app.use(createCorrelationIdMiddleware());
+app.use(
+  createRequestCompletionLogger({
+    log,
+    eventName: "event.request.completed",
+    buildFields: (req) => ({
+      correlationId: req.correlationId || null,
+      userId: req.auth?.userId || null,
+      role: req.auth?.role || null
+    })
+  })
+);
 
 function success(data, meta) {
   if (meta) return { success: true, data, meta };
@@ -219,7 +237,9 @@ function authContext(req) {
   const userId = String(req.header("x-user-id") || "").trim();
   const role = String(req.header("x-user-role") || "").trim().toUpperCase();
   const sessionId = String(req.header("x-session-id") || "").trim();
-  const correlationId = String(req.header("x-correlation-id") || "").trim();
+  const correlationId =
+    String(req.correlationId || req.header("x-correlation-id") || "").trim() ||
+    null;
 
   if (!userId || !role || !sessionId) {
     return null;
@@ -639,14 +659,16 @@ async function boot() {
   }
 
   app.listen(config.port, () => {
-    // eslint-disable-next-line no-console
-    console.log(`[${config.serviceName}] listening on port ${config.port}`);
+    log("info", "service.started", {
+      port: config.port
+    });
   });
 }
 
 boot().catch((err) => {
-  // eslint-disable-next-line no-console
-  console.error(`[${config.serviceName}] failed to boot`, err);
+  log("error", "service.boot.failed", {
+    message: err.message
+  });
   process.exit(1);
 });
 

@@ -12,6 +12,7 @@
     "docs:start": "corepack pnpm --filter docs-portal start",
     "docs:build": "corepack pnpm --filter docs-portal build",
     "docs:serve": "corepack pnpm --filter docs-portal serve",
+    "local:up": "node tools/run-local.mjs",
     "compose:s1-m01:up": "docker compose -f docker-compose.s1-m01.yml up -d --wait",
     "compose:s1-m01:down": "docker compose -f docker-compose.s1-m01.yml down -v",
     "test:s1-m01": "node --test tests/s1-m01.smoke.test.js",

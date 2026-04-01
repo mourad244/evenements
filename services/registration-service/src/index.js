@@ -3,6 +3,11 @@ import { setTimeout as delay } from "node:timers/promises";
 
 import express from "express";
 import pg from "pg";
+import {
+  createCorrelationIdMiddleware,
+  createJsonLogger,
+  createRequestCompletionLogger
+} from "../../shared/observability.js";
 
 import { ensureSchema } from "./db/schema.js";
 import { createRegistrationRepository } from "./repositories/registrationRepository.js";
@@ -19,6 +24,7 @@ const config = {
   eventManagementServiceUrl:
     process.env.EVENT_MANAGEMENT_SERVICE_URL || "http://127.0.0.1:4002"
 };
+const log = createJsonLogger(config.serviceName);
 
 const allowedParticipantRoles = new Set(["PARTICIPANT"]);
 const allowedOrganizerRoles = new Set(["ORGANIZER", "ADMIN"]);
@@ -43,6 +49,18 @@ const repository = createRegistrationRepository(pool);
 
 const app = express();
 app.use(express.json());
+app.use(createCorrelationIdMiddleware());
+app.use(
+  createRequestCompletionLogger({
+    log,
+    eventName: "registration.request.completed",
+    buildFields: (req) => ({
+      correlationId: req.correlationId || null,
+      userId: req.auth?.userId || null,
+      role: req.auth?.role || null
+    })
+  })
+);
 
 function success(data, meta) {
   if (meta) return { success: true, data, meta };
@@ -64,6 +82,9 @@ function authContext(req) {
   const userId = String(req.header("x-user-id") || "").trim();
   const role = String(req.header("x-user-role") || "").trim().toUpperCase();
   const sessionId = String(req.header("x-session-id") || "").trim();
+  const correlationId =
+    String(req.correlationId || req.header("x-correlation-id") || "").trim() ||
+    null;
 
   if (!userId || !role || !sessionId) {
     return null;
@@ -72,14 +93,17 @@ function authContext(req) {
   return {
     userId,
     role,
-    sessionId
+    sessionId,
+    correlationId
   };
 }
 
 function toParticipationView(item) {
+  const ticketStatus = String(item.ticketStatus || "").trim().toUpperCase();
   const canDownloadTicket =
     item.registrationStatus === "CONFIRMED" &&
-    String(item.ticketId || "").trim().length > 0;
+    String(item.ticketId || "").trim().length > 0 &&
+    ticketStatus === ticketStatusIssued;
 
   return {
     id: item.registrationId,
@@ -95,7 +119,10 @@ function toParticipationView(item) {
     waitlistPosition: item.waitlistPosition,
     canDownloadTicket,
     ticketId: item.ticketId,
-    ticketFormat: canDownloadTicket ? defaultTicketFormat : null,
+    ticketFormat: canDownloadTicket
+      ? item.ticketFormat || defaultTicketFormat
+      : null,
+    ticketStatus: ticketStatus || null,
     updatedAt: item.updatedAt
   };
 }
@@ -314,10 +341,17 @@ async function fetchJson(url, options = {}) {
   return { response, payload };
 }
 
-async function fetchPublicEvent(eventId) {
+async function fetchPublicEvent(eventId, correlationId) {
   try {
     const { response, payload } = await fetchJson(
-      `${config.eventManagementServiceUrl}/catalog/events/${encodeURIComponent(eventId)}`
+      `${config.eventManagementServiceUrl}/catalog/events/${encodeURIComponent(eventId)}`,
+      {
+        headers: correlationId
+          ? {
+              "x-correlation-id": correlationId
+            }
+          : undefined
+      }
     );
     if (!response.ok) return null;
     return payload?.data || payload || null;
@@ -334,7 +368,8 @@ async function fetchManagedEvent(eventId, req) {
         headers: {
           "x-user-id": req.auth.userId,
           "x-user-role": req.auth.role,
-          "x-session-id": req.auth.sessionId
+          "x-session-id": req.auth.sessionId,
+          "x-correlation-id": req.correlationId || ""
         }
       }
     );
@@ -388,7 +423,7 @@ app.post("/registrations", async (req, res) => {
       .json(error("Validation failed", "VALIDATION_ERROR", ["eventId is required"]));
   }
 
-  const publicEvent = await fetchPublicEvent(eventId);
+  const publicEvent = await fetchPublicEvent(eventId, req.correlationId);
   if (!publicEvent) {
     return res.status(404).json(error("Event not found", "EVENT_NOT_FOUND"));
   }
@@ -1034,14 +1069,16 @@ async function boot() {
   }
 
   app.listen(config.port, () => {
-    // eslint-disable-next-line no-console
-    console.log(`[${config.serviceName}] listening on port ${config.port}`);
+    log("info", "service.started", {
+      port: config.port
+    });
   });
 }
 
 boot().catch((err) => {
-  // eslint-disable-next-line no-console
-  console.error(`[${config.serviceName}] failed to boot`, err);
+  log("error", "service.boot.failed", {
+    message: err.message
+  });
   process.exit(1);
 });
 

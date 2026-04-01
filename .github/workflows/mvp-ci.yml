@@ -1,0 +1,77 @@
+name: mvp-ci
+
+on:
+  pull_request:
+    paths:
+      - "frontend/**"
+      - "services/**"
+      - "tests/**"
+      - "package.json"
+      - "pnpm-lock.yaml"
+      - "docker-compose.backend.yml"
+      - ".github/workflows/mvp-ci.yml"
+  push:
+    branches:
+      - "main"
+    paths:
+      - "frontend/**"
+      - "services/**"
+      - "tests/**"
+      - "package.json"
+      - "pnpm-lock.yaml"
+      - "docker-compose.backend.yml"
+      - ".github/workflows/mvp-ci.yml"
+
+jobs:
+  backend-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Start backend stack
+        run: docker compose -f docker-compose.backend.yml up -d --build postgres identity-access-service event-management-service registration-service api-gateway
+
+      - name: Wait for gateway
+        run: |
+          for i in {1..30}; do
+            if curl -fsS http://localhost:4000/ready > /dev/null; then
+              echo "Gateway ready";
+              exit 0;
+            fi
+            sleep 2;
+          done
+          echo "Gateway not ready";
+          exit 1
+
+      - name: Run MVP backend smoke
+        run: node --test tests/mvp-backend-critical.smoke.test.js
+
+      - name: Stop backend stack
+        if: always()
+        run: docker compose -f docker-compose.backend.yml down -v
+
+  frontend-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run frontend tests
+        run: pnpm -C frontend test:run

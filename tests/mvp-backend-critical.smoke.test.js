@@ -655,6 +655,25 @@ test("authorization negative paths are enforced", async () => {
   });
   assert.equal(participantOrganizerList.res.status, 403);
 
+  const participantDrafts = await jsonFetch(`${gatewayBase}/api/events/drafts`, {
+    method: "GET",
+    headers: {
+      authorization: `Bearer ${participantAccessToken}`
+    }
+  });
+  assert.equal(participantDrafts.res.status, 403);
+
+  const participantDraftDetails = await jsonFetch(
+    `${gatewayBase}/api/events/drafts/${eventId}`,
+    {
+      method: "GET",
+      headers: {
+        authorization: `Bearer ${participantAccessToken}`
+      }
+    }
+  );
+  assert.equal(participantDraftDetails.res.status, 403);
+
   const otherOrganizerDraft = await jsonFetch(
     `${gatewayBase}/api/events/drafts/${eventId}`,
     {
@@ -677,6 +696,17 @@ test("authorization negative paths are enforced", async () => {
   );
   assert.equal(otherOrganizerRegistrations.res.status, 404);
 
+  const participantOrganizerRegistrations = await jsonFetch(
+    `${gatewayBase}/api/organizer/events/${eventId}/registrations`,
+    {
+      method: "GET",
+      headers: {
+        authorization: `Bearer ${participantAccessToken}`
+      }
+    }
+  );
+  assert.equal(participantOrganizerRegistrations.res.status, 403);
+
   const otherOrganizerExport = await jsonFetch(
     `${gatewayBase}/api/organizer/events/${eventId}/registrations/export`,
     {
@@ -687,6 +717,17 @@ test("authorization negative paths are enforced", async () => {
     }
   );
   assert.equal(otherOrganizerExport.res.status, 404);
+
+  const participantOrganizerExport = await jsonFetch(
+    `${gatewayBase}/api/organizer/events/${eventId}/registrations/export`,
+    {
+      method: "GET",
+      headers: {
+        authorization: `Bearer ${participantAccessToken}`
+      }
+    }
+  );
+  assert.equal(participantOrganizerExport.res.status, 403);
 
   const otherParticipantTicket = await jsonFetch(
     `${gatewayBase}/api/tickets/${ticketId}`,

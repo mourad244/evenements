@@ -48,7 +48,7 @@ export function AdminEventsTable({ events }: { events: AdminEvent[] }) {
   return (
     <DataTableShell
       title="Event list"
-      description="Scan event identity, place, date, and lifecycle from one limited admin table."
+      description="Read-only admin snapshot for event identity, location, schedule, and lifecycle."
       meta={
         <>
           <p className="font-medium">
@@ -57,10 +57,13 @@ export function AdminEventsTable({ events }: { events: AdminEvent[] }) {
           <p className="text-xs uppercase tracking-[0.18em] text-[var(--text-muted)]">
             Sorted by lifecycle, then date
           </p>
+          <p className="text-xs uppercase tracking-[0.18em] text-[var(--text-muted)]">
+            Read-only view
+          </p>
         </>
       }
       tableMinWidthClassName="min-w-[820px]"
-      caption="Event overview with identity, location, scheduled date, and lifecycle status"
+      caption="Read-only event overview with identity, location, scheduled date, and lifecycle status"
     >
       <thead className="bg-[rgba(12,20,35,0.82)] text-[var(--text-muted)]">
         <tr>
