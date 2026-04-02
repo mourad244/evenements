@@ -78,6 +78,17 @@ vi.mock("@/features/registrations/hooks/use-cancel-registration-mutation", () =>
   })
 }));
 
+vi.mock("@/features/payments/hooks/use-create-payment-session-mutation", () => ({
+  useCreatePaymentSessionMutation: () => ({
+    mutate: vi.fn(),
+    isPending: false,
+    isSuccess: false,
+    data: null,
+    error: null,
+    variables: undefined
+  })
+}));
+
 vi.mock("@/features/events/hooks/use-organizer-events-query", () => ({
   useOrganizerEventsQuery: () => ({
     data: [],
@@ -115,7 +126,7 @@ describe("participant refinements", () => {
           id: "reg-1",
           eventId: "evt-1",
           eventTitle: "Atlas Summit",
-          eventDate: "2026-04-02T09:00:00.000Z",
+          eventDate: "2030-04-02T09:00:00.000Z",
           eventCity: "Casablanca",
           status: "CONFIRMED",
           canDownloadTicket: false,
@@ -128,7 +139,7 @@ describe("participant refinements", () => {
           id: "reg-2",
           eventId: "evt-2",
           eventTitle: "Design Circle",
-          eventDate: "2026-04-10T09:00:00.000Z",
+          eventDate: "2030-05-10T09:00:00.000Z",
           eventCity: "Rabat",
           status: "WAITLISTED",
           canDownloadTicket: false,
@@ -161,7 +172,7 @@ describe("participant refinements", () => {
           id: "reg-1",
           eventId: "evt-1",
           eventTitle: "Atlas Summit",
-          eventDate: "2026-04-02T09:00:00.000Z",
+          eventDate: "2030-04-02T09:00:00.000Z",
           eventCity: "Casablanca",
           status: "CONFIRMED",
           canDownloadTicket: true,
@@ -174,7 +185,7 @@ describe("participant refinements", () => {
           id: "reg-2",
           eventId: "evt-2",
           eventTitle: "Design Circle",
-          eventDate: "2026-04-10T09:00:00.000Z",
+          eventDate: "2030-05-10T09:00:00.000Z",
           eventCity: "Rabat",
           status: "WAITLISTED",
           canDownloadTicket: false,

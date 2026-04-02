@@ -11,6 +11,15 @@ const cancelMutationState = {
   variables: undefined as string | undefined
 };
 
+const paymentMutationState = {
+  mutate: vi.fn(),
+  isPending: false,
+  isSuccess: false,
+  data: null as null | { registrationId?: string },
+  error: null as Error | null,
+  variables: undefined as { registrationId?: string } | undefined
+};
+
 vi.mock("next/link", () => ({
   default: ({ href, children, ...props }: Record<string, unknown>) =>
     React.createElement("a", { href: String(href), ...props }, children)
@@ -18,6 +27,10 @@ vi.mock("next/link", () => ({
 
 vi.mock("@/features/registrations/hooks/use-cancel-registration-mutation", () => ({
   useCancelRegistrationMutation: () => cancelMutationState
+}));
+
+vi.mock("@/features/payments/hooks/use-create-payment-session-mutation", () => ({
+  useCreatePaymentSessionMutation: () => paymentMutationState
 }));
 
 import { RegistrationList } from "../registration-list";
@@ -40,6 +53,17 @@ const registrations = [
     eventTitle: "Builders Night",
     eventDate: "2026-05-02T09:00:00.000Z",
     eventCity: "Rabat",
+    status: "CONFIRMED" as const,
+    canDownloadTicket: false,
+    ticketId: "ticket-2",
+    ticketFormat: null
+  },
+  {
+    id: "reg-3",
+    eventId: "evt-3",
+    eventTitle: "Design Circle",
+    eventDate: "2026-05-02T09:00:00.000Z",
+    eventCity: "Rabat",
     status: "WAITLISTED" as const,
     canDownloadTicket: false,
     ticketId: null,
@@ -56,6 +80,12 @@ describe("registration action feedback", () => {
     cancelMutationState.isSuccess = false;
     cancelMutationState.error = null;
     cancelMutationState.variables = undefined;
+    paymentMutationState.mutate.mockReset();
+    paymentMutationState.isPending = false;
+    paymentMutationState.isSuccess = false;
+    paymentMutationState.data = null;
+    paymentMutationState.error = null;
+    paymentMutationState.variables = undefined;
   });
 
   it("shows pending feedback only for the registration currently being cancelled", () => {
@@ -65,7 +95,7 @@ describe("registration action feedback", () => {
     render(<RegistrationList registrations={registrations} />);
 
     expect(screen.getByRole("button", { name: "Cancelling..." }).hasAttribute("disabled")).toBe(true);
-    expect(screen.getByRole("button", { name: "Cancel" })).toBeTruthy();
+    expect(screen.getAllByRole("button", { name: "Cancel" }).length).toBeGreaterThan(0);
   });
 
   it("shows cancellation success feedback", () => {
@@ -84,5 +114,23 @@ describe("registration action feedback", () => {
     render(<RegistrationList registrations={registrations} />);
 
     expect(screen.getByRole("alert").textContent).toContain("Could not cancel this registration");
+  });
+
+  it("shows payment pending state when ticket exists but is not ready", () => {
+    render(<RegistrationList registrations={registrations} />);
+
+    expect(screen.getAllByText("Payment pending").length).toBe(1);
+    expect(
+      screen.getByText(
+        "Payment confirmation will update your ticket automatically. Return here for the latest status."
+      )
+    ).toBeTruthy();
+  });
+
+  it("does not show the ticket-ready action when payment is still pending", () => {
+    render(<RegistrationList registrations={registrations} />);
+
+    const viewButtons = screen.getAllByRole("button", { name: "View ticket" });
+    expect(viewButtons.length).toBe(1);
   });
 });

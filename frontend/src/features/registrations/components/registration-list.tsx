@@ -1,16 +1,30 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
+import { Input } from "@/components/ui/input";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { ROUTES } from "@/lib/constants/routes";
 import { formatDate } from "@/lib/utils/format-date";
 
+import { useCreatePaymentSessionMutation } from "@/features/payments/hooks/use-create-payment-session-mutation";
+
 import { useCancelRegistrationMutation } from "../hooks/use-cancel-registration-mutation";
 import type { RegistrationItem } from "../types/registration.types";
+
+type PaymentDraft = {
+  amount: string;
+  currency: string;
+};
+
+const defaultPaymentDraft: PaymentDraft = {
+  amount: "",
+  currency: "MAD"
+};
 
 function resolveStatusState(registration: RegistrationItem) {
   const paymentPending =
@@ -138,12 +152,26 @@ function resolveNextStep(registration: RegistrationItem) {
 
 export function RegistrationList({ registrations }: { registrations: RegistrationItem[] }) {
   const mutation = useCancelRegistrationMutation();
+  const paymentMutation = useCreatePaymentSessionMutation();
+  const [paymentDrafts, setPaymentDrafts] = useState<Record<string, PaymentDraft>>({});
   const sortedRegistrations = [...registrations].sort((left, right) => {
     const leftDate = left.updatedAt || left.eventDate;
     const rightDate = right.updatedAt || right.eventDate;
 
     return Date.parse(rightDate) - Date.parse(leftDate);
   });
+  const updatePaymentDraft = (registrationId: string, next: Partial<PaymentDraft>) => {
+    setPaymentDrafts((prev) => {
+      const current = prev[registrationId] || defaultPaymentDraft;
+      return {
+        ...prev,
+        [registrationId]: {
+          ...current,
+          ...next
+        }
+      };
+    });
+  };
 
   if (registrations.length === 0) {
     return (
@@ -183,6 +211,28 @@ export function RegistrationList({ registrations }: { registrations: Registratio
         const nextStep = resolveNextStep(registration);
         const isCancellingThis =
           mutation.isPending && mutation.variables === registration.id;
+        const paymentPending =
+          registration.status === "CONFIRMED" &&
+          Boolean(registration.ticketId) &&
+          !registration.canDownloadTicket;
+        const paymentDraft = paymentDrafts[registration.id] || defaultPaymentDraft;
+        const paymentAmount = Number.parseInt(paymentDraft.amount, 10);
+        const canSubmitPayment =
+          Number.isInteger(paymentAmount) && paymentAmount >= 0 && paymentDraft.currency;
+        const isPayingThis =
+          paymentMutation.isPending &&
+          paymentMutation.variables?.registrationId === registration.id;
+        const paymentSuccess =
+          paymentMutation.isSuccess &&
+          paymentMutation.data?.registrationId === registration.id;
+        const paymentError =
+          paymentMutation.error && paymentMutation.variables?.registrationId === registration.id
+            ? paymentMutation.error
+            : null;
+        const showPaymentInputs =
+          registration.status === "CONFIRMED" &&
+          !registration.canDownloadTicket &&
+          !paymentPending;
 
         return (
           <Card
@@ -239,10 +289,77 @@ export function RegistrationList({ registrations }: { registrations: Registratio
                 <p className="text-sm font-medium text-[var(--text-primary)]">{nextStep.title}</p>
                 <p className="text-sm leading-6 text-[var(--text-secondary)]">{nextStep.description}</p>
               </div>
+              {showPaymentInputs ? (
+                <div className="grid gap-3 rounded-[24px] border border-[rgba(88,116,255,0.24)] bg-[rgba(12,18,34,0.7)] p-4">
+                  <div className="grid gap-1">
+                    <p className="text-sm font-semibold text-[var(--text-primary)]">
+                      Start payment session
+                    </p>
+                    <p className="text-xs text-[var(--text-muted)]">
+                      Enter the confirmed amount to unlock ticket access after payment completes.
+                    </p>
+                  </div>
+                  <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_120px]">
+                    <Input
+                      label="Amount"
+                      type="number"
+                      min="0"
+                      step="1"
+                      value={paymentDraft.amount}
+                      onChange={(event) =>
+                        updatePaymentDraft(registration.id, { amount: event.target.value })
+                      }
+                      placeholder="0"
+                    />
+                    <Input
+                      label="Currency"
+                      value={paymentDraft.currency}
+                      onChange={(event) =>
+                        updatePaymentDraft(registration.id, {
+                          currency: event.target.value.toUpperCase()
+                        })
+                      }
+                      placeholder="MAD"
+                    />
+                  </div>
+                  {paymentSuccess ? (
+                    <p className="text-xs text-[var(--status-success)]">
+                      Payment session created. Your ticket will unlock after confirmation.
+                    </p>
+                  ) : null}
+                  {paymentError ? (
+                    <p className="text-xs text-[var(--status-danger)]">
+                      {paymentError.message}
+                    </p>
+                  ) : null}
+                  <Button
+                    onClick={() =>
+                      paymentMutation.mutate({
+                        amount: paymentAmount,
+                        currency: paymentDraft.currency.trim() || "MAD",
+                        registrationId: registration.id,
+                        eventId: registration.eventId,
+                        metadata: {
+                          source: "participant-history"
+                        }
+                      })
+                    }
+                    disabled={!canSubmitPayment || isPayingThis}
+                    className="w-full"
+                  >
+                    {isPayingThis ? "Starting payment..." : "Start payment"}
+                  </Button>
+                </div>
+              ) : null}
               <div className="flex flex-col gap-3 sm:flex-row xl:flex-col xl:items-stretch xl:justify-start">
                 <Link href={`/events/${registration.eventId}`} className="w-full sm:w-auto">
                   <Button variant="ghost" className="w-full sm:w-auto">Review event</Button>
                 </Link>
+                {registration.canDownloadTicket && registration.ticketId ? (
+                  <Link href={`/tickets/${registration.ticketId}`} className="w-full sm:w-auto">
+                    <Button className="w-full sm:w-auto">View ticket</Button>
+                  </Link>
+                ) : null}
               <Button
                 variant="danger"
                 onClick={() => mutation.mutate(registration.id)}

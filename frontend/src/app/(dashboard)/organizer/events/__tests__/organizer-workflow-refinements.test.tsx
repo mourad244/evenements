@@ -101,6 +101,16 @@ vi.mock("@/features/registrations/hooks/use-organizer-event-registrations-query"
   useOrganizerEventRegistrationsQuery: () => organizerRegistrationsState
 }));
 
+vi.mock("@/features/registrations/hooks/use-export-organizer-event-registrations-mutation", () => ({
+  useExportOrganizerEventRegistrationsMutation: () => ({
+    mutate: vi.fn(),
+    isPending: false,
+    isSuccess: false,
+    error: null,
+    variables: undefined
+  })
+}));
+
 vi.mock("@/features/events/hooks/use-update-event-mutation", () => ({
   useUpdateEventMutation: () => ({ mutateAsync: vi.fn(), isPending: mutationState.updatePending })
 }));

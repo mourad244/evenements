@@ -33,11 +33,19 @@ export const ENDPOINTS = {
     mine: "/api/profile/participations",
     cancel: (registrationId: string) => `/api/registrations/${registrationId}/cancel`,
     organizerEventRegistrations: (eventId: string) =>
-      `/api/organizer/events/${eventId}/registrations`
+      `/api/organizer/events/${eventId}/registrations`,
+    organizerEventRegistrationsExport: (eventId: string) =>
+      `/api/organizer/events/${eventId}/registrations/export`
   },
   notifications: {
     list: "/api/notifications",
     markRead: (notificationId: string) =>
       `/api/notifications/${notificationId}/read`
+  },
+  tickets: {
+    get: (ticketId: string) => `/api/tickets/${ticketId}`
+  },
+  payments: {
+    session: "/api/payments/session"
   }
 } as const;
