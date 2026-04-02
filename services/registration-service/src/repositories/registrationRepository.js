@@ -122,7 +122,7 @@ const PARTICIPATION_SELECT = `
     r.promoted_at
   FROM registrations r
   LEFT JOIN tickets t
-    ON r.ticket_id = t.ticket_id
+    ON r.ticket_id::uuid = t.ticket_id
 `;
 
 const TICKET_SELECT = `
@@ -367,13 +367,16 @@ export function createRegistrationRepository(pool) {
       const offset = (page - 1) * pageSize;
       const params = [participantId];
       const whereClauses = ["participant_id = $1"];
+      const whereClausesWithAlias = ["r.participant_id = $1"];
 
       if (status) {
         params.push(status);
         whereClauses.push(`registration_status = $${params.length}`);
+        whereClausesWithAlias.push(`r.registration_status = $${params.length}`);
       }
 
       const whereSql = whereClauses.join(" AND ");
+      const whereSqlWithAlias = whereClausesWithAlias.join(" AND ");
       const countResult = await pool.query(
         `SELECT COUNT(*)::int AS total FROM registrations WHERE ${whereSql}`,
         params
@@ -385,7 +388,7 @@ export function createRegistrationRepository(pool) {
       const { rows } = await pool.query(
         `
           ${PARTICIPATION_SELECT}
-          WHERE ${whereSql}
+          WHERE ${whereSqlWithAlias}
           ORDER BY r.updated_at DESC, r.created_at DESC
           LIMIT $${params.length - 1}
           OFFSET $${params.length}

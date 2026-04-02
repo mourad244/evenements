@@ -11,6 +11,7 @@ import { ErrorState } from "@/components/ui/error-state";
 import { LoadingState } from "@/components/ui/loading-state";
 import { UnavailableState } from "@/components/ui/unavailable-state";
 import { OrganizerRegistrationsList } from "@/features/registrations/components/organizer-registrations-list";
+import { useExportOrganizerEventRegistrationsMutation } from "@/features/registrations/hooks/use-export-organizer-event-registrations-mutation";
 import { useOrganizerEventRegistrationsQuery } from "@/features/registrations/hooks/use-organizer-event-registrations-query";
 import { ROUTES } from "@/lib/constants/routes";
 
@@ -19,6 +20,7 @@ export default function OrganizerEventRegistrationsPage() {
   const { data, isLoading, isError, error } = useOrganizerEventRegistrationsQuery(
     params.eventId
   );
+  const exportMutation = useExportOrganizerEventRegistrationsMutation();
   const confirmedCount =
     data?.registrations.filter((registration) => registration.status === "CONFIRMED").length || 0;
   const waitlistedCount =
@@ -72,8 +74,32 @@ export default function OrganizerEventRegistrationsPage() {
               All organizer events
             </Button>
           </Link>
+          <Button
+            onClick={() => exportMutation.mutate(params.eventId)}
+            disabled={exportMutation.isPending}
+            className="w-full sm:w-auto"
+          >
+            {exportMutation.isPending ? "Exporting..." : "Export CSV"}
+          </Button>
         </div>
       </Card>
+
+      {exportMutation.isSuccess ? (
+        <p
+          role="status"
+          className="rounded-[22px] border border-[rgba(52,211,153,0.22)] bg-[rgba(6,78,59,0.3)] px-4 py-3 text-sm text-[var(--status-success)]"
+        >
+          CSV export started. Your download should begin automatically.
+        </p>
+      ) : null}
+      {exportMutation.isError ? (
+        <p
+          role="alert"
+          className="rounded-[22px] border border-[rgba(251,113,133,0.24)] bg-[rgba(127,29,29,0.26)] px-4 py-3 text-sm text-[var(--status-danger)]"
+        >
+          {exportMutation.error.message}
+        </p>
+      ) : null}
 
       {data ? (
         <Card className="grid gap-2.5 border-[var(--line-soft)] bg-[linear-gradient(180deg,rgba(16,26,45,0.94),rgba(9,15,26,0.98))]">
