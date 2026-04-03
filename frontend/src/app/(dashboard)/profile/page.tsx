@@ -7,14 +7,14 @@ import { PageTitle } from "@/components/shared/page-title";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { ErrorState } from "@/components/ui/error-state";
-import { LoadingState } from "@/components/ui/loading-state";
+import { useCurrentUser } from "@/features/auth/hooks/use-current-user";
 import { useProfileQuery } from "@/features/auth/hooks/use-profile-query";
 import { useUpdateProfileMutation } from "@/features/auth/hooks/use-update-profile-mutation";
 import { ROUTES } from "@/lib/constants/routes";
 import { formatDate } from "@/lib/utils/format-date";
 
-function getInitials(name: string) {
+function getInitials(name?: string) {
+  if (!name) return "U";
   const parts = name.trim().split(/\s+/);
   return parts.length >= 2
     ? `${parts[0][0]}${parts[parts.length - 1][0]}`.toUpperCase()
@@ -44,8 +44,48 @@ function RoleBadge({ role }: { role: string }) {
   );
 }
 
+function ProfileSkeleton() {
+  return (
+    <div className="grid gap-10 animate-pulse">
+      <div className="grid gap-2">
+        <div className="h-3 w-20 rounded-full bg-[rgba(88,116,255,0.15)]" />
+        <div className="h-8 w-48 rounded-xl bg-[rgba(255,255,255,0.06)]" />
+        <div className="h-4 w-80 rounded-full bg-[rgba(255,255,255,0.04)]" />
+      </div>
+      <Card className="grid gap-6 border-[rgba(88,116,255,0.18)] bg-[rgba(18,28,46,0.96)]">
+        <div className="flex items-center gap-4">
+          <div className="h-16 w-16 shrink-0 rounded-2xl bg-[rgba(88,116,255,0.2)]" />
+          <div className="grid gap-2">
+            <div className="h-6 w-40 rounded-lg bg-[rgba(255,255,255,0.07)]" />
+            <div className="h-4 w-52 rounded-full bg-[rgba(255,255,255,0.04)]" />
+            <div className="h-5 w-24 rounded-full bg-[rgba(88,116,255,0.12)]" />
+          </div>
+        </div>
+        <div className="grid gap-3 sm:grid-cols-2">
+          {[1, 2].map((i) => (
+            <div key={i} className="h-12 rounded-[22px] bg-[rgba(255,255,255,0.04)]" />
+          ))}
+        </div>
+      </Card>
+      <Card className="grid gap-6 border-[var(--line-soft)] bg-[rgba(16,26,45,0.94)]">
+        <div className="grid gap-3 border-b border-[var(--line-soft)] pb-5">
+          <div className="h-3 w-32 rounded-full bg-[rgba(88,116,255,0.15)]" />
+          <div className="h-6 w-40 rounded-lg bg-[rgba(255,255,255,0.06)]" />
+        </div>
+        <div className="grid gap-5 md:grid-cols-2">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="h-12 rounded-[22px] bg-[rgba(255,255,255,0.04)]" />
+          ))}
+        </div>
+        <div className="h-20 rounded-[22px] bg-[rgba(255,255,255,0.04)]" />
+      </Card>
+    </div>
+  );
+}
+
 export default function ProfilePage() {
-  const { data: profile, isLoading, isError, error } = useProfileQuery();
+  const { data: currentUser } = useCurrentUser();
+  const { data: profile, isLoading: isProfileLoading } = useProfileQuery();
   const mutation = useUpdateProfileMutation();
 
   const [formState, setFormState] = useState({
@@ -57,16 +97,42 @@ export default function ProfilePage() {
   const [isDirty, setIsDirty] = useState(false);
   const [saved, setSaved] = useState(false);
 
-  const derivedValues = useMemo(
-    () => ({
-      fullName: profile?.fullName || "",
-      phone: profile?.phone || "",
-      city: profile?.city || "",
-      bio: profile?.bio || ""
-    }),
-    [profile]
-  );
+  // Use profile data when available, fall back to currentUser for display
+  const displayData = useMemo(() => ({
+    fullName: profile?.fullName || currentUser?.fullName || "",
+    email: profile?.email || currentUser?.email || "",
+    role: profile?.role || currentUser?.role || "PARTICIPANT",
+    phone: profile?.phone || "",
+    city: profile?.city || "",
+    bio: profile?.bio || "",
+    createdAt: profile?.createdAt,
+    updatedAt: profile?.updatedAt
+  }), [profile, currentUser]);
+
+  const derivedValues = useMemo(() => ({
+    fullName: displayData.fullName,
+    phone: displayData.phone,
+    city: displayData.city,
+    bio: displayData.bio
+  }), [displayData]);
+
   const values = isDirty ? formState : derivedValues;
+
+  // Show skeleton only if we have neither currentUser nor profile
+  if (!currentUser && isProfileLoading) {
+    return <ProfileSkeleton />;
+  }
+
+  if (!currentUser && !isProfileLoading) {
+    return (
+      <div className="flex flex-col items-center justify-center gap-4 py-24 text-center">
+        <p className="text-[var(--text-secondary)]">Please sign in to view your profile.</p>
+        <Link href={ROUTES.login}>
+          <Button>Sign in</Button>
+        </Link>
+      </div>
+    );
+  }
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -87,15 +153,7 @@ export default function ProfilePage() {
     );
   }
 
-  if (isError) {
-    return <ErrorState title="Could not load profile" description={error.message} />;
-  }
-
-  if (isLoading || !profile) {
-    return <LoadingState label="Loading your profile..." variant="detail" />;
-  }
-
-  const initials = getInitials(profile.fullName || "U");
+  const initials = getInitials(displayData.fullName);
 
   return (
     <div className="grid gap-10">
@@ -115,26 +173,26 @@ export default function ProfilePage() {
             </div>
             <div className="grid gap-1">
               <h2 className="text-2xl font-semibold tracking-tight text-[var(--text-primary)]">
-                {profile.fullName}
+                {displayData.fullName || "—"}
               </h2>
-              <p className="text-sm text-[var(--text-secondary)]">{profile.email}</p>
+              <p className="text-sm text-[var(--text-secondary)]">{displayData.email}</p>
               <div className="flex flex-wrap items-center gap-2 pt-0.5">
-                <RoleBadge role={profile.role} />
-                {profile.city ? (
-                  <span className="text-xs text-[var(--text-muted)]">{profile.city}</span>
+                <RoleBadge role={displayData.role} />
+                {displayData.city ? (
+                  <span className="text-xs text-[var(--text-muted)]">{displayData.city}</span>
                 ) : null}
               </div>
             </div>
           </div>
           <div className="flex flex-col gap-2 sm:items-end">
-            {profile.createdAt ? (
+            {displayData.createdAt ? (
               <p className="text-xs text-[var(--text-muted)]">
-                Member since {formatDate(profile.createdAt)}
+                Member since {formatDate(displayData.createdAt)}
               </p>
             ) : null}
-            {profile.updatedAt ? (
+            {displayData.updatedAt ? (
               <p className="text-xs text-[var(--text-muted)]">
-                Last updated {formatDate(profile.updatedAt)}
+                Last updated {formatDate(displayData.updatedAt)}
               </p>
             ) : null}
           </div>
@@ -144,22 +202,22 @@ export default function ProfilePage() {
         <dl className="grid gap-3 sm:grid-cols-2">
           <div className="flex items-center justify-between gap-4 rounded-[22px] border border-[var(--line-soft)] bg-[rgba(12,20,35,0.6)] px-4 py-3">
             <dt className="text-xs font-semibold uppercase tracking-wide text-[var(--text-muted)]">Email</dt>
-            <dd className="text-sm font-medium text-[var(--text-primary)]">{profile.email}</dd>
+            <dd className="text-sm font-medium text-[var(--text-primary)]">{displayData.email}</dd>
           </div>
           <div className="flex items-center justify-between gap-4 rounded-[22px] border border-[var(--line-soft)] bg-[rgba(12,20,35,0.6)] px-4 py-3">
             <dt className="text-xs font-semibold uppercase tracking-wide text-[var(--text-muted)]">Role</dt>
-            <dd><RoleBadge role={profile.role} /></dd>
+            <dd><RoleBadge role={displayData.role} /></dd>
           </div>
-          {profile.phone ? (
+          {displayData.phone ? (
             <div className="flex items-center justify-between gap-4 rounded-[22px] border border-[var(--line-soft)] bg-[rgba(12,20,35,0.6)] px-4 py-3">
               <dt className="text-xs font-semibold uppercase tracking-wide text-[var(--text-muted)]">Phone</dt>
-              <dd className="text-sm font-medium text-[var(--text-primary)]">{profile.phone}</dd>
+              <dd className="text-sm font-medium text-[var(--text-primary)]">{displayData.phone}</dd>
             </div>
           ) : null}
-          {profile.bio ? (
+          {displayData.bio ? (
             <div className="flex items-center justify-between gap-4 rounded-[22px] border border-[var(--line-soft)] bg-[rgba(12,20,35,0.6)] px-4 py-3 sm:col-span-2">
               <dt className="text-xs font-semibold uppercase tracking-wide text-[var(--text-muted)]">Bio</dt>
-              <dd className="text-sm text-[var(--text-secondary)]">{profile.bio}</dd>
+              <dd className="text-sm text-[var(--text-secondary)]">{displayData.bio}</dd>
             </div>
           ) : null}
         </dl>

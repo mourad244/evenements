@@ -525,7 +525,7 @@ function AdminDashboard() {
 }
 
 export default function DashboardPage() {
-  const { data: user, isLoading: isUserLoading } = useCurrentUser();
+  const { data: user, isLoading: isUserLoading, isFetching: isUserFetching } = useCurrentUser();
   const isParticipant = user?.role === "PARTICIPANT";
   const isOrganizer = user?.role === "ORGANIZER";
   const isAdmin = user?.role === "ADMIN";
@@ -533,7 +533,13 @@ export default function DashboardPage() {
   const registrationsQuery = useMyRegistrationsQuery({}, isParticipant);
   const organizerEventsQuery = useOrganizerEventsQuery(isOrganizer);
 
-  if (isUserLoading) {
+  // Show loading while user is being fetched (covers hard-refresh and initial login)
+  if (isUserLoading || (isUserFetching && !user)) {
+    return <LoadingState label="Loading dashboard..." variant="dashboard" />;
+  }
+
+  // Safety: if user never loaded (no token / auth failure), nothing to render
+  if (!user) {
     return <LoadingState label="Loading dashboard..." variant="dashboard" />;
   }
 

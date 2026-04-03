@@ -27,12 +27,16 @@ export function AuthGuard({ children }: AuthGuardProps) {
   }, [router, targetRoute, token]);
 
   useEffect(() => {
-    if (token && !isLoading && (isError || !user)) {
+    // Only redirect when there is no token, or when the fetch failed AND there is no cached user
+    // (do not redirect on background-refetch errors when we already have valid cached data)
+    if (!token) {
+      router.replace(targetRoute);
+    } else if (!isLoading && isError && !user) {
       router.replace(targetRoute);
     }
   }, [isError, isLoading, router, targetRoute, token, user]);
 
-  if (!token || (token && isLoading) || (token && !isLoading && (isError || !user))) {
+  if (!token || (token && isLoading && !user) || (token && !isLoading && isError && !user)) {
     return (
       <div className="flex min-h-[240px] items-center justify-center">
         <Spinner />
