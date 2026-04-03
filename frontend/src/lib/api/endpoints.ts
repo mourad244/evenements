@@ -13,12 +13,14 @@ export const ENDPOINTS = {
   auth: {
     login: "/api/auth/login",
     register: "/api/auth/register",
+    refresh: "/api/auth/refresh",
     me: "/api/auth/me",
     forgotPassword: "/api/auth/forgot-password",
     resetPassword: "/api/auth/reset-password"
   },
   admin: {
-    users: "/api/admin/users"
+    users: "/api/admin/users",
+    events: "/api/admin/events"
   },
   events: {
     list: "/api/catalog/events",
@@ -46,7 +48,8 @@ export const ENDPOINTS = {
     get: (ticketId: string) => `/api/tickets/${ticketId}`
   },
   payments: {
-    session: "/api/payments/session"
+    session: "/api/payments/session",
+    webhook: "/api/payments/webhook"
   },
   profile: {
     get: "/api/profile",

@@ -331,7 +331,7 @@ export function RegistrationList({ registrations }: { registrations: Registratio
                   </div>
                   {paymentSuccess ? (
                     <p className="text-xs text-[var(--status-success)]">
-                      Payment session created. Your ticket will unlock after confirmation.
+                      Payment confirmed. Your ticket is now being issued — refresh to see it.
                     </p>
                   ) : null}
                   {paymentError ? (

@@ -11,6 +11,7 @@ export function useCurrentUser() {
     queryKey: ["current-user"],
     queryFn: getMe,
     retry: false,
-    enabled: Boolean(getToken())
+    enabled: Boolean(getToken()),
+    staleTime: 5 * 60 * 1000 // 5 minutes — prevents immediate background refetch after login setQueryData
   });
 }
