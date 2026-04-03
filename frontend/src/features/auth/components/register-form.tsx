@@ -8,6 +8,7 @@ import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { Select } from "@/components/ui/select";
 import { ROUTES } from "@/lib/constants/routes";
 
 import { registerSchema, type RegisterSchema } from "../schemas/auth.schema";
@@ -84,19 +85,14 @@ export function RegisterForm() {
           error={form.formState.errors.confirmPassword?.message}
           disabled={mutation.isPending}
         />
-        <label className="grid gap-2.5 text-sm text-[var(--text-secondary)]">
-          <span className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--text-muted)]">
-            Role
-          </span>
-          <select
-            className="h-12 rounded-[22px] border border-[var(--line-soft)] bg-[linear-gradient(180deg,rgba(16,26,45,0.96),rgba(10,17,30,0.98))] px-4 text-sm text-[var(--text-primary)] outline-none transition shadow-[inset_0_1px_0_rgba(255,255,255,0.03)] focus-visible:border-[rgba(88,116,255,0.38)] focus-visible:ring-2 focus-visible:ring-[var(--ring-brand)]"
-            {...form.register("role")}
-            disabled={mutation.isPending}
-          >
-            <option value="PARTICIPANT">Participant</option>
-            <option value="ORGANIZER">Organizer</option>
-          </select>
-        </label>
+        <Select
+          label="Role"
+          {...form.register("role")}
+          disabled={mutation.isPending}
+        >
+          <option value="PARTICIPANT">Participant</option>
+          <option value="ORGANIZER">Organizer</option>
+        </Select>
         {mutation.isPending ? (
           <p role="status" className="rounded-[22px] border border-[rgba(88,116,255,0.18)] bg-[rgba(88,116,255,0.08)] px-4 py-3 text-sm text-[var(--text-secondary)]">
             Creating your account. You will be redirected to sign in next.

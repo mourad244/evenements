@@ -14,6 +14,8 @@ function mapEvent(row) {
     capacity: row.capacity,
     visibility: row.visibility,
     pricingType: row.pricing_type,
+    price: row.price != null ? Number(row.price) : 0,
+    currency: row.currency || "MAD",
     status: row.status,
     coverImageRef: row.cover_image_ref,
     publishedAt: row.published_at,
@@ -38,6 +40,8 @@ const BASE_SELECT = `
     capacity,
     visibility,
     pricing_type,
+    price,
+    currency,
     status,
     cover_image_ref,
     published_at,
@@ -70,6 +74,8 @@ export function createEventRepository(pool) {
             capacity,
             visibility,
             pricing_type,
+            price,
+            currency,
             status,
             cover_image_ref,
             published_at,
@@ -77,7 +83,7 @@ export function createEventRepository(pool) {
             updated_at,
             deleted_at
           )
-          VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19)
+          VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21)
           RETURNING
             event_id,
             organizer_id,
@@ -92,6 +98,8 @@ export function createEventRepository(pool) {
             capacity,
             visibility,
             pricing_type,
+            price,
+            currency,
             status,
             cover_image_ref,
             published_at,
@@ -113,6 +121,8 @@ export function createEventRepository(pool) {
           event.capacity,
           event.visibility,
           event.pricingType,
+          event.price ?? 0,
+          event.currency ?? "MAD",
           event.status,
           event.coverImageRef,
           event.publishedAt,
@@ -290,6 +300,8 @@ export function createEventRepository(pool) {
         capacity: "capacity",
         visibility: "visibility",
         pricingType: "pricing_type",
+        price: "price",
+        currency: "currency",
         coverImageRef: "cover_image_ref"
       };
 
@@ -325,6 +337,8 @@ export function createEventRepository(pool) {
           capacity,
           visibility,
           pricing_type,
+          price,
+          currency,
           status,
           cover_image_ref,
           published_at,

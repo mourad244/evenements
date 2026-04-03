@@ -12,5 +12,8 @@ export const ROUTES = {
   organizerEvents: "/organizer/events",
   organizerNewEvent: "/organizer/events/new",
   adminEvents: "/admin/events",
-  adminUsers: "/admin/users"
+  adminUsers: "/admin/users",
+  privacyPolicy: "/privacy-policy",
+  termsOfService: "/terms-of-service",
+  profile: "/profile"
 } as const;

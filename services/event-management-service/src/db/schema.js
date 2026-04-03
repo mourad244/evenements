@@ -23,6 +23,9 @@ export async function ensureSchema(pool) {
     );
   `);
 
+  await pool.query(`ALTER TABLE events ADD COLUMN IF NOT EXISTS price NUMERIC(10,2) DEFAULT 0;`);
+  await pool.query(`ALTER TABLE events ADD COLUMN IF NOT EXISTS currency TEXT DEFAULT 'MAD';`);
+
   await pool.query(`
     CREATE INDEX IF NOT EXISTS idx_events_organizer_status
       ON events (organizer_id, status)

@@ -1,9 +1,15 @@
 "use client";
 
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { createPaymentSession } from "../api/create-payment-session";
 
 export function useCreatePaymentSessionMutation() {
-  return useMutation({ mutationFn: createPaymentSession });
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: createPaymentSession,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["my-registrations"] });
+    }
+  });
 }

@@ -84,6 +84,8 @@ function toEventResponse(event) {
     capacity: event.capacity,
     visibility: event.visibility,
     pricingType: event.pricingType,
+    price: event.price ?? 0,
+    currency: event.currency ?? "MAD",
     status: event.status,
     coverImageRef: event.coverImageRef,
     imageUrl: event.coverImageRef,
@@ -111,6 +113,8 @@ function toCatalogEventSummary(event) {
     capacity: event.capacity,
     visibility: event.visibility,
     pricingType: event.pricingType,
+    price: event.price ?? 0,
+    currency: event.currency ?? "MAD",
     status: event.status,
     coverImageRef: event.coverImageRef,
     imageUrl: event.coverImageRef,
@@ -173,6 +177,8 @@ function validateDraftPayload(payload, { partial = false } = {}) {
     "capacity",
     "visibility",
     "pricingType",
+    "price",
+    "currency",
     "coverImageRef"
   ]) {
     if (Object.hasOwn(body, key)) {

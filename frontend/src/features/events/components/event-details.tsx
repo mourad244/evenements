@@ -1,4 +1,7 @@
-﻿import Image from "next/image";
+﻿"use client";
+
+import { useState } from "react";
+import Image from "next/image";
 
 import { StatusBadge } from "@/components/shared/status-badge";
 import { Badge } from "@/components/ui/badge";
@@ -13,23 +16,32 @@ type EventDetailsProps = {
 };
 
 export function EventDetails({ event }: EventDetailsProps) {
+  const [imgError, setImgError] = useState(false);
+  const hasImage = Boolean(event.imageUrl) && !imgError;
+
   return (
     <div className="grid gap-8 lg:grid-cols-[1.3fr_0.7fr]">
       <Card className="overflow-hidden border-[var(--line-soft)] bg-[linear-gradient(180deg,rgba(18,28,46,0.96),rgba(8,14,24,0.98))] p-0 shadow-[0_30px_70px_rgba(0,0,0,0.34)]">
         <div className="relative h-72 w-full">
-          <Image
-            src={event.imageUrl || "/images/placeholder-event.jpg"}
-            alt={event.title}
-            fill
-            className="object-cover"
-          />
-          <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(5,7,13,0.04),rgba(5,7,13,0.5))]" />
-        </div>
-        <div className="grid gap-6 p-5 sm:p-8">
-          <div className="flex flex-wrap items-center gap-3">
+          {hasImage ? (
+            <Image
+              src={event.imageUrl!}
+              alt={event.title}
+              fill
+              className="object-cover"
+              onError={() => setImgError(true)}
+            />
+          ) : (
+            <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(65,93,255,0.3)_0%,rgba(18,28,46,0.98)_55%,rgba(243,154,99,0.2)_100%)]" />
+          )}
+          <div className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(9,15,26,0.06)_0%,rgba(9,15,26,0.2)_50%,rgba(9,15,26,0.88)_100%)]" />
+          {/* Status + theme overlaid at bottom of hero */}
+          <div className="absolute bottom-0 left-0 right-0 flex flex-wrap items-end gap-2 p-5">
             <Badge>{event.theme}</Badge>
             <StatusBadge status={event.status} />
           </div>
+        </div>
+        <div className="grid gap-6 p-5 sm:p-8">
           <div className="grid gap-3.5">
             <h1 className="text-4xl font-semibold tracking-tight text-[var(--text-primary)] sm:text-5xl">
               {event.title}

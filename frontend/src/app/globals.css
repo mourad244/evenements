@@ -62,6 +62,17 @@ a {
   color: var(--text-primary);
 }
 
+/* Force dark background on native <option> dropdown lists */
+select option {
+  background-color: #0d1a2e;
+  color: #f3f6ff;
+}
+
+select option:hover,
+select option:checked {
+  background-color: #1a2d4d;
+}
+
 @layer utilities {
   .bg-app {
     background:
