@@ -11,19 +11,16 @@ import { Card } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { ErrorState } from "@/components/ui/error-state";
 import { LoadingState } from "@/components/ui/loading-state";
+import { Select } from "@/components/ui/select";
 import { useCurrentUser } from "@/features/auth/hooks/use-current-user";
 import { useMarkNotificationReadMutation } from "@/features/notifications/hooks/use-mark-notification-read-mutation";
 import { useNotificationsQuery } from "@/features/notifications/hooks/use-notifications-query";
 import type { NotificationItem } from "@/features/notifications/types/notification.types";
 import { ROUTES } from "@/lib/constants/routes";
 import { formatDate } from "@/lib/utils/format-date";
+import { normalizePositiveInt } from "@/lib/utils/normalize-positive-int";
 
 const PAGE_SIZE_OPTIONS = [10, 20, 50];
-
-function normalizePositiveInt(value: string | null, fallback: number) {
-  const parsed = Number.parseInt(String(value || ""), 10);
-  return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
-}
 
 function formatNotificationType(type: string) {
   return type
@@ -270,23 +267,19 @@ export default function NotificationsPage() {
                 </p>
               </div>
               <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-                <label className="grid gap-2 text-sm text-[var(--text-secondary)]" htmlFor="notifications-page-size">
-                  Page size
-                  <select
-                    id="notifications-page-size"
-                    value={String(pageSize)}
-                    onChange={(event) =>
-                      updateSearchParams({ pageSize: event.target.value, page: "1" })
-                    }
-                    className="rounded-[22px] border border-[var(--line-soft)] bg-[linear-gradient(180deg,rgba(16,26,45,0.96),rgba(10,17,30,0.98))] px-4 py-3 text-sm text-[var(--text-primary)] outline-none focus-visible:border-[rgba(88,116,255,0.38)] focus-visible:ring-2 focus-visible:ring-[var(--ring-brand)]"
-                  >
-                    {PAGE_SIZE_OPTIONS.map((option) => (
-                      <option key={option} value={option}>
-                        {option} per page
-                      </option>
-                    ))}
-                  </select>
-                </label>
+                <Select
+                  label="Page size"
+                  value={String(pageSize)}
+                  onChange={(event) =>
+                    updateSearchParams({ pageSize: event.target.value, page: "1" })
+                  }
+                >
+                  {PAGE_SIZE_OPTIONS.map((option) => (
+                    <option key={option} value={option}>
+                      {option} per page
+                    </option>
+                  ))}
+                </Select>
                 <div className="flex flex-col gap-3 sm:flex-row">
                   <Button
                     onClick={() =>

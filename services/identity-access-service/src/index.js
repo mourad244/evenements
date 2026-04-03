@@ -76,7 +76,7 @@ config.jwtRefreshSecret = resolveJwtSecret(
 
 const allowedSelfServiceRoles = new Set(["PARTICIPANT", "ORGANIZER"]);
 const activeAccountStatuses = new Set(["ACTIVE"]);
-const allowedProfileRoles = new Set(["PARTICIPANT", "ORGANIZER"]);
+const allowedProfileRoles = new Set(["PARTICIPANT", "ORGANIZER", "ADMIN"]);
 
 const pool = new Pool({
   connectionString: config.databaseUrl

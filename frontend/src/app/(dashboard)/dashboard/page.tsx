@@ -470,53 +470,53 @@ function AdminDashboard() {
     <SectionPanel
       eyebrow="Admin overview"
       title="Platform operations at a glance"
-      description="Use the current admin surfaces for limited event review and user oversight while deeper admin tooling is still out of scope."
+      description="Review and moderate events, manage users, and keep the platform running smoothly from your admin workspace."
       className="grid gap-6 border-[rgba(243,154,99,0.18)] bg-[radial-gradient(circle_at_top_right,rgba(243,154,99,0.14),transparent_30%),linear-gradient(180deg,rgba(18,28,46,0.96),rgba(10,17,30,0.98))] shadow-[0_28px_64px_rgba(0,0,0,0.32)]"
       action={
         <>
           <Link href={ROUTES.adminEvents} className="w-full sm:w-auto">
             <Button variant="ghost" className="w-full sm:w-auto">
-              Open admin events
+              Manage events
             </Button>
           </Link>
           <Link href={ROUTES.adminUsers} className="w-full sm:w-auto">
-            <Button className="w-full sm:w-auto">Open admin users</Button>
+            <Button className="w-full sm:w-auto">Manage users</Button>
           </Link>
         </>
       }
     >
       <div className="grid gap-4 sm:gap-6 md:grid-cols-3">
         <SummaryCard
-          label="Admin events"
-          value="Limited overview"
-          description="A dedicated admin metrics contract is not available yet, so this workspace avoids invented KPIs."
+          label="Event moderation"
+          value="All events"
+          description="Review published and pending events across the platform. Approve, reject, or take action as needed."
           accent="highlight"
         />
         <Card className="grid gap-3.5 border-[var(--line-soft)] bg-[linear-gradient(180deg,rgba(18,28,46,0.9),rgba(10,17,30,0.98))] shadow-[0_22px_48px_rgba(0,0,0,0.24)]">
           <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[var(--text-muted)]">
-            Admin users
+            User management
           </p>
           <h2 className="text-2xl font-semibold tracking-tight text-[var(--text-primary)]">
-            User oversight
+            All platform users
           </h2>
           <p className="text-sm leading-6 text-[var(--text-secondary)]">
-            Review the live admin user list while the metrics surface is still pending.
+            Browse participants, organizers, and admins. View account details and manage access rights.
           </p>
           <Link href={ROUTES.adminUsers} className="w-full sm:w-auto">
             <Button variant="ghost" className="w-full sm:w-auto">
-              Open admin users
+              View all users
             </Button>
           </Link>
         </Card>
         <Card className="grid gap-3.5 border-[var(--line-soft)] bg-[linear-gradient(180deg,rgba(18,28,46,0.9),rgba(10,17,30,0.98))] shadow-[0_22px_48px_rgba(0,0,0,0.24)]">
           <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[var(--text-muted)]">
-            Metrics readiness
+            Platform health
           </p>
           <h2 className="text-2xl font-semibold tracking-tight text-[var(--text-primary)]">
-            Awaiting backend support
+            Monitor &amp; respond
           </h2>
           <p className="text-sm leading-6 text-[var(--text-secondary)]">
-            Once the backend exposes admin KPI endpoints, this area can become a live operational summary.
+            Stay on top of registration activity, flag suspicious accounts, and ensure the catalog stays accurate and up to date.
           </p>
         </Card>
       </div>
@@ -544,7 +544,7 @@ export default function DashboardPage() {
       <PageTitle
         eyebrow="Dashboard"
         title={title}
-        description="A role-aware summary of your recent activity, upcoming work, and the actions that matter most right now."
+        description="Here is a summary of your recent activity, upcoming events, and the actions that need your attention today."
       />
 
       {isParticipant ? (

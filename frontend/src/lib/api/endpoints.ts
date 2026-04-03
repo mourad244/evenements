@@ -47,5 +47,9 @@ export const ENDPOINTS = {
   },
   payments: {
     session: "/api/payments/session"
+  },
+  profile: {
+    get: "/api/profile",
+    update: "/api/profile"
   }
 } as const;

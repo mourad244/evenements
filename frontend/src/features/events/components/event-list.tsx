@@ -77,7 +77,7 @@ export function EventList({
           ) : null}
         </div>
       </div>
-      <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+      <div className="grid items-stretch gap-6 md:grid-cols-2 xl:grid-cols-3">
         {events.map((event) => (
           <EventCard key={event.id} event={event} />
         ))}

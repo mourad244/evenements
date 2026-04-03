@@ -46,7 +46,14 @@ export default function TicketPage() {
   }
 
   if (isError) {
-    if (error.status === 404) {
+    const errorStatus =
+      typeof error === "object" &&
+      error !== null &&
+      "status" in error &&
+      typeof (error as { status?: number }).status === "number"
+        ? (error as { status?: number }).status
+        : undefined;
+    if (errorStatus === 404) {
       return (
         <UnavailableState
           title="Ticket not found"
@@ -54,7 +61,7 @@ export default function TicketPage() {
         />
       );
     }
-    if (error.status === 410) {
+    if (errorStatus === 410) {
       return (
         <UnavailableState
           title="Ticket inactive"

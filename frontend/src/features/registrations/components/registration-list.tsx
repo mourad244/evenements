@@ -23,7 +23,7 @@ type PaymentDraft = {
 
 const defaultPaymentDraft: PaymentDraft = {
   amount: "",
-  currency: "MAD"
+  currency: ""
 };
 
 function resolveStatusState(registration: RegistrationItem) {
@@ -216,9 +216,16 @@ export function RegistrationList({ registrations }: { registrations: Registratio
           Boolean(registration.ticketId) &&
           !registration.canDownloadTicket;
         const paymentDraft = paymentDrafts[registration.id] || defaultPaymentDraft;
-        const paymentAmount = Number.parseInt(paymentDraft.amount, 10);
+        const derivedAmount =
+          paymentDraft.amount ||
+          (typeof registration.eventPrice === "number"
+            ? String(registration.eventPrice)
+            : "");
+        const derivedCurrency =
+          paymentDraft.currency || registration.eventCurrency || "MAD";
+        const paymentAmount = Number.parseInt(derivedAmount, 10);
         const canSubmitPayment =
-          Number.isInteger(paymentAmount) && paymentAmount >= 0 && paymentDraft.currency;
+          Number.isInteger(paymentAmount) && paymentAmount >= 0 && derivedCurrency;
         const isPayingThis =
           paymentMutation.isPending &&
           paymentMutation.variables?.registrationId === registration.id;
@@ -305,7 +312,7 @@ export function RegistrationList({ registrations }: { registrations: Registratio
                       type="number"
                       min="0"
                       step="1"
-                      value={paymentDraft.amount}
+                      value={derivedAmount}
                       onChange={(event) =>
                         updatePaymentDraft(registration.id, { amount: event.target.value })
                       }
@@ -313,7 +320,7 @@ export function RegistrationList({ registrations }: { registrations: Registratio
                     />
                     <Input
                       label="Currency"
-                      value={paymentDraft.currency}
+                      value={derivedCurrency}
                       onChange={(event) =>
                         updatePaymentDraft(registration.id, {
                           currency: event.target.value.toUpperCase()
@@ -336,7 +343,7 @@ export function RegistrationList({ registrations }: { registrations: Registratio
                     onClick={() =>
                       paymentMutation.mutate({
                         amount: paymentAmount,
-                        currency: paymentDraft.currency.trim() || "MAD",
+                        currency: derivedCurrency.trim() || "MAD",
                         registrationId: registration.id,
                         eventId: registration.eventId,
                         metadata: {
@@ -352,7 +359,7 @@ export function RegistrationList({ registrations }: { registrations: Registratio
                 </div>
               ) : null}
               <div className="flex flex-col gap-3 sm:flex-row xl:flex-col xl:items-stretch xl:justify-start">
-                <Link href={`/events/${registration.eventId}`} className="w-full sm:w-auto">
+                <Link href={`${ROUTES.events}/${registration.eventId}`} className="w-full sm:w-auto">
                   <Button variant="ghost" className="w-full sm:w-auto">Review event</Button>
                 </Link>
                 {registration.canDownloadTicket && registration.ticketId ? (
@@ -360,18 +367,18 @@ export function RegistrationList({ registrations }: { registrations: Registratio
                     <Button className="w-full sm:w-auto">View ticket</Button>
                   </Link>
                 ) : null}
-              <Button
-                variant="danger"
-                onClick={() => mutation.mutate(registration.id)}
-                disabled={
-                  registration.status === "CANCELLED" ||
-                  registration.status === "REJECTED" ||
-                  isCancellingThis
-                }
-                className="w-full sm:w-auto"
-              >
-                {isCancellingThis ? "Cancelling..." : "Cancel"}
-              </Button>
+                <Button
+                  variant="danger"
+                  onClick={() => mutation.mutate(registration.id)}
+                  disabled={
+                    registration.status === "CANCELLED" ||
+                    registration.status === "REJECTED" ||
+                    isCancellingThis
+                  }
+                  className="w-full sm:w-auto"
+                >
+                  {isCancellingThis ? "Cancelling..." : "Cancel"}
+                </Button>
               </div>
             </div>
           </Card>

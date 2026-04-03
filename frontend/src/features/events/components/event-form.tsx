@@ -51,14 +51,20 @@ export function EventForm({
           />
         </div>
         <div className="md:col-span-2">
-          <label className="grid gap-2 text-sm text-slate-700">
-            <span className="font-medium">Description</span>
+          <label className="grid gap-2.5 text-sm text-[var(--text-secondary)]">
+            <span className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--text-muted)]">
+              Description
+            </span>
             <textarea
-              className="min-h-36 rounded-3xl border border-line bg-white px-4 py-3 text-sm text-ink outline-none focus:border-brand-400 focus:ring-2 focus:ring-brand-100 disabled:cursor-not-allowed disabled:opacity-60"
+              className="min-h-36 rounded-[22px] border border-[var(--line-soft)] bg-[linear-gradient(180deg,rgba(16,26,45,0.96),rgba(10,17,30,0.98))] px-4 py-3 text-sm text-[var(--text-primary)] outline-none ring-0 shadow-[inset_0_1px_0_rgba(255,255,255,0.03)] transition placeholder:text-[var(--text-muted)] focus-visible:border-[rgba(88,116,255,0.38)] focus-visible:ring-2 focus-visible:ring-[var(--ring-brand)] disabled:cursor-not-allowed disabled:opacity-60"
               {...form.register("description")}
               disabled={submitDisabled}
             />
-            {form.formState.errors.description?.message ? <span className="text-xs text-red-600">{form.formState.errors.description.message}</span> : null}
+            {form.formState.errors.description?.message ? (
+              <span className="text-xs text-[var(--status-danger)]">
+                {form.formState.errors.description.message}
+              </span>
+            ) : null}
           </label>
         </div>
         <Input label="City" {...form.register("city")} error={form.formState.errors.city?.message} disabled={submitDisabled} />

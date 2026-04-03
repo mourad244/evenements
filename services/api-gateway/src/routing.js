@@ -1,7 +1,7 @@
 const organizerOrAdmin = ["ORGANIZER", "ADMIN"];
 const participantOnly = ["PARTICIPANT"];
 const authenticatedRoles = ["PARTICIPANT", "ORGANIZER", "ADMIN"];
-const participantOrOrganizer = ["PARTICIPANT", "ORGANIZER"];
+const participantOrOrganizer = ["PARTICIPANT", "ORGANIZER", "ADMIN"];
 
 export function buildRouteTable(config) {
   return [

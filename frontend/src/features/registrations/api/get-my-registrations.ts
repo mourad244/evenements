@@ -1,6 +1,7 @@
 import { apiClient } from "@/lib/api/client";
 import { normalizeApiError } from "@/lib/api/error-handler";
 import { ENDPOINTS } from "@/lib/api/endpoints";
+import { normalizePositiveInt } from "@/lib/utils/normalize-positive-int";
 
 import type {
   ParticipantHistoryQuery,
@@ -11,11 +12,19 @@ import type {
 const DEFAULT_PAGE = 1;
 const DEFAULT_PAGE_SIZE = 20;
 
-function normalizePositiveInt(value: number | undefined, fallback: number) {
-  return Number.isInteger(value) && Number(value) > 0 ? Number(value) : fallback;
-}
-
 function mapRegistrationItem(item: Record<string, unknown>): RegistrationItem {
+  const rawPrice =
+    typeof item.eventPrice === "number"
+      ? item.eventPrice
+      : typeof item.price === "number"
+        ? item.price
+        : item.eventPrice
+          ? Number(item.eventPrice)
+          : item.price
+            ? Number(item.price)
+            : null;
+  const rawCurrency = item.eventCurrency ?? item.currency ?? null;
+
   return {
     id: String(item.registrationId || item.id || "registration-placeholder"),
     eventId: String(item.eventId || ""),
@@ -25,6 +34,9 @@ function mapRegistrationItem(item: Record<string, unknown>): RegistrationItem {
     ) as RegistrationItem["status"],
     eventDate: String(item.eventStartAt || item.updatedAt || new Date().toISOString()),
     eventCity: item.eventCity ? String(item.eventCity) : null,
+    eventPrice:
+      typeof rawPrice === "number" && Number.isFinite(rawPrice) ? rawPrice : null,
+    eventCurrency: rawCurrency ? String(rawCurrency) : null,
     waitlistPosition:
       typeof item.waitlistPosition === "number"
         ? item.waitlistPosition

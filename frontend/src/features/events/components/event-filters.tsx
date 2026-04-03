@@ -1,9 +1,8 @@
 "use client";
 
-import { Search } from "lucide-react";
-
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Select } from "@/components/ui/select";
 
 import type { EventFilters } from "../types/event.types";
 
@@ -90,29 +89,17 @@ export function EventFilters({
         </div>
 
         <div className="grid gap-2 self-end text-sm text-[var(--text-secondary)]">
-          <label className="grid gap-2" htmlFor="event-sort">
-            <span className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--text-muted)]">
-              Sort visible results
-            </span>
-            <div className="relative">
-              <Search
-                className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--text-muted)] transition-colors duration-200"
-                aria-hidden="true"
-              />
-              <select
-                id="event-sort"
-                value={sortBy}
-                onChange={(event) => onSortChange(event.target.value as EventSortOption)}
-                className="h-12 w-full rounded-[22px] border border-[var(--line-soft)] bg-[linear-gradient(180deg,rgba(16,26,45,0.96),rgba(10,17,30,0.98))] pl-11 pr-4 text-sm text-[var(--text-primary)] outline-none transition-[border-color,box-shadow,background-color,transform] duration-200 ease-out hover:border-[rgba(88,116,255,0.24)] hover:bg-[linear-gradient(180deg,rgba(18,30,52,0.98),rgba(11,19,33,0.98))] focus-visible:border-[rgba(88,116,255,0.38)] focus-visible:ring-2 focus-visible:ring-[var(--ring-brand)]"
-              >
-                {SORT_OPTIONS.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </label>
+          <Select
+            label="Sort visible results"
+            value={sortBy}
+            onChange={(event) => onSortChange(event.target.value as EventSortOption)}
+          >
+            {SORT_OPTIONS.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </Select>
         </div>
       </div>
     </div>

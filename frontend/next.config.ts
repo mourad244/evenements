@@ -1,11 +1,18 @@
 import type { NextConfig } from "next";
 import path from "node:path";
 
+const useStandalone = process.env.NEXT_OUTPUT_STANDALONE === "true";
+
 const nextConfig: NextConfig = {
-  output: "standalone",
-  outputFileTracingRoot: path.join(__dirname, ".."),
+  output: useStandalone ? "standalone" : undefined,
+  outputFileTracingRoot: useStandalone ? path.join(__dirname, "..") : undefined,
   images: {
-    remotePatterns: []
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "images.unsplash.com"
+      }
+    ]
   }
 };
 
