@@ -16,6 +16,8 @@ export default function OrganizerNewEventPage() {
       />
       <EventForm
         submitLabel={mutation.isPending ? "Saving..." : "Save event"}
+        submitDisabled={mutation.isPending}
+        submitError={mutation.error?.message ?? null}
         onSubmit={async (values) => mutation.mutateAsync(values)}
       />
     </div>

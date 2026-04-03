@@ -13,6 +13,7 @@ export function useOrganizerEventsQuery(
   return useQuery({
     queryKey: ["organizer-events"],
     queryFn: getOrganizerEvents,
-    enabled
+    enabled,
+    staleTime: 2 * 60 * 1000
   });
 }
