@@ -17,6 +17,7 @@ export function useMyRegistrationsQuery(
   return useQuery({
     queryKey: ["my-registrations", query],
     queryFn: () => getMyRegistrations(query),
-    enabled
+    enabled,
+    staleTime: 60 * 1000
   });
 }

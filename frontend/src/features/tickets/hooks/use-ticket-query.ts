@@ -8,6 +8,7 @@ export function useTicketQuery(ticketId: string | undefined) {
   return useQuery({
     queryKey: ["ticket", ticketId],
     queryFn: () => getTicket(ticketId ?? ""),
-    enabled: Boolean(ticketId)
+    enabled: Boolean(ticketId),
+    staleTime: 2 * 60 * 1000
   });
 }

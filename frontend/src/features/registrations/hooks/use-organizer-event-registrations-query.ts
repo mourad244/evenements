@@ -13,6 +13,7 @@ export function useOrganizerEventRegistrationsQuery(
   return useQuery({
     queryKey: ["organizer-event-registrations", eventId],
     queryFn: () => getOrganizerEventRegistrations(eventId),
-    enabled: Boolean(eventId)
+    enabled: Boolean(eventId),
+    staleTime: 60 * 1000
   });
 }

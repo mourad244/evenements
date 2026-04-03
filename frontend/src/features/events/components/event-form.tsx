@@ -14,6 +14,7 @@ type EventFormProps = {
   defaultValues?: Partial<UpsertEventInput>;
   submitLabel?: string;
   submitDisabled?: boolean;
+  submitError?: string | null;
   onSubmit: (values: UpsertEventInput) => Promise<unknown> | void;
 };
 
@@ -21,6 +22,7 @@ export function EventForm({
   defaultValues,
   submitLabel = "Save event",
   submitDisabled = false,
+  submitError,
   onSubmit
 }: EventFormProps) {
   const form = useForm<EventSchema>({
@@ -75,7 +77,15 @@ export function EventForm({
         <Input label="Currency" {...form.register("currency")} error={form.formState.errors.currency?.message} disabled={submitDisabled} />
         <Input label="Capacity" type="number" {...form.register("capacity")} error={form.formState.errors.capacity?.message} disabled={submitDisabled} />
         <Input label="Theme" {...form.register("theme")} error={form.formState.errors.theme?.message} disabled={submitDisabled} />
-        <div className="md:col-span-2">
+        <div className="md:col-span-2 grid gap-3">
+          {submitError ? (
+            <p
+              role="alert"
+              className="rounded-[22px] border border-[rgba(251,113,133,0.24)] bg-[rgba(127,29,29,0.26)] px-4 py-3 text-sm text-[var(--status-danger)]"
+            >
+              {submitError}
+            </p>
+          ) : null}
           <Button type="submit" disabled={submitDisabled}>{submitLabel}</Button>
         </div>
       </form>
