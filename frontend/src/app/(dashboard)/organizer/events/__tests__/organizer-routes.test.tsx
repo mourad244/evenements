@@ -75,6 +75,14 @@ const organizerRegistrationsState: OrganizerRegistrationsState = {
   isError: false
 };
 
+const organizerExportMutationState = {
+  mutate: vi.fn(),
+  isPending: false,
+  isSuccess: false,
+  error: null as Error | null,
+  data: undefined as { filename: string } | undefined
+};
+
 const routerState = {
   pushes: [] as string[]
 };
@@ -101,6 +109,10 @@ vi.mock("@/features/events/hooks/use-organizer-event-details-query", () => ({
 
 vi.mock("@/features/registrations/hooks/use-organizer-event-registrations-query", () => ({
   useOrganizerEventRegistrationsQuery: () => organizerRegistrationsState
+}));
+
+vi.mock("@/features/registrations/hooks/use-download-organizer-registrations-export-mutation", () => ({
+  useDownloadOrganizerRegistrationsExportMutation: () => organizerExportMutationState
 }));
 
 vi.mock("@/features/events/hooks/use-update-event-mutation", () => ({
@@ -175,6 +187,12 @@ describe("organizer routes", () => {
     organizerRegistrationsState.isLoading = false;
     organizerRegistrationsState.isError = false;
     organizerRegistrationsState.error = undefined;
+
+    organizerExportMutationState.mutate.mockReset();
+    organizerExportMutationState.isPending = false;
+    organizerExportMutationState.isSuccess = false;
+    organizerExportMutationState.error = null;
+    organizerExportMutationState.data = undefined;
   });
 
   it("/organizer/events shows loading, error, empty, and success states", () => {
@@ -286,5 +304,6 @@ describe("organizer routes", () => {
     };
     const successHtml = render(<OrganizerEventRegistrationsPage />);
     expect(successHtml).toContain("Atlas Summit:Sara Bennani");
+    expect(successHtml).toContain("Export CSV");
   });
 });

@@ -1,7 +1,7 @@
 /** @type {import('@docusaurus/types').Config} */
 const config = {
   title: "Evenements Dev Portal",
-  tagline: "Architecture, contrats, backlog et sprints dans un portail visuel unique.",
+  tagline: "Livrables, architecture, contrats, backlog et sprints dans un portail visuel unique.",
   url: "http://localhost",
   baseUrl: "/",
   onBrokenLinks: "throw",
@@ -68,6 +68,7 @@ const config = {
       title: "Evenements Portal",
       items: [
         { to: "/", label: "Accueil", position: "left" },
+        { to: "/livrables", label: "Livrables", position: "left" },
         { to: "/architecture", label: "Architecture", position: "left" },
         { to: "/api", label: "API", position: "left" },
         { to: "/backlogs", label: "Backlogs", position: "left" },
@@ -90,6 +91,7 @@ const config = {
           title: "Portail",
           items: [
             { label: "Accueil", to: "/" },
+            { label: "Livrables", to: "/livrables" },
             { label: "Architecture", to: "/architecture" },
             { label: "API", to: "/api" }
           ]
@@ -99,7 +101,7 @@ const config = {
           items: [
             { label: "Documentation index", to: "/reference/navigation" },
             { label: "MVP scope", to: "/reference/mvp-scope" },
-            { label: "Sprint 1 tracker", to: "/reference/sprints/sprint-1-tracker" }
+            { label: "Sprint 1 tracker", to: "/reference/sprints/sprint_1_execution_tracker" }
           ]
         },
         {

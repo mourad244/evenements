@@ -23,7 +23,7 @@ slug: frontend
 - Priorite produit: `P1`
 - Lead: `Ibrahim`
 - Support: `Mourad`
-- Reste principal au `2026-03-26`: `F04.2`, `F04.3`, `F06.3`, `F07.3`
+- Reste principal au `2026-04-04`: `F07.3`
 
 ## Taches
 
@@ -89,7 +89,7 @@ slug: frontend
 
 ### F04 - Garde de routes et etats auth/ACL
 
-- Status: `PARTIAL`
+- Status: `DONE`
 - Priority: `P0` · Difficulty: `M` · Impact: `H`
 - Owner: `Ibrahim`
 - Support: `Mourad`
@@ -98,14 +98,20 @@ slug: frontend
   - guards participant / organizer / admin
   - gestion token expire
   - ecrans acces refuse
+- Notes:
+  - `middleware.ts`, `AuthGuard`, `RoleGuard`, `/access-denied` et
+    `/session-expired` sont maintenant branches cote frontend.
+  - Le frontend persiste aussi le `refreshToken` et tente un refresh
+    unique via `/api/auth/refresh` avant de basculer sur
+    `session-expired`.
 
 #### Tickets prets a coder
 
 | Ticket ID | Status | Priority | Owner | Support | Sprint cible | Dependances | Interfaces impactees | Sortie attendue | Critere d'acceptation | Branche suggeree |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | F04.1 | DONE | P0 | Ibrahim | Mourad | Sprint 0 | I04.1 | Contrat ACL frontend | Guards et statuts auth documentes | Les roles et redirections par route sont fixes pour public, participant, organisateur et admin | `docs/frontend-acl-contract` |
-| F04.2 | PARTIAL | P0 | Ibrahim | Mourad | Sprint 1 | F04.1, I03.2 | Guard de routes | Guards frontend implementables | Une route protegee redirige correctement sur login ou "acces refuse" selon le cas | `feature/frontend-route-guards` |
-| F04.3 | PARTIAL | P0 | Ibrahim | Mourad | Sprint 1 | F04.1, I02.3 | Gestion session expiree | UX session expiree implementable | Token expire, refresh et perte de session sont geres sans etat incoherent | `feature/frontend-session-expiry` |
+| F04.2 | DONE | P0 | Ibrahim | Mourad | Sprint 1 | F04.1, I03.2 | Guard de routes | Guards frontend implementables | Une route protegee redirige correctement sur login ou "acces refuse" selon le cas | `feature/frontend-route-guards` |
+| F04.3 | DONE | P0 | Ibrahim | Mourad | Sprint 1 | F04.1, I02.3 | Gestion session expiree | UX session expiree implementable | Token expire, refresh et perte de session sont geres sans etat incoherent | `feature/frontend-session-expiry` |
 
 ### F05 - Standards loading / error / empty states
 
@@ -128,7 +134,7 @@ slug: frontend
 
 ### F06 - Telechargement des billets et artefacts proteges
 
-- Status: `PARTIAL`
+- Status: `DONE`
 - Priority: `P1` · Difficulty: `S` · Impact: `M`
 - Owner: `Ibrahim`
 - Support: `Mourad`
@@ -136,6 +142,11 @@ slug: frontend
 - Livrables:
   - preview/download de blob authentifie
   - gestion erreurs `401/403/404/502`
+- Notes:
+  - Le parcours participant integre maintenant le telechargement protege
+    de billet avec messages lisibles pour `401/403/404/502`.
+  - La vue organisateur integre maintenant le bouton d'export CSV avec
+    feedback `loading/success/error` sur le contrat gateway existant.
 
 #### Tickets prets a coder
 
@@ -143,7 +154,7 @@ slug: frontend
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | F06.1 | DONE | P1 | Ibrahim | Mourad | Sprint 1 | R04.1 | Contrat download protege | UX de telechargement documentee | Le comportement preview/download et la gestion d'erreur sont figes avant implementation | `docs/frontend-protected-downloads` |
 | F06.2 | DONE | P1 | Ibrahim | Mourad | Sprint 2 | F06.1, R04.2 | Helper blob auth | Telechargement blob implementable | Un artefact protege est recupere via client authentifie sans exposer le token dans l'URL | `feature/frontend-blob-download-helper` |
-| F06.3 | PARTIAL | P1 | Ibrahim | Mourad | Sprint 2 | F06.2, R05.3 | Dashboard participant, vue organisateur | UX telechargement integree | Les erreurs `401/403/404/502` sont transformees en messages lisibles | `feature/frontend-ticket-download-ux` |
+| F06.3 | DONE | P1 | Ibrahim | Mourad | Sprint 2 | F06.2, R05.3 | Dashboard participant, vue organisateur | UX telechargement integree | Les erreurs `401/403/404/502` sont transformees en messages lisibles | `feature/frontend-ticket-download-ux` |
 
 ### F07 - Responsive et accessibilite
 
@@ -156,6 +167,10 @@ slug: frontend
   - parcours mobile lisible
   - navigation clavier
   - labels/erreurs accessibles
+- Notes:
+  - Les parcours principaux ont deja des composants labels/feedback
+    propres, mais la passe finale clavier/erreurs sur tous les parcours
+    critiques reste a consolider.
 
 #### Tickets prets a coder
 

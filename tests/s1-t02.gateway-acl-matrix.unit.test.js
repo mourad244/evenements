@@ -52,6 +52,7 @@ test("S1-T02 route table exposes required event and registration proxies", () =>
       "/api/registrations/:registrationId/cancel",
       "/registrations/:registrationId/cancel"
     ],
+    ["GET", "/api/tickets/:ticketId/download", "/tickets/:ticketId/download"],
     ["GET", "/api/profile/participations", "/profile/participations"]
   ];
 

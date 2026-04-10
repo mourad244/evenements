@@ -6,6 +6,11 @@ import pg from "pg";
 
 import { ensureSchema } from "./db/schema.js";
 import { createRegistrationRepository } from "./repositories/registrationRepository.js";
+import {
+  buildTicketDownloadContentType,
+  buildTicketDownloadFilename,
+  renderTicketArtifactBuffer
+} from "./ticketArtifactResponse.js";
 
 const { Pool } = pg;
 
@@ -58,6 +63,15 @@ function error(errorMessage, code, details) {
 
 function nowIso() {
   return new Date().toISOString();
+}
+
+function isUniqueViolation(error, constraintName) {
+  return (
+    error &&
+    typeof error === "object" &&
+    error.code === "23505" &&
+    (!constraintName || error.constraint === constraintName)
+  );
 }
 
 function authContext(req) {
@@ -456,7 +470,12 @@ app.post("/registrations", async (req, res) => {
     } else {
       created = await repository.createRegistration(registrationPayload);
     }
-  } catch {
+  } catch (err) {
+    if (isUniqueViolation(err, "idx_registrations_active_event_participant")) {
+      return res
+        .status(409)
+        .json(error("Registration already exists", "REGISTRATION_EXISTS"));
+    }
     return res.status(500).json(error("Registration failed", "REGISTRATION_FAILED"));
   }
 
@@ -532,38 +551,37 @@ app.post("/registrations/:registrationId/cancel", async (req, res) => {
 
   let promotedRegistrationId = null;
   if (registration.registrationStatus === "CONFIRMED") {
-    const nextWaitlisted = await repository.findNextWaitlisted(registration.eventId);
-    if (nextWaitlisted) {
-      const promotedTicketId = randomUUID();
-      const promotedTicketRef = buildTicketRef(
-        nextWaitlisted.eventId,
-        nextWaitlisted.registrationId
-      );
-      const promotedTicketPayloadSource = {
-        ...nextWaitlisted,
-        ticketId: promotedTicketId,
-        ticketRef: promotedTicketRef,
-        createdAt: timestamp
-      };
-      const promotedTicketPayload = {
-        ticketId: promotedTicketId,
-        registrationId: nextWaitlisted.registrationId,
-        eventId: nextWaitlisted.eventId,
-        participantId: nextWaitlisted.participantId,
-        ticketRef: promotedTicketRef,
-        ticketFormat: defaultTicketFormat,
-        ticketStatus: ticketStatusIssued,
-        payload: buildTicketPayload(promotedTicketPayloadSource),
-        createdAt: timestamp,
-        updatedAt: timestamp
-      };
-      const promoted = await repository.promoteRegistrationWithTicket(
-        nextWaitlisted.registrationId,
-        timestamp,
-        promotedTicketId,
-        promotedTicketRef,
-        promotedTicketPayload
-      );
+    const promoted = await repository.promoteNextWaitlistedWithTicket(
+      registration.eventId,
+      timestamp,
+      (nextWaitlisted) => {
+        const promotedTicketId = randomUUID();
+        const promotedTicketRef = buildTicketRef(
+          nextWaitlisted.eventId,
+          nextWaitlisted.registrationId
+        );
+        const promotedTicketPayloadSource = {
+          ...nextWaitlisted,
+          ticketId: promotedTicketId,
+          ticketRef: promotedTicketRef,
+          createdAt: timestamp
+        };
+
+        return {
+          ticketId: promotedTicketId,
+          registrationId: nextWaitlisted.registrationId,
+          eventId: nextWaitlisted.eventId,
+          participantId: nextWaitlisted.participantId,
+          ticketRef: promotedTicketRef,
+          ticketFormat: defaultTicketFormat,
+          ticketStatus: ticketStatusIssued,
+          payload: buildTicketPayload(promotedTicketPayloadSource),
+          createdAt: timestamp,
+          updatedAt: timestamp
+        };
+      }
+    );
+    if (promoted) {
       promotedRegistrationId = promoted.registration.registrationId;
       try {
         await repository.createNotification(
@@ -617,6 +635,34 @@ app.get("/tickets/:ticketId", async (req, res) => {
   }
 
   return res.status(200).json(success(toTicketView(ticket)));
+});
+
+app.get("/tickets/:ticketId/download", async (req, res) => {
+  if (!req.auth) {
+    return res.status(401).json(error("Unauthorized", "MISSING_AUTH_CONTEXT"));
+  }
+  if (!allowedParticipantRoles.has(req.auth.role)) {
+    return res.status(403).json(error("Forbidden", "FORBIDDEN"));
+  }
+
+  const ticket = await repository.findTicketById(req.params.ticketId);
+  if (!ticket) {
+    return res.status(404).json(error("Ticket not found", "TICKET_NOT_FOUND"));
+  }
+  if (ticket.participantId !== req.auth.userId) {
+    return res.status(403).json(error("Forbidden", "FORBIDDEN"));
+  }
+  if (ticket.ticketStatus !== ticketStatusIssued) {
+    return res.status(404).json(error("Ticket not available", "TICKET_NOT_READY"));
+  }
+
+  const filename = buildTicketDownloadFilename(ticket);
+  const contentType = buildTicketDownloadContentType(ticket);
+  const artifactBuffer = renderTicketArtifactBuffer(ticket);
+
+  res.setHeader("content-type", contentType);
+  res.setHeader("content-disposition", `attachment; filename="${filename}"`);
+  return res.status(200).send(artifactBuffer);
 });
 
 app.get("/notifications", async (req, res) => {

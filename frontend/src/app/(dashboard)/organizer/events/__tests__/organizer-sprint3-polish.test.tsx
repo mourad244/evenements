@@ -73,6 +73,14 @@ const organizerRegistrationsState: OrganizerRegistrationsState = {
   isError: false
 };
 
+const organizerExportMutationState = {
+  mutate: vi.fn(),
+  isPending: false,
+  isSuccess: false,
+  error: null as Error | null,
+  data: undefined as { filename: string } | undefined
+};
+
 const mutationState = {
   updatePending: false,
   publishPending: false,
@@ -99,6 +107,10 @@ vi.mock("@/features/events/hooks/use-organizer-event-details-query", () => ({
 
 vi.mock("@/features/registrations/hooks/use-organizer-event-registrations-query", () => ({
   useOrganizerEventRegistrationsQuery: () => organizerRegistrationsState
+}));
+
+vi.mock("@/features/registrations/hooks/use-download-organizer-registrations-export-mutation", () => ({
+  useDownloadOrganizerRegistrationsExportMutation: () => organizerExportMutationState
 }));
 
 vi.mock("@/features/events/hooks/use-update-event-mutation", () => ({
@@ -142,6 +154,12 @@ describe("Sprint 3 organizer polish", () => {
     organizerRegistrationsState.isLoading = false;
     organizerRegistrationsState.isError = false;
     organizerRegistrationsState.error = undefined;
+
+    organizerExportMutationState.mutate.mockReset();
+    organizerExportMutationState.isPending = false;
+    organizerExportMutationState.isSuccess = false;
+    organizerExportMutationState.error = null;
+    organizerExportMutationState.data = undefined;
 
     mutationState.updatePending = false;
     mutationState.publishPending = false;

@@ -26,7 +26,7 @@ promotion automatique, la billetterie et l'export des inscrits.
 - Priorite produit: `P1/P2`
 - Lead: `Mourad`
 - Support: `Ibrahim`
-- Reste principal au `2026-03-26`: `R02.2`, `R02.3`, `R03.3`, `R05.3`, `R06.3`
+- Reste principal au `2026-04-04`: `R02.3`, `R03.3`
 
 ## Taches
 
@@ -61,14 +61,21 @@ promotion automatique, la billetterie et l'export des inscrits.
   - unicite participant/evenement
   - garde-fous sur inscriptions simultanees
   - promotion waitlist atomique
+- Notes:
+  - Le service verifie l'existant applicatif et impose maintenant une
+    unicite SQL active sur `event_id + participant_id`.
+  - Une course de creation retourne desormais `409 REGISTRATION_EXISTS`
+    au lieu d'un `500`.
+  - Les tests dedies couvrent l'index anti-doublon et la promotion
+    verrouillee, mais pas encore un vrai scenario multi-processus.
 
 #### Tickets prets a coder
 
 | Ticket ID | Status | Priority | Owner | Support | Sprint cible | Dependances | Interfaces impactees | Sortie attendue | Critere d'acceptation | Branche suggeree |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | R02.1 | DONE | P0 | Mourad | Ibrahim | Sprint 0 | R01.1 | Modele `Registration` | Strategie unicite et concurrence documentee | Les cas double clic, multi-onglet et dernier siege simultane sont couverts | `docs/registration-concurrency-rules` |
-| R02.2 | PARTIAL | P0 | Mourad | Ibrahim | Sprint 1 | R02.1, R01.2 | Couche persistence registration | Gardes anti-doublon implementables | Une meme personne ne peut pas obtenir deux inscriptions actives sur le meme evenement | `feature/registration-uniqueness-guards` |
-| R02.3 | TODO | P0 | Mourad | Ibrahim | Sprint 1 | R02.1, R03.3 | Tests concurrence | Jeu de tests critique definis | Les scenarios de course et promotion concurrente sont ecrits et passes en revue | `test/registration-concurrency-cases` |
+| R02.2 | DONE | P0 | Mourad | Ibrahim | Sprint 1 | R02.1, R01.2 | Couche persistence registration | Gardes anti-doublon implementables | Une meme personne ne peut pas obtenir deux inscriptions actives sur le meme evenement | `feature/registration-uniqueness-guards` |
+| R02.3 | PARTIAL | P0 | Mourad | Ibrahim | Sprint 1 | R02.1, R03.3 | Tests concurrence | Jeu de tests critique definis | Les scenarios de course et promotion concurrente sont ecrits et passes en revue | `test/registration-concurrency-cases` |
 
 ### R03 - Gerer annulation et promotion automatique depuis la waitlist
 
@@ -81,6 +88,13 @@ promotion automatique, la billetterie et l'export des inscrits.
   - annulation participant/organisateur
   - promotion du premier candidat eligible
   - emission `registration.promoted`
+- Notes:
+  - La selection du prochain candidat waitlist est maintenant verouillee
+    en transaction avec `FOR UPDATE SKIP LOCKED`.
+  - Le ticket et la confirmation sont toujours produits dans la meme
+    transaction.
+  - L'emission explicite de l'evenement metier `registration.promoted`
+    reste a brancher.
 
 #### Tickets prets a coder
 
@@ -121,6 +135,12 @@ promotion automatique, la billetterie et l'export des inscrits.
   - dashboard participant
   - liste des participations
   - acces au billet si confirme
+- Notes:
+  - La page `my-registrations` et la liste detaillee sont implementees
+    avec statuts, pagination, readiness du billet et telechargement
+    protege.
+  - Le bouton n'apparait que pour les inscriptions confirmees
+    telechargeables et les erreurs utilisateur sont mappees proprement.
 
 #### Tickets prets a coder
 
@@ -128,11 +148,11 @@ promotion automatique, la billetterie et l'export des inscrits.
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | R05.1 | DONE | P1 | Ibrahim | Mourad | Sprint 0 | F02.1 | Reponse dashboard participant | Contrat historique participant documente | Les colonnes statut, date, evenement et billet sont stabilisees | `docs/participant-history-contract` |
 | R05.2 | DONE | P1 | Mourad | Ibrahim | Sprint 1 | R05.1, R03.2 | REST participations | Endpoint historique implementable | Un participant recupere ses inscriptions et leurs statuts sans voir celles des autres | `feature/participant-history-endpoint` |
-| R05.3 | PARTIAL | P1 | Ibrahim | Mourad | Sprint 2 | R05.1, R04.2, F06.2 | Dashboard participant | Telechargement billet integre | Le dashboard affiche un bouton de telechargement uniquement pour les inscriptions confirmees | `feature/participant-ticket-download-ui` |
+| R05.3 | DONE | P1 | Ibrahim | Mourad | Sprint 2 | R05.1, R04.2, F06.2 | Dashboard participant | Telechargement billet integre | Le dashboard affiche un bouton de telechargement uniquement pour les inscriptions confirmees | `feature/participant-ticket-download-ui` |
 
 ### R06 - Exporter les inscrits pour les organisateurs
 
-- Status: `PARTIAL`
+- Status: `DONE`
 - Priority: `P2` · Difficulty: `S` · Impact: `M`
 - Owner: `Mourad`
 - Support: `Ibrahim`
@@ -140,6 +160,11 @@ promotion automatique, la billetterie et l'export des inscrits.
 - Livrables:
   - export CSV/XLSX ou equivalent
   - colonnes statut, contact, reference billet
+- Notes:
+  - La vue `/organizer/events/[eventId]/registrations` existe avec
+    resume, ordering et details de readiness.
+  - L'action UI d'export est maintenant visible dans cette vue avec
+    etats `loading/success/error` et telechargement CSV protege.
 
 #### Tickets prets a coder
 
@@ -147,4 +172,4 @@ promotion automatique, la billetterie et l'export des inscrits.
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | R06.1 | DONE | P2 | Mourad | Ibrahim | Sprint 0 | E05.1 | Format export organisateur | Contrat export documente | Les colonnes obligatoires et le format cible sont valides avec l'UI organisateur | `docs/organizer-export-contract` |
 | R06.2 | DONE | P2 | Mourad | Ibrahim | Sprint 2 | R06.1, R05.2 | REST export inscrits | Export implementable | L'organisateur exporte les inscrits de ses evenements uniquement | `feature/organizer-registrants-export` |
-| R06.3 | PARTIAL | P2 | Ibrahim | Mourad | Sprint 2 | R06.1, F03.3 | Back-office organisateur | Action export integree | Le bouton export apparait dans la vue inscrits avec le bon etat de chargement/erreur | `feature/organizer-export-ui` |
+| R06.3 | DONE | P2 | Ibrahim | Mourad | Sprint 2 | R06.1, F03.3 | Back-office organisateur | Action export integree | Le bouton export apparait dans la vue inscrits avec le bon etat de chargement/erreur | `feature/organizer-export-ui` |

@@ -12,6 +12,7 @@ export const SERVICE_URLS = {
 export const ENDPOINTS = {
   auth: {
     login: "/api/auth/login",
+    refresh: "/api/auth/refresh",
     register: "/api/auth/register",
     me: "/api/auth/me",
     forgotPassword: "/api/auth/forgot-password",
@@ -33,6 +34,11 @@ export const ENDPOINTS = {
     mine: "/api/profile/participations",
     cancel: (registrationId: string) => `/api/registrations/${registrationId}/cancel`,
     organizerEventRegistrations: (eventId: string) =>
-      `/api/organizer/events/${eventId}/registrations`
+      `/api/organizer/events/${eventId}/registrations`,
+    organizerEventRegistrationsExport: (eventId: string) =>
+      `/api/organizer/events/${eventId}/registrations/export`
+  },
+  tickets: {
+    download: (ticketId: string) => `/api/tickets/${encodeURIComponent(ticketId)}/download`
   }
 } as const;

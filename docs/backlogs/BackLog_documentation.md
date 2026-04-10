@@ -23,7 +23,7 @@ du projet evenements.
 
 - Statut global: `DONE`
 - Date debut: `2026-03-07`
-- Derniere mise a jour: `2026-03-11`
+- Derniere mise a jour: `2026-04-04`
 - Lead: `Mourad`
 - Reviewer: `Ibrahim`
 
@@ -148,3 +148,27 @@ du projet evenements.
 | D06.1 | DONE | P2 | Mourad | Ibrahim | Sprint 0 | docs/task_history.md | Historique livrables | Routine `task_history` documentee | Les mises a jour majeures du cadrage ou du code ont une place claire dans l'historique | `docs/task-history-routine` |
 | D06.2 | DONE | P2 | Mourad | Ibrahim | Sprint 0 | docs/README.md | Activation releases/deployments | Regle d'activation deja formalisee | La doc explique clairement quand activer `releases/` et `deployments/` | `docs/release-activation-rule` |
 | D06.3 | DONE | P2 | Mourad | Ibrahim | Sprint 1 | docs/planning/team_work_split.md | Gouvernance documentaire | Rituel de revue doc defini | L'equipe a une regle simple de revue et mise a jour documentaire a chaque sprint | `docs/documentation-review-cadence` |
+
+### D07 - Aligner la documentation repo avec le livrable HTML Evenements
+
+- Status: `DONE`
+- Priority: `P1` · Difficulty: `M` · Impact: `H`
+- Owner: `Mourad`
+- Support: `Ibrahim`
+- User stories: `none`
+- Livrables:
+  - correspondance explicite entre les 9 livrables HTML et les sources
+    canoniques du repo
+  - guides de synthese UI/application, securite, guide dev et tests
+  - navigation `Livrables` dans le portail docs
+- Notes:
+  - ce lot ne recopie pas la stack pedagogique du HTML mot pour mot;
+    il la remappe sur le monorepo et les services reels.
+
+#### Tickets prets a coder
+
+| Ticket ID | Status | Priority | Owner | Support | Sprint cible | Dependances | Interfaces impactees | Sortie attendue | Critere d'acceptation | Branche suggeree |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| D07.1 | DONE | P1 | Mourad | Ibrahim | Sprint 1 | D01.2, D04.1, D04.2, D05.1 | `docs/livrables-html-evenements.md` | Matrice d'alignement HTML -> repo | Chaque livrable du HTML `AgendaGo` renvoie vers des documents canoniques et les ecarts de stack sont explicitement notes | `docs/html-deliverables-alignment` |
+| D07.2 | DONE | P1 | Mourad | Ibrahim | Sprint 1 | D07.1 | `docs/README.md`, `docs/QUICK_START.md`, `docs/DOCUMENTATION_INDEX.md`, docs de synthese | Entrees documentaires remises a jour | Un lecteur peut retrouver rapidement UI, application, securite, guide dev et tests depuis les points d'entree principaux | `docs/html-deliverables-entrypoints` |
+| D07.3 | DONE | P1 | Mourad | Ibrahim | Sprint 1 | D07.1 | `apps/docs-portal/` | Hub `Livrables` dans le portail docs | Le portail expose une navigation dediee aux livrables HTML et build sans lien casse | `docs-portal/html-deliverables-hub` |

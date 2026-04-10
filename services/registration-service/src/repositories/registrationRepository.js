@@ -440,6 +440,94 @@ export function createRegistrationRepository(pool) {
       return mapRegistration(rows[0]);
     },
 
+    async promoteNextWaitlistedWithTicket(eventId, updatedAt, buildTicketPayload) {
+      const client = await pool.connect();
+      try {
+        await client.query("BEGIN");
+
+        const nextWaitlistedResult = await client.query(
+          `
+            ${BASE_SELECT}
+            WHERE event_id = $1
+              AND registration_status = 'WAITLISTED'
+            ORDER BY waitlist_position ASC NULLS LAST, created_at ASC
+            FOR UPDATE SKIP LOCKED
+            LIMIT 1
+          `,
+          [eventId]
+        );
+
+        const nextWaitlisted = mapRegistration(nextWaitlistedResult.rows[0]);
+        if (!nextWaitlisted) {
+          await client.query("COMMIT");
+          return null;
+        }
+
+        const ticketPayload = buildTicketPayload(nextWaitlisted);
+        const registrationResult = await client.query(
+          `
+            UPDATE registrations
+            SET registration_status = 'CONFIRMED',
+                updated_at = $2,
+                promoted_at = $2,
+                waitlist_position = NULL,
+                ticket_id = $3,
+                ticket_ref = $4
+            WHERE registration_id = $1
+            RETURNING *
+          `,
+          [
+            nextWaitlisted.registrationId,
+            updatedAt,
+            ticketPayload.ticketId,
+            ticketPayload.ticketRef
+          ]
+        );
+
+        const ticketResult = await client.query(
+          `
+            INSERT INTO tickets (
+              ticket_id,
+              registration_id,
+              event_id,
+              participant_id,
+              ticket_ref,
+              ticket_format,
+              ticket_status,
+              payload,
+              created_at,
+              updated_at
+            )
+            VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)
+            RETURNING *
+          `,
+          [
+            ticketPayload.ticketId,
+            ticketPayload.registrationId,
+            ticketPayload.eventId,
+            ticketPayload.participantId,
+            ticketPayload.ticketRef,
+            ticketPayload.ticketFormat,
+            ticketPayload.ticketStatus,
+            ticketPayload.payload,
+            ticketPayload.createdAt,
+            ticketPayload.updatedAt
+          ]
+        );
+
+        await client.query("COMMIT");
+        return {
+          registration: mapRegistration(registrationResult.rows[0]),
+          ticket: mapTicket(ticketResult.rows[0])
+        };
+      } catch (err) {
+        await client.query("ROLLBACK");
+        throw err;
+      } finally {
+        client.release();
+      }
+    },
+
     async promoteRegistration(registrationId, updatedAt, ticketId, ticketRef) {
       const { rows } = await pool.query(
         `

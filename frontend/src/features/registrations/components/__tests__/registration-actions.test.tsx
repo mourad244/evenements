@@ -11,6 +11,14 @@ const cancelMutationState = {
   variables: undefined as string | undefined
 };
 
+const downloadMutationState = {
+  mutate: vi.fn(),
+  isPending: false,
+  isSuccess: false,
+  error: null as Error | null,
+  variables: undefined as { id: string } | undefined
+};
+
 vi.mock("next/link", () => ({
   default: ({ href, children, ...props }: Record<string, unknown>) =>
     React.createElement("a", { href: String(href), ...props }, children)
@@ -18,6 +26,10 @@ vi.mock("next/link", () => ({
 
 vi.mock("@/features/registrations/hooks/use-cancel-registration-mutation", () => ({
   useCancelRegistrationMutation: () => cancelMutationState
+}));
+
+vi.mock("@/features/registrations/hooks/use-download-ticket-mutation", () => ({
+  useDownloadTicketMutation: () => downloadMutationState
 }));
 
 import { RegistrationList } from "../registration-list";
@@ -32,7 +44,8 @@ const registrations = [
     status: "CONFIRMED" as const,
     canDownloadTicket: true,
     ticketId: "ticket-1",
-    ticketFormat: "PDF" as const
+    ticketFormat: "PDF" as const,
+    updatedAt: "2026-03-20T09:00:00.000Z"
   },
   {
     id: "reg-2",
@@ -44,7 +57,8 @@ const registrations = [
     canDownloadTicket: false,
     ticketId: null,
     ticketFormat: null,
-    waitlistPosition: 3
+    waitlistPosition: 3,
+    updatedAt: "2026-03-19T09:00:00.000Z"
   }
 ];
 
@@ -56,6 +70,11 @@ describe("registration action feedback", () => {
     cancelMutationState.isSuccess = false;
     cancelMutationState.error = null;
     cancelMutationState.variables = undefined;
+    downloadMutationState.mutate.mockReset();
+    downloadMutationState.isPending = false;
+    downloadMutationState.isSuccess = false;
+    downloadMutationState.error = null;
+    downloadMutationState.variables = undefined;
   });
 
   it("shows pending feedback only for the registration currently being cancelled", () => {
@@ -84,5 +103,38 @@ describe("registration action feedback", () => {
     render(<RegistrationList registrations={registrations} />);
 
     expect(screen.getByRole("alert").textContent).toContain("Could not cancel this registration");
+  });
+
+  it("shows the download action only for eligible confirmed registrations", () => {
+    render(<RegistrationList registrations={registrations} />);
+
+    expect(screen.getByRole("button", { name: "Download ticket" })).toBeTruthy();
+    expect(screen.queryByText("Downloading...")).toBeNull();
+  });
+
+  it("shows download pending and success feedback", () => {
+    downloadMutationState.isPending = true;
+    downloadMutationState.variables = { id: "reg-1" };
+
+    const { rerender } = render(<RegistrationList registrations={registrations} />);
+
+    expect(screen.getByRole("button", { name: "Downloading..." }).hasAttribute("disabled")).toBe(true);
+
+    downloadMutationState.isPending = false;
+    downloadMutationState.isSuccess = true;
+    downloadMutationState.variables = undefined;
+    rerender(<RegistrationList registrations={registrations} />);
+
+    expect(screen.getByRole("status").textContent).toContain("Your ticket was downloaded successfully.");
+  });
+
+  it("shows ticket download errors with readable feedback", () => {
+    downloadMutationState.error = new Error("Ticket service is temporarily unavailable. Please retry.");
+
+    render(<RegistrationList registrations={registrations} />);
+
+    expect(screen.getByRole("alert").textContent).toContain(
+      "Ticket service is temporarily unavailable. Please retry."
+    );
   });
 });

@@ -86,6 +86,12 @@ export async function ensureSchema(pool) {
   `);
 
   await pool.query(`
+    CREATE UNIQUE INDEX IF NOT EXISTS idx_registrations_active_event_participant
+      ON registrations (event_id, participant_id)
+      WHERE registration_status IN ('CONFIRMED', 'WAITLISTED');
+  `);
+
+  await pool.query(`
     CREATE INDEX IF NOT EXISTS idx_tickets_participant
       ON tickets (participant_id, created_at DESC);
   `);

@@ -10,6 +10,7 @@ import { ROUTES } from "@/lib/constants/routes";
 import { formatDate } from "@/lib/utils/format-date";
 
 import { useCancelRegistrationMutation } from "../hooks/use-cancel-registration-mutation";
+import { useDownloadTicketMutation } from "../hooks/use-download-ticket-mutation";
 import type { RegistrationItem } from "../types/registration.types";
 
 function resolveStatusState(registration: RegistrationItem) {
@@ -114,6 +115,7 @@ function resolveNextStep(registration: RegistrationItem) {
 
 export function RegistrationList({ registrations }: { registrations: RegistrationItem[] }) {
   const mutation = useCancelRegistrationMutation();
+  const downloadMutation = useDownloadTicketMutation();
   const sortedRegistrations = [...registrations].sort((left, right) => {
     const leftDate = left.updatedAt || left.eventDate;
     const rightDate = right.updatedAt || right.eventDate;
@@ -153,12 +155,35 @@ export function RegistrationList({ registrations }: { registrations: Registratio
           {mutation.error.message}
         </p>
       ) : null}
+      {downloadMutation.isSuccess ? (
+        <p
+          role="status"
+          className="rounded-[22px] border border-[rgba(52,211,153,0.22)] bg-[rgba(6,78,59,0.3)] px-4 py-3 text-sm text-[var(--status-success)]"
+        >
+          Your ticket was downloaded successfully.
+        </p>
+      ) : null}
+      {downloadMutation.error ? (
+        <p
+          role="alert"
+          className="rounded-[22px] border border-[rgba(251,113,133,0.24)] bg-[rgba(127,29,29,0.26)] px-4 py-3 text-sm text-[var(--status-danger)]"
+        >
+          {downloadMutation.error.message}
+        </p>
+      ) : null}
       {sortedRegistrations.map((registration) => {
         const statusState = resolveStatusState(registration);
         const ticketState = resolveTicketState(registration);
         const nextStep = resolveNextStep(registration);
         const isCancellingThis =
           mutation.isPending && mutation.variables === registration.id;
+        const isDownloadingThis =
+          downloadMutation.isPending &&
+          downloadMutation.variables?.id === registration.id;
+        const canDownloadTicket =
+          registration.status === "CONFIRMED" &&
+          registration.canDownloadTicket &&
+          Boolean(registration.ticketId);
 
         return (
           <Card
@@ -219,6 +244,15 @@ export function RegistrationList({ registrations }: { registrations: Registratio
                 <Link href={`/events/${registration.eventId}`} className="w-full sm:w-auto">
                   <Button variant="ghost" className="w-full sm:w-auto">Review event</Button>
                 </Link>
+              {canDownloadTicket ? (
+                <Button
+                  onClick={() => downloadMutation.mutate(registration)}
+                  disabled={isDownloadingThis}
+                  className="w-full sm:w-auto"
+                >
+                  {isDownloadingThis ? "Downloading..." : "Download ticket"}
+                </Button>
+              ) : null}
               <Button
                 variant="danger"
                 onClick={() => mutation.mutate(registration.id)}

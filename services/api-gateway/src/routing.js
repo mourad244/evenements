@@ -183,6 +183,14 @@ export function buildRouteTable(config) {
     },
     {
       method: "GET",
+      path: "/api/tickets/:ticketId/download",
+      public: false,
+      allowedRoles: participantOnly,
+      targetBaseUrl: config.registrationServiceUrl,
+      targetPath: "/tickets/:ticketId/download"
+    },
+    {
+      method: "GET",
       path: "/api/notifications",
       public: false,
       allowedRoles: authenticatedRoles,

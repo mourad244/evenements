@@ -16,14 +16,23 @@ slug: navigation
 # Index de Documentation - Projet Evenements
 
 > Public cible: produit, architecte, dev backend, dev frontend, ops  
-> Derniere mise a jour: 2026-03-26
+> Derniere mise a jour: 2026-04-04
 
 ## Demarrage rapide
 
 - [Guide de demarrage rapide](./QUICK_START.md)
+- [Alignement livrables HTML -> repo](./livrables-html-evenements.md)
 - [Perimetre MVP et architecture cible](./mvp_scope.md)
 - [Roadmap des sprints](./planning/roadmap_sprints.md)
 - [Cahier des charges PDF](./cahier_des_charges_evenements_microservices.pdf)
+
+## Livrables HTML - Sujet Evenements
+
+- [Alignement livrables HTML -> repo](./livrables-html-evenements.md)
+- [Surfaces UI et application](./ui-application-surfaces-evenements.md)
+- [Strategie securite Evenements](./security-strategy-evenements.md)
+- [Guide developpeur Evenements](./developer-guide-evenements.md)
+- [Strategie de tests Evenements](./testing-strategy-evenements.md)
 
 ## Architecture et delivery
 
@@ -39,6 +48,9 @@ slug: navigation
 - [Plan de smoke tests MVP](./test-plan-smoke-mvp.md)
 - [Plan de recette par phase](./test-plan-acceptance-matrix.md)
 - [Plan de non-regression ACL](./test-plan-role-regression.md)
+- [Strategie securite Evenements](./security-strategy-evenements.md)
+- [Guide developpeur Evenements](./developer-guide-evenements.md)
+- [Strategie de tests Evenements](./testing-strategy-evenements.md)
 - [Spec identity-access-service](./services/identity-access-service-spec.md)
 - [Spec event-management-service](./services/event-management-service-spec.md)
 - [Spec catalog-search-service](./services/catalog-search-service-spec.md)
@@ -133,6 +145,11 @@ deployable.
 
 ## Navigation par besoin
 
+- Aligner la doc sur le livrable HTML -> [livrables-html-evenements.md](./livrables-html-evenements.md)
+- Lire les maquettes et surfaces UI -> [ui-application-surfaces-evenements.md](./ui-application-surfaces-evenements.md)
+- Verifier la posture securite -> [security-strategy-evenements.md](./security-strategy-evenements.md)
+- Demarrer techniquement le depot -> [developer-guide-evenements.md](./developer-guide-evenements.md)
+- Comprendre la couverture de tests -> [testing-strategy-evenements.md](./testing-strategy-evenements.md)
 - Comprendre le produit -> [mvp_scope.md](./mvp_scope.md)
 - Prioriser le MVP -> [user_stories_table.md](./user_stories/user_stories_table.md)
 - Planifier un increment -> [roadmap_sprints.md](./planning/roadmap_sprints.md)

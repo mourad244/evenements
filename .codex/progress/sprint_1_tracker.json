@@ -3,7 +3,7 @@
     "sprint_id": "S1",
     "name": "Sprint 1 - MVP publication & inscription",
     "source": "docs/sprints/sprint_1_mvp_event_publication_registration.md",
-    "last_updated": "2026-03-26T21:27:06.589Z"
+    "last_updated": "2026-04-04T10:02:58.208Z"
   },
   "tasks": [
     {
@@ -20,12 +20,17 @@
         "replace in-memory auth store",
         "postgres-backed repositories"
       ],
-      "updated_at": "2026-03-08T13:30:00Z",
+      "updated_at": "2026-04-04T10:02:58.208Z",
       "notes": [
         {
           "date": "2026-03-08T13:30:00Z",
           "status": "DONE",
           "text": "Identity auth/session/reset persistence migrated to Postgres with schema + repository + smoke validation."
+        },
+        {
+          "date": "2026-04-04T10:02:58.208Z",
+          "status": "DONE",
+          "text": "Added an idempotent identity-access-service seed command with fictional users, sessions, reset tokens, and audit logs; executed it against evenements_s1_m01 and verified a second run keeps counts stable at 12 users, 19 sessions, 4 reset tokens, and 18 audit logs."
         }
       ]
     },

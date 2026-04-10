@@ -2,7 +2,7 @@
 
 - Sprint: `S1`
 - Source: `docs/sprints/sprint_1_mvp_event_publication_registration.md`
-- Last updated: `2026-03-26T21:27:06.589Z`
+- Last updated: `2026-04-04T10:02:58.208Z`
 
 ## Summary
 
@@ -16,7 +16,7 @@
 
 | ID | Status | Priority | Refs | Task | Last update |
 | --- | --- | --- | --- | --- | --- |
-| S1-T01 | DONE | P0 | S1-M01, I02.3 | Replace in-memory auth/session/reset stores with Postgres-backed repositories. | 2026-03-08T13:30:00Z |
+| S1-T01 | DONE | P0 | S1-M01, I02.3 | Replace in-memory auth/session/reset stores with Postgres-backed repositories. | 2026-04-04T10:02:58.208Z |
 | S1-T02 | DONE | P0 | S1-M02, S1-M04, I04.2 | Add gateway proxies + ACL matrix for next Sprint 1 routes (/api/events/*, /api/registrations/*). | 2026-03-08T20:31:42.203Z |
 | S1-T03 | DONE | P1 | S1-M01, M01.2, M02.3 | Add docker-compose and CI job to run test:s1-m01 automatically. | 2026-03-26T21:27:06.588Z |
 | S1-T04 | DONE | P1 | S1-M06, M02.2, M02.3 | S1-M06 hardening on current services: structured logs + guaranteed x-correlation-id tracing on every auth path (Gateway + Identity), plus smoke assertions. | 2026-03-26T21:16:40.354Z |
@@ -26,7 +26,7 @@
 
 ## Latest Notes
 
-- `S1-T01` `DONE` (2026-03-08T13:30:00Z): Identity auth/session/reset persistence migrated to Postgres with schema + repository + smoke validation.
+- `S1-T01` `DONE` (2026-04-04T10:02:58.208Z): Added an idempotent identity-access-service seed command with fictional users, sessions, reset tokens, and audit logs; executed it against evenements_s1_m01 and verified a second run keeps counts stable at 12 users, 19 sessions, 4 reset tokens, and 18 audit logs.
 - `S1-T02` `DONE` (2026-03-08T20:31:42.204Z): Introduced explicit gateway ACL/proxy route matrix for /api/events/*, /api/registrations/*, and /api/profile/participations via routing module; added and passed unit tests in tests/s1-t02.gateway-acl-matrix.unit.test.js.
 - `S1-T03` `DONE` (2026-03-26T21:27:06.589Z): Adjusted the S1-M01 smoke test to wait on api-gateway /health instead of /ready because /ready now depends on event-management and registration upstreams; verified corepack pnpm test:s1-m01 passes with docker-compose.s1-m01.yml external Postgres.
 - `S1-T04` `DONE` (2026-03-09T00:45:47.781Z): Refactored observability into testable middleware modules, enforced correlation-id middleware and structured auth-path completion logging for Gateway + Identity, and added passing unit coverage in tests/s1-t04.observability.unit.test.js; smoke assertions for x-correlation-id remain in tests/s1-m01.smoke.test.js.

@@ -2,6 +2,69 @@
 
 Journal synthetique des livrables majeurs et des baselines de cadrage.
 
+## 2026-04-04 - Fermeture auth/ACL frontend et durcissement registration
+
+- Ajout de la route publique `access-denied` et redirection de
+  `RoleGuard` vers un ecran explicite au lieu du fallback dashboard.
+- Mise en place d'un vrai flux de refresh frontend:
+  persistance du `refreshToken`, tentative unique sur
+  `/api/auth/refresh`, puis repli propre sur `session-expired`.
+- Ajout d'une contrainte SQL anti-doublon actif sur
+  `registrations(event_id, participant_id)` et conversion des courses de
+  creation en `409 REGISTRATION_EXISTS`.
+- Durcissement de la promotion waitlist avec selection verouillee
+  `FOR UPDATE SKIP LOCKED` et tests dedies sur le repository.
+- Mise a jour des backlogs `frontend` et `registration_ticketing` pour
+  passer `F04.2`, `F04.3` et `R02.2` en `DONE`.
+
+## 2026-04-04 - Telechargement billet participant end-to-end
+
+- Ajout du endpoint `GET /tickets/{ticketId}/download` dans
+  `registration-service` avec reponse binaire et en-tetes
+  `content-disposition`.
+- Extension du gateway pour exposer
+  `GET /api/tickets/{ticketId}/download` et relayer correctement les
+  reponses non JSON/binaries.
+- Integration frontend du bouton `Download ticket` dans
+  `my-registrations` avec telechargement protege et messages lisibles
+  pour `401`, `403`, `404` et `502`.
+- Mise a jour du backlog `registration_ticketing` pour passer `R05.3`
+  en `DONE`; `F06.3` reste `PARTIAL` tant que la tranche organisateur
+  n'est pas livree.
+
+## 2026-04-04 - Revalidation des backlogs frontend et registration
+
+- Relecture des surfaces frontend `my-registrations`,
+  `organizer/events/[eventId]/registrations`, guards et ecran
+  `session-expired` pour recaler les tickets ouverts sur l'etat reel du
+  code.
+- Mise a jour des metas `Reste principal` dans
+  `docs/backlogs/BackLog_frontend.md` et
+  `docs/backlogs/BackLog_registration_ticketing.md`.
+- Ajout de notes explicites sur les ecarts restants:
+  ecran `acces refuse` absent, `refreshToken` non exploite cote
+  frontend, absence de contrainte SQL anti-doublon active, absence
+  d'UI de telechargement billet et d'UI export organisateur.
+
+## 2026-04-04 - Alignement documentation avec le livrable HTML Evenements
+
+- Creation du document de correspondance
+  `docs/livrables-html-evenements.md` pour mapper les 9 livrables
+  `AgendaGo` du HTML vers les sources canoniques du repo.
+- Creation des documents de synthese
+  `docs/ui-application-surfaces-evenements.md`,
+  `docs/security-strategy-evenements.md`,
+  `docs/developer-guide-evenements.md` et
+  `docs/testing-strategy-evenements.md`.
+- Mise a jour de `docs/README.md`, `docs/QUICK_START.md` et
+  `docs/DOCUMENTATION_INDEX.md` pour corriger les informations obsoletes
+  et exposer une navigation par livrables.
+- Ajout d'une entree `Livrables` dans le portail Docusaurus pour
+  retrouver le meme decoupage documentaire que dans le HTML externe.
+- Mise a jour de `docs/backlogs/BackLog_documentation.md` avec le lot
+  `D07` et ses tickets `DONE` pour tracer explicitement cet alignement
+  dans le backlog.
+
 ## 2026-03-07 - Baseline documentaire projet
 
 - Structuration complete du dossier `docs/` sur le modele de `docs copy`,
@@ -1088,6 +1151,28 @@ Journal synthetique des livrables majeurs et des baselines de cadrage.
 - Mise a jour de `docs/DOCUMENTATION_INDEX.md` pour retirer la note
   obsolete indiquant que le depot ne contenait pas encore de code
   d'execution.
+
+## 2026-04-04 - Integration UI export organisateur (`R06.3`, `F06.3`)
+
+- Ajout du telechargement CSV organisateur cote frontend via
+  `frontend/src/features/registrations/api/download-organizer-registrations-export.ts`
+  et du hook associe.
+- Branchement du bouton `Export CSV` dans
+  `/organizer/events/[eventId]/registrations` avec etats
+  `loading/success/error` et messages lisibles pour
+  `401/403/404/502`.
+- Ajout de tests frontend cibles pour l'API d'export et l'action UI,
+  plus mise a jour des mocks des suites organisateur existantes.
+- Mise a jour de `docs/backlogs/BackLog_frontend.md`:
+  `F06` et `F06.3` passent a `DONE`.
+- Mise a jour de `docs/backlogs/BackLog_registration_ticketing.md`:
+  `R06` et `R06.3` passent a `DONE`.
+- Verification:
+  `corepack pnpm --filter event-platform-frontend build` OK.
+- Limite connue:
+  les suites `vitest` frontend ne demarrent pas dans l'environnement
+  courant a cause d'un chargement ESM casse entre `vitest` et `vite`
+  depuis `frontend/vitest.config.ts`.
 
 ## A completer ensuite
 

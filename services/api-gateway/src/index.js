@@ -87,6 +87,10 @@ app.use((req, res, next) => {
     "authorization, content-type, x-correlation-id"
   );
   res.setHeader(
+    "access-control-expose-headers",
+    "content-disposition, content-type, x-correlation-id"
+  );
+  res.setHeader(
     "access-control-allow-methods",
     "GET,POST,PATCH,PUT,DELETE,OPTIONS"
   );
@@ -339,14 +343,23 @@ app.use(async (req, res) => {
   }
 
   const contentType = upstreamResponse.headers.get("content-type") || "";
-  const responseText = await upstreamResponse.text();
+  const contentDisposition =
+    upstreamResponse.headers.get("content-disposition") || "";
+  const contentLength = upstreamResponse.headers.get("content-length") || "";
 
   res.status(upstreamResponse.status);
   if (contentType) {
     res.setHeader("content-type", contentType);
   }
+  if (contentDisposition) {
+    res.setHeader("content-disposition", contentDisposition);
+  }
+  if (contentLength) {
+    res.setHeader("content-length", contentLength);
+  }
 
   if (contentType.includes("application/json")) {
+    const responseText = await upstreamResponse.text();
     if (!responseText) {
       return res.send({});
     }
@@ -359,7 +372,8 @@ app.use(async (req, res) => {
     }
   }
 
-  return res.send(responseText);
+  const responseBuffer = Buffer.from(await upstreamResponse.arrayBuffer());
+  return res.send(responseBuffer);
 });
 
 app.listen(config.port, () => {
