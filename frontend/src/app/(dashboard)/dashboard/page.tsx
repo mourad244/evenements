@@ -531,7 +531,7 @@ export default function DashboardPage() {
   const isAdmin = user?.role === "ADMIN";
 
   const registrationsQuery = useMyRegistrationsQuery({}, isParticipant);
-  const organizerEventsQuery = useOrganizerEventsQuery(isOrganizer);
+  const organizerEventsQuery = useOrganizerEventsQuery({}, isOrganizer);
 
   if (isUserLoading) {
     return <LoadingState label="Loading dashboard..." variant="dashboard" />;
@@ -558,7 +558,7 @@ export default function DashboardPage() {
 
       {isOrganizer ? (
         <OrganizerDashboard
-          events={organizerEventsQuery.data || []}
+          events={organizerEventsQuery.data?.items || []}
           isLoading={organizerEventsQuery.isLoading}
           isError={organizerEventsQuery.isError}
           errorMessage={organizerEventsQuery.error?.message}

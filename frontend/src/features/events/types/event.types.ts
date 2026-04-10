@@ -1,4 +1,10 @@
-export type EventStatus = "DRAFT" | "PUBLISHED" | "CANCELLED";
+export type EventStatus =
+  | "DRAFT"
+  | "PUBLISHED"
+  | "FULL"
+  | "CLOSED"
+  | "ARCHIVED"
+  | "CANCELLED";
 
 export type EventModel = {
   id: string;
@@ -38,6 +44,33 @@ export type EventFilters = {
   theme?: string;
 };
 
+export type OrganizerEventsQueryFilters = {
+  status?: EventStatus | "";
+  theme?: string;
+  fromDate?: string;
+  toDate?: string;
+  page?: number;
+  pageSize?: number;
+};
+
+export type OrganizerEventCounts = {
+  total: number;
+  draft: number;
+  published: number;
+  full: number;
+  closed: number;
+  archived: number;
+  cancelled: number;
+};
+
+export type OrganizerEventsResult = {
+  items: EventItem[];
+  page: number;
+  pageSize: number;
+  total: number;
+  counts: OrganizerEventCounts;
+};
+
 export type UpsertEventInput = {
   title: string;
   description: string;
@@ -49,4 +82,5 @@ export type UpsertEventInput = {
   currency: string;
   capacity: number;
   theme: string;
+  imageUrl?: string;
 };

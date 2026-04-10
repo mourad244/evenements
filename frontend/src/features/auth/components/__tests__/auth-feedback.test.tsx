@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 
-import { cleanup, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import React from "react";
 
 type MutationState<T = unknown> = {
@@ -113,6 +113,21 @@ describe("auth action feedback", () => {
     render(<LoginForm />);
 
     expect(screen.getByRole("alert").textContent).toContain("Invalid credentials");
+  });
+
+  it("shows login validation summary and focuses the first invalid field", async () => {
+    render(<LoginForm />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Sign in" }));
+
+    await waitFor(() => {
+      expect(screen.getByRole("alert").textContent).toContain("Fix the sign-in form");
+    });
+
+    expect(screen.getAllByText("Enter a valid email address.").length).toBeGreaterThan(0);
+    await waitFor(() => {
+      expect(document.activeElement).toBe(screen.getByLabelText("Email"));
+    });
   });
 
   it("shows register pending feedback and inline error feedback", () => {

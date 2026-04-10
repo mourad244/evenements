@@ -3,12 +3,18 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useId } from "react";
 import { useForm } from "react-hook-form";
 
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { FormErrorSummary } from "@/components/shared/form-error-summary";
 import { Input } from "@/components/ui/input";
 import { ROUTES } from "@/lib/constants/routes";
+import {
+  focusFirstErrorField,
+  getFieldErrorMessages
+} from "@/lib/forms/form-accessibility";
 
 import { registerSchema, type RegisterSchema } from "../schemas/auth.schema";
 import { useRegisterMutation } from "../hooks/use-register-mutation";
@@ -17,6 +23,7 @@ import { PasswordField } from "./password-field";
 export function RegisterForm() {
   const router = useRouter();
   const mutation = useRegisterMutation();
+  const roleSelectId = useId();
   const form = useForm<RegisterSchema>({
     resolver: zodResolver(registerSchema),
     defaultValues: {
@@ -28,10 +35,23 @@ export function RegisterForm() {
     }
   });
 
-  const onSubmit = form.handleSubmit(async (values) => {
-    await mutation.mutateAsync(values);
-    router.push(ROUTES.login);
-  });
+  const onSubmit = form.handleSubmit(
+    async (values) => {
+      await mutation.mutateAsync(values);
+      router.push(ROUTES.login);
+    },
+    (errors) => {
+      focusFirstErrorField(
+        ["fullName", "email", "password", "confirmPassword", "role"] as const,
+        errors,
+        form.setFocus
+      );
+    }
+  );
+  const validationMessages = getFieldErrorMessages(form.formState.errors);
+  const roleHintId = `${roleSelectId}-hint`;
+  const roleErrorId = form.formState.errors.role ? `${roleSelectId}-error` : undefined;
+  const roleDescribedBy = [roleHintId, roleErrorId].filter(Boolean).join(" ") || undefined;
 
   return (
     <Card className="mx-auto grid w-full max-w-xl gap-7 border-[rgba(88,116,255,0.18)] bg-[radial-gradient(circle_at_top_right,rgba(88,116,255,0.14),transparent_30%),linear-gradient(180deg,rgba(18,28,46,0.96),rgba(9,15,26,0.98))] shadow-[0_30px_68px_rgba(14,24,54,0.32)]">
@@ -46,10 +66,12 @@ export function RegisterForm() {
           Start as a participant or organizer and connect to the platform securely.
         </p>
       </div>
-      <form className="grid gap-4" onSubmit={onSubmit}>
+      <form className="grid gap-4" onSubmit={onSubmit} noValidate aria-busy={mutation.isPending}>
+        <FormErrorSummary title="Fix the registration form" messages={validationMessages} />
         <Input
           id="register-full-name"
           label="Full name"
+          hint="Use the name other attendees should see."
           autoComplete="name"
           placeholder="Your full name"
           {...form.register("fullName")}
@@ -59,6 +81,7 @@ export function RegisterForm() {
         <Input
           id="register-email"
           label="Email"
+          hint="We will use this address to sign you in and send recovery emails."
           type="email"
           autoComplete="email"
           placeholder="you@example.com"
@@ -69,6 +92,7 @@ export function RegisterForm() {
         <PasswordField
           id="register-password"
           label="Password"
+          hint="Use at least 8 characters with upper and lower case letters and a number."
           autoComplete="new-password"
           placeholder="Choose a strong password"
           {...form.register("password")}
@@ -78,24 +102,37 @@ export function RegisterForm() {
         <PasswordField
           id="register-confirm-password"
           label="Confirm password"
+          hint="Repeat the same password so we can check it matches."
           autoComplete="new-password"
           placeholder="Repeat your password"
           {...form.register("confirmPassword")}
           error={form.formState.errors.confirmPassword?.message}
           disabled={mutation.isPending}
         />
-        <label className="grid gap-2.5 text-sm text-[var(--text-secondary)]">
+        <label className="grid gap-2.5 text-sm text-[var(--text-secondary)]" htmlFor={roleSelectId}>
           <span className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--text-muted)]">
             Role
           </span>
           <select
+            id={roleSelectId}
             className="h-12 rounded-[22px] border border-[var(--line-soft)] bg-[linear-gradient(180deg,rgba(16,26,45,0.96),rgba(10,17,30,0.98))] px-4 text-sm text-[var(--text-primary)] outline-none transition shadow-[inset_0_1px_0_rgba(255,255,255,0.03)] focus-visible:border-[rgba(88,116,255,0.38)] focus-visible:ring-2 focus-visible:ring-[var(--ring-brand)]"
+            aria-invalid={form.formState.errors.role ? "true" : "false"}
+            aria-describedby={roleDescribedBy}
+            aria-errormessage={roleErrorId}
             {...form.register("role")}
             disabled={mutation.isPending}
           >
             <option value="PARTICIPANT">Participant</option>
             <option value="ORGANIZER">Organizer</option>
           </select>
+          <span id={roleHintId} className="text-xs text-[var(--text-muted)]">
+            Choose participant for attendee access or organizer for event management.
+          </span>
+          {form.formState.errors.role ? (
+            <span id={roleErrorId} className="text-xs text-[var(--status-danger)]">
+              {form.formState.errors.role.message}
+            </span>
+          ) : null}
         </label>
         {mutation.isPending ? (
           <p role="status" className="rounded-[22px] border border-[rgba(88,116,255,0.18)] bg-[rgba(88,116,255,0.08)] px-4 py-3 text-sm text-[var(--text-secondary)]">

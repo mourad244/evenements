@@ -3,7 +3,7 @@
     "sprint_id": "S1",
     "name": "Sprint 1 - MVP publication & inscription",
     "source": "docs/sprints/sprint_1_mvp_event_publication_registration.md",
-    "last_updated": "2026-04-04T10:02:58.208Z"
+    "last_updated": "2026-04-10T22:00:01.955Z"
   },
   "tasks": [
     {
@@ -177,7 +177,7 @@
         "events drafts crud",
         "ownership rules for event drafts"
       ],
-      "updated_at": "2026-03-08T13:26:25.287Z",
+      "updated_at": "2026-04-10T20:57:00.339Z",
       "notes": [
         {
           "date": "2026-03-08T13:22:39.682Z",
@@ -188,6 +188,31 @@
           "date": "2026-03-08T13:26:25.288Z",
           "status": "DONE",
           "text": "Implemented event-management-service draft CRUD with Postgres, ownership guards, and passing S1-T05 smoke + S1-M01 regression."
+        },
+        {
+          "date": "2026-04-10T20:48:30.747Z",
+          "status": "IN_PROGRESS",
+          "text": "Started follow-up work to seed persistent demo rows for events and related registration-facing tables so the frontend has realistic data to render."
+        },
+        {
+          "date": "2026-04-10T20:51:23.613Z",
+          "status": "DONE",
+          "text": "Added idempotent seed scripts for event-management-service and registration-service, plus root seed commands. Verified against evenements_s1_m01 with 4 seeded events, 6 registrations, 2 tickets, 4 notifications, and 2 payments."
+        },
+        {
+          "date": "2026-04-10T20:55:17.009Z",
+          "status": "IN_PROGRESS",
+          "text": "Extending demo seeds with edge-case rows: extra cancelled registrations, additional organizer events, and notification-heavy scenarios."
+        },
+        {
+          "date": "2026-04-10T20:56:55.268Z",
+          "status": "DONE",
+          "text": "Expanded the demo seed set with extra cancelled registrations, more organizer events, soft-deleted/archive event rows, and notification-heavy scenarios; verified the database now has 7 events, 11 registrations, 3 tickets, 9 notifications, and 4 payments."
+        },
+        {
+          "date": "2026-04-10T20:57:00.339Z",
+          "status": "DONE",
+          "text": "Expanded the demo seed set with extra cancelled registrations, more organizer events, soft-deleted/archive event rows, and notification-heavy scenarios; verified the database now has 7 events, 11 registrations, 3 tickets, 9 notifications, and 4 payments."
         }
       ]
     },
@@ -205,7 +230,7 @@
         "wire gateway routes events",
         "contract style s1-m01"
       ],
-      "updated_at": "2026-03-08T22:16:43.669Z",
+      "updated_at": "2026-04-10T22:00:01.955Z",
       "notes": [
         {
           "date": "2026-03-08T18:40:41.591Z",
@@ -226,6 +251,16 @@
           "date": "2026-03-08T22:16:43.670Z",
           "status": "DONE",
           "text": "Gateway event routes are fully wired with organizer/admin guards in shared routing matrix; exact target-path contracts and ACL expectations are covered by passing unit tests (tests/s1-t02.gateway-acl-matrix.unit.test.js)."
+        },
+        {
+          "date": "2026-04-10T21:59:58.782Z",
+          "status": "IN_PROGRESS",
+          "text": "Auto-start from prompt: E05.3 organizer events UI"
+        },
+        {
+          "date": "2026-04-10T22:00:01.955Z",
+          "status": "DONE",
+          "text": "Auto-start matched the wrong prompt during E05.3 work; restoring the task to DONE."
         }
       ]
     },

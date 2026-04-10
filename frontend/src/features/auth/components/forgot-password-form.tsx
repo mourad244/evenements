@@ -6,8 +6,13 @@ import { useForm } from "react-hook-form";
 
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { FormErrorSummary } from "@/components/shared/form-error-summary";
 import { Input } from "@/components/ui/input";
 import { ROUTES } from "@/lib/constants/routes";
+import {
+  focusFirstErrorField,
+  getFieldErrorMessages
+} from "@/lib/forms/form-accessibility";
 
 import {
   forgotPasswordSchema,
@@ -24,9 +29,15 @@ export function ForgotPasswordForm() {
     }
   });
 
-  const onSubmit = form.handleSubmit(async (values) => {
-    await mutation.mutateAsync(values);
-  });
+  const onSubmit = form.handleSubmit(
+    async (values) => {
+      await mutation.mutateAsync(values);
+    },
+    (errors) => {
+      focusFirstErrorField(["email"] as const, errors, form.setFocus);
+    }
+  );
+  const validationMessages = getFieldErrorMessages(form.formState.errors);
 
   return (
     <Card className="mx-auto grid w-full max-w-xl gap-7 border-[rgba(243,154,99,0.18)] bg-[radial-gradient(circle_at_top_right,rgba(243,154,99,0.14),transparent_30%),linear-gradient(180deg,rgba(18,28,46,0.96),rgba(9,15,26,0.98))] shadow-[0_30px_68px_rgba(0,0,0,0.32)]">
@@ -41,10 +52,12 @@ export function ForgotPasswordForm() {
           Enter your email and we will trigger the password reset flow.
         </p>
       </div>
-      <form className="grid gap-4" onSubmit={onSubmit}>
+      <form className="grid gap-4" onSubmit={onSubmit} noValidate aria-busy={mutation.isPending}>
+        <FormErrorSummary title="Fix the recovery form" messages={validationMessages} />
         <Input
           id="forgot-password-email"
           label="Email"
+          hint="Use the email address attached to your account."
           type="email"
           autoComplete="email"
           placeholder="you@example.com"

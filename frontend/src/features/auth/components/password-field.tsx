@@ -8,12 +8,14 @@ import { cn } from "@/lib/utils/cn";
 
 type PasswordFieldProps = InputHTMLAttributes<HTMLInputElement> & {
   label: string;
+  hint?: string;
   error?: string;
 };
 
 export function PasswordField({
   className,
   label,
+  hint,
   error,
   id,
   ...props
@@ -21,7 +23,9 @@ export function PasswordField({
   const generatedId = useId();
   const inputId = id || generatedId;
   const [visible, setVisible] = useState(false);
+  const hintId = hint ? `${inputId}-hint` : undefined;
   const errorId = error ? `${inputId}-error` : undefined;
+  const describedBy = [hintId, errorId].filter(Boolean).join(" ") || undefined;
 
   return (
     <label className="grid gap-2.5 text-sm text-[var(--text-secondary)]" htmlFor={inputId}>
@@ -33,7 +37,8 @@ export function PasswordField({
           id={inputId}
           type={visible ? "text" : "password"}
           aria-invalid={error ? "true" : "false"}
-          aria-describedby={errorId}
+          aria-describedby={describedBy}
+          aria-errormessage={errorId}
           className={cn(
             "h-12 w-full rounded-[22px] border border-[var(--line-soft)] bg-[linear-gradient(180deg,rgba(16,26,45,0.96),rgba(10,17,30,0.98))] px-4 pr-12 text-sm text-[var(--text-primary)] outline-none ring-0 shadow-[inset_0_1px_0_rgba(255,255,255,0.03)] transition placeholder:text-[var(--text-muted)] focus-visible:border-[rgba(88,116,255,0.38)] focus-visible:ring-2 focus-visible:ring-[var(--ring-brand)]",
             error
@@ -48,10 +53,17 @@ export function PasswordField({
           className="absolute inset-y-0 right-0 inline-flex w-12 items-center justify-center rounded-r-[22px] text-[var(--text-muted)] transition hover:text-[var(--text-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring-brand)]"
           onClick={() => setVisible((value) => !value)}
           aria-label={visible ? "Hide password" : "Show password"}
+          aria-controls={inputId}
+          aria-pressed={visible}
         >
           {visible ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
         </button>
       </span>
+      {hint ? (
+        <span id={hintId} className="text-xs text-[var(--text-muted)]">
+          {hint}
+        </span>
+      ) : null}
       {error ? (
         <span id={errorId} className="text-xs text-[var(--status-danger)]">
           {error}

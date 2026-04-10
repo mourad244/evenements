@@ -35,7 +35,8 @@ export function EventForm({
       price: defaultValues?.price || 0,
       currency: defaultValues?.currency || "MAD",
       capacity: defaultValues?.capacity || 100,
-      theme: defaultValues?.theme || ""
+      theme: defaultValues?.theme || "",
+      imageUrl: defaultValues?.imageUrl || ""
     }
   });
 
@@ -69,6 +70,16 @@ export function EventForm({
         <Input label="Currency" {...form.register("currency")} error={form.formState.errors.currency?.message} disabled={submitDisabled} />
         <Input label="Capacity" type="number" {...form.register("capacity")} error={form.formState.errors.capacity?.message} disabled={submitDisabled} />
         <Input label="Theme" {...form.register("theme")} error={form.formState.errors.theme?.message} disabled={submitDisabled} />
+        <div className="md:col-span-2">
+          <Input
+            label="Featured image path"
+            hint="Use a public path such as /images/event-media-demo.svg."
+            placeholder="/images/event-media-demo.svg"
+            {...form.register("imageUrl")}
+            error={form.formState.errors.imageUrl?.message}
+            disabled={submitDisabled}
+          />
+        </div>
         <div className="md:col-span-2">
           <Button type="submit" disabled={submitDisabled}>{submitLabel}</Button>
         </div>

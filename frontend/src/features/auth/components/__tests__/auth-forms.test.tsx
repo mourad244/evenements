@@ -102,7 +102,9 @@ describe("auth forms", () => {
 
     expect(html).toContain("Welcome back");
     expect(html).toContain('type="email"');
+    expect(html).toContain("Use the email address linked to your account.");
     expect(html).toContain("Enter your password");
+    expect(html).toContain("Enter the password you use for this workspace.");
     expect(html).toContain("Forgot password?");
     expect(html).toContain("Create an account");
   });
@@ -131,7 +133,9 @@ describe("auth forms", () => {
 
     expect(html).toContain("Create your account");
     expect(html).toContain("Full name");
+    expect(html).toContain("Use the name other attendees should see.");
     expect(html).toContain("Confirm password");
+    expect(html).toContain("Choose participant for attendee access or organizer for event management.");
     expect(html).toContain('option value="PARTICIPANT"');
     expect(html).toContain("Sign in");
   });
@@ -152,6 +156,7 @@ describe("auth forms", () => {
     const html = render(<ForgotPasswordForm />);
 
     expect(html).toContain("If the account exists, reset instructions have been sent.");
+    expect(html).toContain("Use the email address attached to your account.");
     expect(html).toContain("Instructions sent");
     expect((html.match(/disabled=""/g) || []).length).toBeGreaterThanOrEqual(2);
   });
@@ -165,6 +170,7 @@ describe("auth forms", () => {
 
     expect(html).toContain("Reset your password");
     expect(html).toContain("Reset token");
+    expect(html).toContain("Use the token from the password reset email.");
     expect(html).toContain(
       "Resetting your password. You will return to sign in once this is complete."
     );

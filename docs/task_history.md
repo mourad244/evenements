@@ -2,6 +2,41 @@
 
 Journal synthetique des livrables majeurs et des baselines de cadrage.
 
+## 2026-04-10 - Contrat de moderation evenement reserve (`E06.3`)
+
+- Creation du contrat [`docs/event-moderation-hooks.md`](/home/mourad/git_workspace_work/evenements/docs/event-moderation-hooks.md)
+  pour figer les cas "publication soumise a moderation" et "demande de
+  correction".
+- Ajout des hooks de moderation reserves dans les specs
+  `event-management-service` et `api-contracts-p1`.
+- Mise a jour de `docs/backlogs/BackLog_event_management.md`:
+  `E06.3` passe a `DONE` et le backlog Event Management passe a
+  `DONE`.
+
+## 2026-04-10 - Annulation evenement avec emission structuree (`E06.2`)
+
+- Ajout d'une emission structuree `event.cancelled` cote
+  `event-management-service` avec `previousStatus`, `reasonCode` et
+  `correlationId`.
+- Ajout du marquage de l'annulation dans la notification derivee pour
+  garder les motifs visibles dans la chaine d'alerte.
+- Ajout d'une verification smoke qui attend explicitement la trace
+  `event.cancelled` apres l'appel d'annulation.
+- Mise a jour de `docs/backlogs/BackLog_event_management.md`:
+  `E06.2` passe a `DONE` et le reste principal se limite a `E06.3`.
+
+## 2026-04-10 - Vue organisateur "Mes evenements" filtree et cadree (`E05.3`)
+
+- Ajout des filtres `status`, `theme`, `fromDate` et `toDate` dans la
+  vue organisateur afin de consommer le listing backend deja
+  filtre/pagine.
+- Ajout des compteurs de synthese par statut et de la pagination dans
+  l'espace "Mes evenements" pour garder la vue cadree sur
+  l'organisateur courant.
+- Mise a jour de `docs/backlogs/BackLog_event_management.md`:
+  `E05.3` passe a `DONE`, le reste principal devient `E06.2`,
+  `E06.3`, et le bloc `E05` passe a `DONE`.
+
 ## 2026-04-04 - Fermeture auth/ACL frontend et durcissement registration
 
 - Ajout de la route publique `access-denied` et redirection de
@@ -1173,6 +1208,28 @@ Journal synthetique des livrables majeurs et des baselines de cadrage.
   les suites `vitest` frontend ne demarrent pas dans l'environnement
   courant a cause d'un chargement ESM casse entre `vitest` et `vite`
   depuis `frontend/vitest.config.ts`.
+
+## 2026-04-10 - Cloture de la publication immediat et differee (`E03.2`, `E03.3`)
+
+- Verrouillage de l'etat reel dans `docs/backlogs/BackLog_event_management.md`:
+  `E03.2` et `E03.3` passent a `DONE` et le reste principal passe a
+  `E05.2`, `E05.3`, `E06.2`, `E06.3`.
+- Ajout du support de publication immediate ou planifiee dans
+  `event-management-service`, avec sweep interne des publications
+  differees et trace observable de `event.published`.
+- Ajout d'un smoke test de publication planifiee pour verifier la
+  transition differree puis la visibilite catalogue.
+
+## 2026-04-10 - Listing organisateur filtre et compteurs (`E05.2`)
+
+- Ajout des filtres `status`, `theme`, `fromDate` et `toDate` sur
+  `GET /api/events/me`, avec pagination et `counts` de synthese.
+- Ajout d'une synthese par statut pour la vue "Mes evenements" afin de
+  servir les compteurs cote UI.
+- Ajout d'un smoke test qui couvre les trois etats organisateur:
+  brouillon, publie et annule, ainsi que la pagination et les filtres.
+- Mise a jour de `docs/backlogs/BackLog_event_management.md` pour
+  passer `E05.2` a `DONE`.
 
 ## A completer ensuite
 

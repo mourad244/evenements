@@ -48,6 +48,6 @@ export function mapUpsertEventToDraftPayload(payload: UpsertEventInput) {
     capacity: payload.capacity,
     visibility: "PUBLIC",
     pricingType: payload.price > 0 ? "PAID" : "FREE",
-    coverImageRef: null
+    coverImageRef: payload.imageUrl?.trim() || null
   };
 }

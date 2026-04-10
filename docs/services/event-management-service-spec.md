@@ -84,6 +84,17 @@ doivent etre stables cote service.
 - `DRAFT -> PUBLISHED`
 - `PUBLISHED -> CANCELLED`
 
+#### Hooks de moderation reserves
+
+- une publication peut etre retenue pour revue admin sans changer la
+  source de verite du brouillon;
+- `request_changes` conserve l'evenement en `DRAFT` et renvoie
+  l'organisateur vers l'edition;
+- `approve` publie l'evenement et declenche `event.published`;
+- `reject` conserve l'evenement en `DRAFT` sans exposition publique;
+- le detail contractuel est documente dans
+  [`docs/event-moderation-hooks.md`](/home/mourad/git_workspace_work/evenements/docs/event-moderation-hooks.md).
+
 #### Transitions reservees mais non obligatoires en implementation `P1`
 
 - `PUBLISHED -> FULL`
@@ -127,6 +138,7 @@ doivent etre stables cote service.
   - `capacity`
   - `visibility`
   - `pricingType`
+  - `coverImageRef?`
 - Reponse de succes:
   `201` avec l'evenement cree en `DRAFT`
 - Erreurs attendues:
@@ -180,7 +192,8 @@ doivent etre stables cote service.
 - Path params:
   - `eventId`
 - Body:
-  tout sous-ensemble modifiable des champs de brouillon
+  - tout sous-ensemble modifiable des champs de brouillon
+  - `coverImageRef?`
 - Reponse de succes:
   `200` avec le brouillon mis a jour
 - Erreurs attendues:
@@ -219,10 +232,11 @@ doivent etre stables cote service.
 - Path params:
   - `eventId`
 - Body:
-  - `publishMode`
-  - `scheduledAt?`
+  - `publishMode` (`IMMEDIATE` ou `SCHEDULED`)
+  - `scheduledAt?` si `publishMode = SCHEDULED`
 - Reponse de succes:
   `200` avec `eventId`, `status`, `publishedAt`
+  - `SCHEDULED` conserve `status = DRAFT` jusqu'au sweep de publication
 - Erreurs attendues:
   - `400`
   - `401`
@@ -234,6 +248,9 @@ doivent etre stables cote service.
   `ORGANIZER`, `ADMIN`
 - Idempotence:
   oui metier sur un event deja publie; pas de double publication visible
+- Comportement differe:
+  une publication planifiee stocke `scheduled_publish_at` puis un sweep
+  interne applique la transition `DRAFT -> PUBLISHED` au moment voulu.
 
 ### `GET /api/events/me`
 
@@ -247,14 +264,32 @@ doivent etre stables cote service.
   - `page`
   - `pageSize`
 - Reponse de succes:
-  `200` avec liste paginee + compteurs
+  `200` avec liste paginee + `counts`
+- `counts` expose au minimum:
+  - `total`
+  - `draft`
+  - `published`
+  - `full`
+  - `closed`
+  - `archived`
+  - `cancelled`
 - Erreurs attendues:
   - `401`
   - `403`
+  - `400` si un filtre est invalide
 - Role ou permission requis:
   `ORGANIZER`, `ADMIN`
 - Idempotence:
   oui
+
+### Media reference rules
+
+- `coverImageRef` is optional on create/update draft bodies.
+- If provided, it must be a public path starting with `/`.
+- The same value is returned as `coverImageRef` on service responses and
+  as `imageUrl` by the public catalog projection.
+- Binary upload, presigned URLs, and media moderation are out of scope
+  for the P1 contract and are reserved for a later slice.
 
 ### `GET /internal/events/{eventId}/registration-policy`
 
@@ -508,6 +543,22 @@ Champs minimums:
   - lecture synchrone de
     `GET /internal/events/{eventId}/registration-policy`
   - consommation de `event.cancelled`
+
+### `admin-moderation-service`
+
+- mode:
+  sync + async reserve
+- usage:
+  - creation de cas de moderation lors d'une publication soumise a
+    revue admin
+  - consommation de `moderation.case_approved`
+  - consommation de `moderation.case_changes_requested`
+  - consommation de `moderation.case_rejected`
+- notes:
+  - le brouillon reste la source de verite tant que la moderation n'est
+    pas resolue
+  - les details de gouvernance sont documentes dans
+    [`docs/event-moderation-hooks.md`](/home/mourad/git_workspace_work/evenements/docs/event-moderation-hooks.md)
 
 ### Media
 

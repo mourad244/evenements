@@ -5,7 +5,7 @@ docKind: backlog
 domain: frontend
 phase: P1-P3
 owner: Ibrahim
-status: PARTIAL
+status: DONE
 priority: P0
 tags:
   - frontend
@@ -18,12 +18,12 @@ slug: frontend
 
 ## Meta
 
-- Statut global: `PARTIAL`
+- Statut global: `DONE`
 - Date debut: `2026-03-07`
 - Priorite produit: `P1`
 - Lead: `Ibrahim`
 - Support: `Mourad`
-- Reste principal au `2026-04-04`: `F07.3`
+- Reste principal: `aucun`
 
 ## Taches
 
@@ -158,7 +158,7 @@ slug: frontend
 
 ### F07 - Responsive et accessibilite
 
-- Status: `PARTIAL`
+- Status: `DONE`
 - Priority: `P2` · Difficulty: `M` · Impact: `M`
 - Owner: `Ibrahim`
 - Support: `Mourad`
@@ -178,4 +178,4 @@ slug: frontend
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | F07.1 | DONE | P2 | Ibrahim | Mourad | Sprint 0 | F01.1, F02.1, F03.1 | Checklist responsive/a11y | Checklist MVP documentee | Les ecrans prioritaires et controles a valider sont identifies | `docs/frontend-responsive-a11y-checklist` |
 | F07.2 | DONE | P2 | Ibrahim | Mourad | Sprint 1 | F07.1 | Portail et dashboard | Ajustements responsive MVP implementables | Les ecrans publics et participant restent utilisables sur mobile | `feature/frontend-responsive-mvp` |
-| F07.3 | PARTIAL | P2 | Ibrahim | Mourad | Sprint 2 | F07.1 | Formulaires et feedback | Correctifs accessibilite implementables | Labels, erreurs et navigation clavier couvrent les parcours critiques | `feature/frontend-a11y-pass` |
+| F07.3 | DONE | P2 | Ibrahim | Mourad | Sprint 2 | F07.1 | Formulaires et feedback | Correctifs accessibilite implementes | Labels, erreurs et navigation clavier couvrent les parcours critiques | `feature/frontend-a11y-pass` |
