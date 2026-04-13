@@ -1,0 +1,54 @@
+{
+  "id": "workflows/Workflow_backend",
+  "title": "Workflow backend",
+  "description": "Conventions backend transverses du projet Evenements.",
+  "source": "@site/../../docs/workflows/Workflow_backend.md",
+  "sourceDirName": "workflows",
+  "slug": "/workflows/backend",
+  "permalink": "/reference/workflows/backend",
+  "draft": false,
+  "unlisted": false,
+  "editUrl": "https://github.com/mourad244/evenements/tree/main/../../docs/workflows/Workflow_backend.md",
+  "tags": [
+    {
+      "inline": true,
+      "label": "workflow",
+      "permalink": "/reference/tags/workflow"
+    },
+    {
+      "inline": true,
+      "label": "backend",
+      "permalink": "/reference/tags/backend"
+    },
+    {
+      "inline": true,
+      "label": "conventions",
+      "permalink": "/reference/tags/conventions"
+    }
+  ],
+  "version": "current",
+  "frontMatter": {
+    "title": "Workflow backend",
+    "description": "Conventions backend transverses du projet Evenements.",
+    "docKind": "workflow",
+    "domain": "backend",
+    "phase": "P1-P4",
+    "owner": "Mourad",
+    "status": "DONE",
+    "tags": [
+      "workflow",
+      "backend",
+      "conventions"
+    ],
+    "slug": "backend"
+  },
+  "sidebar": "referenceSidebar",
+  "previous": {
+    "title": "User Stories - Projet Evenements (table consolidee)",
+    "permalink": "/reference/user_stories/user_stories_table"
+  },
+  "next": {
+    "title": "Workflow backend event domain",
+    "permalink": "/reference/workflows/backend-event-domain"
+  }
+}

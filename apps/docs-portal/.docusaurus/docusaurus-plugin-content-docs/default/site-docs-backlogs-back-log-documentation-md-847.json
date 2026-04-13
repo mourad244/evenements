@@ -1,0 +1,55 @@
+{
+  "id": "backlogs/BackLog_documentation",
+  "title": "Backlog Documentation",
+  "description": "Backlog de gouvernance documentaire, diagrammes, matrices et plans de test.",
+  "source": "@site/../../docs/backlogs/BackLog_documentation.md",
+  "sourceDirName": "backlogs",
+  "slug": "/backlogs/documentation",
+  "permalink": "/reference/backlogs/documentation",
+  "draft": false,
+  "unlisted": false,
+  "editUrl": "https://github.com/mourad244/evenements/tree/main/../../docs/backlogs/BackLog_documentation.md",
+  "tags": [
+    {
+      "inline": true,
+      "label": "documentation",
+      "permalink": "/reference/tags/documentation"
+    },
+    {
+      "inline": true,
+      "label": "diagrams",
+      "permalink": "/reference/tags/diagrams"
+    },
+    {
+      "inline": true,
+      "label": "governance",
+      "permalink": "/reference/tags/governance"
+    }
+  ],
+  "version": "current",
+  "frontMatter": {
+    "title": "Backlog Documentation",
+    "description": "Backlog de gouvernance documentaire, diagrammes, matrices et plans de test.",
+    "docKind": "backlog",
+    "domain": "documentation",
+    "phase": "P0-P1",
+    "owner": "Mourad",
+    "status": "IN_PROGRESS",
+    "priority": "P1",
+    "tags": [
+      "documentation",
+      "diagrams",
+      "governance"
+    ],
+    "slug": "documentation"
+  },
+  "sidebar": "referenceSidebar",
+  "previous": {
+    "title": "Backlog Admin & Moderation",
+    "permalink": "/reference/backlogs/admin-moderation"
+  },
+  "next": {
+    "title": "Backlog Event Management",
+    "permalink": "/reference/backlogs/event-management"
+  }
+}

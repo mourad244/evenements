@@ -1,0 +1,24 @@
+{
+  "id": "QUICK_START",
+  "title": "Guide de Demarrage Rapide - Projet Evenements",
+  "description": "Objectif: prendre en main le projet en moins de 30 minutes",
+  "source": "@site/../../docs/QUICK_START.md",
+  "sourceDirName": ".",
+  "slug": "/QUICK_START",
+  "permalink": "/reference/QUICK_START",
+  "draft": false,
+  "unlisted": false,
+  "editUrl": "https://github.com/mourad244/evenements/tree/main/../../docs/QUICK_START.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {},
+  "sidebar": "referenceSidebar",
+  "previous": {
+    "title": "Index de documentation",
+    "permalink": "/reference/navigation"
+  },
+  "next": {
+    "title": "Documentation projet",
+    "permalink": "/reference/overview"
+  }
+}

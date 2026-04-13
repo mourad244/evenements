@@ -25,9 +25,33 @@ Le dossier `docs/` sert de source de verite pour:
 
 - le cadrage fonctionnel;
 - le decoupage microservices;
+- l'alignement avec les livrables pedagogiques attendus;
 - la planification MVP puis P2/P3/P4;
 - les backlogs par domaine;
 - les conventions de delivery, de tests et d'exploitation.
+
+## Navigation par livrables HTML
+
+Le livrable externe `livrables-techniques-sujets-fullstack.html`
+attend, pour le sujet `Evenements`, une lecture par:
+
+- base de donnees;
+- maquettes UI;
+- backlog;
+- architecture;
+- API docs;
+- application;
+- securite;
+- guide dev;
+- tests.
+
+Pour retrouver cette meme lecture dans le repo:
+
+- [Alignement HTML -> repo](./livrables-html-evenements.md)
+- [Surfaces UI et application](./ui-application-surfaces-evenements.md)
+- [Strategie securite](./security-strategy-evenements.md)
+- [Guide developpeur](./developer-guide-evenements.md)
+- [Strategie de tests](./testing-strategy-evenements.md)
 
 ## Principes
 
@@ -121,12 +145,17 @@ silos rigides.
 
 ## Etat actuel du depot
 
-Au 2026-03-07, ce depot contient surtout le cadrage et la documentation
-projet. Le code applicatif n'est pas encore structure ici; les documents
-de ce dossier servent donc de base de conception et d'execution.
+Au 2026-04-04, le depot contient:
 
-En consequence, les fichiers de `docs/releases/` et `docs/deployments/`
-ne sont pas a maintenir pour l'instant.
+- les services backend critiques du socle evenement;
+- un frontend Next.js structure par routes et features;
+- un portail docs Docusaurus;
+- des suites de tests backend et frontend;
+- la documentation canonique du scope, des contrats et des workflows.
 
-**Derniere mise a jour:** 2026-03-08  
-**Version:** 0.2
+Les fichiers de `docs/releases/` et `docs/deployments/` restent
+secondaires tant qu'aucune baseline de deploiement n'est officiellement
+ouverte.
+
+**Derniere mise a jour:** 2026-04-04
+**Version:** 0.3

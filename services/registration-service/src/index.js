@@ -3,14 +3,14 @@ import { setTimeout as delay } from "node:timers/promises";
 
 import express from "express";
 import pg from "pg";
-import {
-  createCorrelationIdMiddleware,
-  createJsonLogger,
-  createRequestCompletionLogger
-} from "../../shared/observability.js";
 
 import { ensureSchema } from "./db/schema.js";
 import { createRegistrationRepository } from "./repositories/registrationRepository.js";
+import {
+  buildTicketDownloadContentType,
+  buildTicketDownloadFilename,
+  renderTicketArtifactBuffer
+} from "./ticketArtifactResponse.js";
 
 const { Pool } = pg;
 
@@ -24,7 +24,6 @@ const config = {
   eventManagementServiceUrl:
     process.env.EVENT_MANAGEMENT_SERVICE_URL || "http://127.0.0.1:4002"
 };
-const log = createJsonLogger(config.serviceName);
 
 const allowedParticipantRoles = new Set(["PARTICIPANT"]);
 const allowedOrganizerRoles = new Set(["ORGANIZER", "ADMIN"]);
@@ -49,18 +48,6 @@ const repository = createRegistrationRepository(pool);
 
 const app = express();
 app.use(express.json());
-app.use(createCorrelationIdMiddleware());
-app.use(
-  createRequestCompletionLogger({
-    log,
-    eventName: "registration.request.completed",
-    buildFields: (req) => ({
-      correlationId: req.correlationId || null,
-      userId: req.auth?.userId || null,
-      role: req.auth?.role || null
-    })
-  })
-);
 
 function success(data, meta) {
   if (meta) return { success: true, data, meta };
@@ -78,13 +65,19 @@ function nowIso() {
   return new Date().toISOString();
 }
 
+function isUniqueViolation(error, constraintName) {
+  return (
+    error &&
+    typeof error === "object" &&
+    error.code === "23505" &&
+    (!constraintName || error.constraint === constraintName)
+  );
+}
+
 function authContext(req) {
   const userId = String(req.header("x-user-id") || "").trim();
   const role = String(req.header("x-user-role") || "").trim().toUpperCase();
   const sessionId = String(req.header("x-session-id") || "").trim();
-  const correlationId =
-    String(req.correlationId || req.header("x-correlation-id") || "").trim() ||
-    null;
 
   if (!userId || !role || !sessionId) {
     return null;
@@ -93,17 +86,14 @@ function authContext(req) {
   return {
     userId,
     role,
-    sessionId,
-    correlationId
+    sessionId
   };
 }
 
 function toParticipationView(item) {
-  const ticketStatus = String(item.ticketStatus || "").trim().toUpperCase();
   const canDownloadTicket =
     item.registrationStatus === "CONFIRMED" &&
-    String(item.ticketId || "").trim().length > 0 &&
-    ticketStatus === ticketStatusIssued;
+    String(item.ticketId || "").trim().length > 0;
 
   return {
     id: item.registrationId,
@@ -119,10 +109,7 @@ function toParticipationView(item) {
     waitlistPosition: item.waitlistPosition,
     canDownloadTicket,
     ticketId: item.ticketId,
-    ticketFormat: canDownloadTicket
-      ? item.ticketFormat || defaultTicketFormat
-      : null,
-    ticketStatus: ticketStatus || null,
+    ticketFormat: canDownloadTicket ? defaultTicketFormat : null,
     updatedAt: item.updatedAt
   };
 }
@@ -341,17 +328,10 @@ async function fetchJson(url, options = {}) {
   return { response, payload };
 }
 
-async function fetchPublicEvent(eventId, correlationId) {
+async function fetchPublicEvent(eventId) {
   try {
     const { response, payload } = await fetchJson(
-      `${config.eventManagementServiceUrl}/catalog/events/${encodeURIComponent(eventId)}`,
-      {
-        headers: correlationId
-          ? {
-              "x-correlation-id": correlationId
-            }
-          : undefined
-      }
+      `${config.eventManagementServiceUrl}/catalog/events/${encodeURIComponent(eventId)}`
     );
     if (!response.ok) return null;
     return payload?.data || payload || null;
@@ -368,8 +348,7 @@ async function fetchManagedEvent(eventId, req) {
         headers: {
           "x-user-id": req.auth.userId,
           "x-user-role": req.auth.role,
-          "x-session-id": req.auth.sessionId,
-          "x-correlation-id": req.correlationId || ""
+          "x-session-id": req.auth.sessionId
         }
       }
     );
@@ -423,7 +402,7 @@ app.post("/registrations", async (req, res) => {
       .json(error("Validation failed", "VALIDATION_ERROR", ["eventId is required"]));
   }
 
-  const publicEvent = await fetchPublicEvent(eventId, req.correlationId);
+  const publicEvent = await fetchPublicEvent(eventId);
   if (!publicEvent) {
     return res.status(404).json(error("Event not found", "EVENT_NOT_FOUND"));
   }
@@ -491,7 +470,12 @@ app.post("/registrations", async (req, res) => {
     } else {
       created = await repository.createRegistration(registrationPayload);
     }
-  } catch {
+  } catch (err) {
+    if (isUniqueViolation(err, "idx_registrations_active_event_participant")) {
+      return res
+        .status(409)
+        .json(error("Registration already exists", "REGISTRATION_EXISTS"));
+    }
     return res.status(500).json(error("Registration failed", "REGISTRATION_FAILED"));
   }
 
@@ -567,38 +551,37 @@ app.post("/registrations/:registrationId/cancel", async (req, res) => {
 
   let promotedRegistrationId = null;
   if (registration.registrationStatus === "CONFIRMED") {
-    const nextWaitlisted = await repository.findNextWaitlisted(registration.eventId);
-    if (nextWaitlisted) {
-      const promotedTicketId = randomUUID();
-      const promotedTicketRef = buildTicketRef(
-        nextWaitlisted.eventId,
-        nextWaitlisted.registrationId
-      );
-      const promotedTicketPayloadSource = {
-        ...nextWaitlisted,
-        ticketId: promotedTicketId,
-        ticketRef: promotedTicketRef,
-        createdAt: timestamp
-      };
-      const promotedTicketPayload = {
-        ticketId: promotedTicketId,
-        registrationId: nextWaitlisted.registrationId,
-        eventId: nextWaitlisted.eventId,
-        participantId: nextWaitlisted.participantId,
-        ticketRef: promotedTicketRef,
-        ticketFormat: defaultTicketFormat,
-        ticketStatus: ticketStatusIssued,
-        payload: buildTicketPayload(promotedTicketPayloadSource),
-        createdAt: timestamp,
-        updatedAt: timestamp
-      };
-      const promoted = await repository.promoteRegistrationWithTicket(
-        nextWaitlisted.registrationId,
-        timestamp,
-        promotedTicketId,
-        promotedTicketRef,
-        promotedTicketPayload
-      );
+    const promoted = await repository.promoteNextWaitlistedWithTicket(
+      registration.eventId,
+      timestamp,
+      (nextWaitlisted) => {
+        const promotedTicketId = randomUUID();
+        const promotedTicketRef = buildTicketRef(
+          nextWaitlisted.eventId,
+          nextWaitlisted.registrationId
+        );
+        const promotedTicketPayloadSource = {
+          ...nextWaitlisted,
+          ticketId: promotedTicketId,
+          ticketRef: promotedTicketRef,
+          createdAt: timestamp
+        };
+
+        return {
+          ticketId: promotedTicketId,
+          registrationId: nextWaitlisted.registrationId,
+          eventId: nextWaitlisted.eventId,
+          participantId: nextWaitlisted.participantId,
+          ticketRef: promotedTicketRef,
+          ticketFormat: defaultTicketFormat,
+          ticketStatus: ticketStatusIssued,
+          payload: buildTicketPayload(promotedTicketPayloadSource),
+          createdAt: timestamp,
+          updatedAt: timestamp
+        };
+      }
+    );
+    if (promoted) {
       promotedRegistrationId = promoted.registration.registrationId;
       try {
         await repository.createNotification(
@@ -652,6 +635,34 @@ app.get("/tickets/:ticketId", async (req, res) => {
   }
 
   return res.status(200).json(success(toTicketView(ticket)));
+});
+
+app.get("/tickets/:ticketId/download", async (req, res) => {
+  if (!req.auth) {
+    return res.status(401).json(error("Unauthorized", "MISSING_AUTH_CONTEXT"));
+  }
+  if (!allowedParticipantRoles.has(req.auth.role)) {
+    return res.status(403).json(error("Forbidden", "FORBIDDEN"));
+  }
+
+  const ticket = await repository.findTicketById(req.params.ticketId);
+  if (!ticket) {
+    return res.status(404).json(error("Ticket not found", "TICKET_NOT_FOUND"));
+  }
+  if (ticket.participantId !== req.auth.userId) {
+    return res.status(403).json(error("Forbidden", "FORBIDDEN"));
+  }
+  if (ticket.ticketStatus !== ticketStatusIssued) {
+    return res.status(404).json(error("Ticket not available", "TICKET_NOT_READY"));
+  }
+
+  const filename = buildTicketDownloadFilename(ticket);
+  const contentType = buildTicketDownloadContentType(ticket);
+  const artifactBuffer = renderTicketArtifactBuffer(ticket);
+
+  res.setHeader("content-type", contentType);
+  res.setHeader("content-disposition", `attachment; filename="${filename}"`);
+  return res.status(200).send(artifactBuffer);
 });
 
 app.get("/notifications", async (req, res) => {
@@ -1069,16 +1080,14 @@ async function boot() {
   }
 
   app.listen(config.port, () => {
-    log("info", "service.started", {
-      port: config.port
-    });
+    // eslint-disable-next-line no-console
+    console.log(`[${config.serviceName}] listening on port ${config.port}`);
   });
 }
 
 boot().catch((err) => {
-  log("error", "service.boot.failed", {
-    message: err.message
-  });
+  // eslint-disable-next-line no-console
+  console.error(`[${config.serviceName}] failed to boot`, err);
   process.exit(1);
 });
 

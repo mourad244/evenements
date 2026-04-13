@@ -1,44 +1,25 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
 
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
-import { Input } from "@/components/ui/input";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { ROUTES } from "@/lib/constants/routes";
 import { formatDate } from "@/lib/utils/format-date";
 
-import { useCreatePaymentSessionMutation } from "@/features/payments/hooks/use-create-payment-session-mutation";
-
 import { useCancelRegistrationMutation } from "../hooks/use-cancel-registration-mutation";
+import { useDownloadTicketMutation } from "../hooks/use-download-ticket-mutation";
 import type { RegistrationItem } from "../types/registration.types";
 
-type PaymentDraft = {
-  amount: string;
-  currency: string;
-};
-
-const defaultPaymentDraft: PaymentDraft = {
-  amount: "",
-  currency: ""
-};
-
 function resolveStatusState(registration: RegistrationItem) {
-  const paymentPending =
-    registration.status === "CONFIRMED" &&
-    Boolean(registration.ticketId) &&
-    !registration.canDownloadTicket;
   if (registration.status === "CONFIRMED") {
     return {
       title: "Registration confirmed",
       description: registration.canDownloadTicket
         ? "Your place is secured and the ticket record is already available."
-        : paymentPending
-            ? "Your place is secured. Payment confirmation is still pending, and ticket access will unlock after it completes."
-            : "Your place is secured. Ticket details will appear here as soon as they are ready.",
+        : "Your place is secured. Ticket details will appear here as soon as they are ready.",
       tone: "text-[var(--status-success)]"
     };
   }
@@ -69,18 +50,6 @@ function resolveStatusState(registration: RegistrationItem) {
 }
 
 function resolveTicketState(registration: RegistrationItem) {
-  if (
-    registration.status === "CONFIRMED" &&
-    registration.ticketId &&
-    !registration.canDownloadTicket
-  ) {
-    return {
-      title: "Payment pending",
-      description: "Your ticket will unlock automatically once payment is confirmed.",
-      tone: "text-[var(--status-warning)]"
-    };
-  }
-
   if (registration.canDownloadTicket && registration.ticketId) {
     return {
       title: `${registration.ticketFormat || "Ticket"} available`,
@@ -115,16 +84,10 @@ function resolveTicketState(registration: RegistrationItem) {
 function resolveNextStep(registration: RegistrationItem) {
   if (registration.status === "CONFIRMED") {
     return {
-      title: registration.canDownloadTicket
-        ? "Everything is in place"
-        : registration.ticketId
-            ? "Payment confirmation pending"
-            : "Check back for ticket readiness",
+      title: registration.canDownloadTicket ? "Everything is in place" : "Check back for ticket readiness",
       description: registration.canDownloadTicket
         ? "You can review the event details any time, and your full participant history will keep this record visible."
-        : registration.ticketId
-            ? "Payment confirmation will update your ticket automatically. Return here for the latest status."
-            : "Your place is secured. Keep this history view nearby so you can spot the ticket update as soon as it appears."
+        : "Your place is secured. Keep this history view nearby so you can spot the ticket update as soon as it appears."
     };
   }
 
@@ -152,26 +115,13 @@ function resolveNextStep(registration: RegistrationItem) {
 
 export function RegistrationList({ registrations }: { registrations: RegistrationItem[] }) {
   const mutation = useCancelRegistrationMutation();
-  const paymentMutation = useCreatePaymentSessionMutation();
-  const [paymentDrafts, setPaymentDrafts] = useState<Record<string, PaymentDraft>>({});
+  const downloadMutation = useDownloadTicketMutation();
   const sortedRegistrations = [...registrations].sort((left, right) => {
     const leftDate = left.updatedAt || left.eventDate;
     const rightDate = right.updatedAt || right.eventDate;
 
     return Date.parse(rightDate) - Date.parse(leftDate);
   });
-  const updatePaymentDraft = (registrationId: string, next: Partial<PaymentDraft>) => {
-    setPaymentDrafts((prev) => {
-      const current = prev[registrationId] || defaultPaymentDraft;
-      return {
-        ...prev,
-        [registrationId]: {
-          ...current,
-          ...next
-        }
-      };
-    });
-  };
 
   if (registrations.length === 0) {
     return (
@@ -205,41 +155,35 @@ export function RegistrationList({ registrations }: { registrations: Registratio
           {mutation.error.message}
         </p>
       ) : null}
+      {downloadMutation.isSuccess ? (
+        <p
+          role="status"
+          className="rounded-[22px] border border-[rgba(52,211,153,0.22)] bg-[rgba(6,78,59,0.3)] px-4 py-3 text-sm text-[var(--status-success)]"
+        >
+          Your ticket was downloaded successfully.
+        </p>
+      ) : null}
+      {downloadMutation.error ? (
+        <p
+          role="alert"
+          className="rounded-[22px] border border-[rgba(251,113,133,0.24)] bg-[rgba(127,29,29,0.26)] px-4 py-3 text-sm text-[var(--status-danger)]"
+        >
+          {downloadMutation.error.message}
+        </p>
+      ) : null}
       {sortedRegistrations.map((registration) => {
         const statusState = resolveStatusState(registration);
         const ticketState = resolveTicketState(registration);
         const nextStep = resolveNextStep(registration);
         const isCancellingThis =
           mutation.isPending && mutation.variables === registration.id;
-        const paymentPending =
+        const isDownloadingThis =
+          downloadMutation.isPending &&
+          downloadMutation.variables?.id === registration.id;
+        const canDownloadTicket =
           registration.status === "CONFIRMED" &&
-          Boolean(registration.ticketId) &&
-          !registration.canDownloadTicket;
-        const paymentDraft = paymentDrafts[registration.id] || defaultPaymentDraft;
-        const derivedAmount =
-          paymentDraft.amount ||
-          (typeof registration.eventPrice === "number"
-            ? String(registration.eventPrice)
-            : "");
-        const derivedCurrency =
-          paymentDraft.currency || registration.eventCurrency || "MAD";
-        const paymentAmount = Number.parseInt(derivedAmount, 10);
-        const canSubmitPayment =
-          Number.isInteger(paymentAmount) && paymentAmount >= 0 && derivedCurrency;
-        const isPayingThis =
-          paymentMutation.isPending &&
-          paymentMutation.variables?.registrationId === registration.id;
-        const paymentSuccess =
-          paymentMutation.isSuccess &&
-          paymentMutation.data?.registrationId === registration.id;
-        const paymentError =
-          paymentMutation.error && paymentMutation.variables?.registrationId === registration.id
-            ? paymentMutation.error
-            : null;
-        const showPaymentInputs =
-          registration.status === "CONFIRMED" &&
-          !registration.canDownloadTicket &&
-          !paymentPending;
+          registration.canDownloadTicket &&
+          Boolean(registration.ticketId);
 
         return (
           <Card
@@ -296,89 +240,31 @@ export function RegistrationList({ registrations }: { registrations: Registratio
                 <p className="text-sm font-medium text-[var(--text-primary)]">{nextStep.title}</p>
                 <p className="text-sm leading-6 text-[var(--text-secondary)]">{nextStep.description}</p>
               </div>
-              {showPaymentInputs ? (
-                <div className="grid gap-3 rounded-[24px] border border-[rgba(88,116,255,0.24)] bg-[rgba(12,18,34,0.7)] p-4">
-                  <div className="grid gap-1">
-                    <p className="text-sm font-semibold text-[var(--text-primary)]">
-                      Start payment session
-                    </p>
-                    <p className="text-xs text-[var(--text-muted)]">
-                      Enter the confirmed amount to unlock ticket access after payment completes.
-                    </p>
-                  </div>
-                  <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_120px]">
-                    <Input
-                      label="Amount"
-                      type="number"
-                      min="0"
-                      step="1"
-                      value={derivedAmount}
-                      onChange={(event) =>
-                        updatePaymentDraft(registration.id, { amount: event.target.value })
-                      }
-                      placeholder="0"
-                    />
-                    <Input
-                      label="Currency"
-                      value={derivedCurrency}
-                      onChange={(event) =>
-                        updatePaymentDraft(registration.id, {
-                          currency: event.target.value.toUpperCase()
-                        })
-                      }
-                      placeholder="MAD"
-                    />
-                  </div>
-                  {paymentSuccess ? (
-                    <p className="text-xs text-[var(--status-success)]">
-                      Payment confirmed. Your ticket is now being issued — refresh to see it.
-                    </p>
-                  ) : null}
-                  {paymentError ? (
-                    <p className="text-xs text-[var(--status-danger)]">
-                      {paymentError.message}
-                    </p>
-                  ) : null}
-                  <Button
-                    onClick={() =>
-                      paymentMutation.mutate({
-                        amount: paymentAmount,
-                        currency: derivedCurrency.trim() || "MAD",
-                        registrationId: registration.id,
-                        eventId: registration.eventId,
-                        metadata: {
-                          source: "participant-history"
-                        }
-                      })
-                    }
-                    disabled={!canSubmitPayment || isPayingThis}
-                    className="w-full"
-                  >
-                    {isPayingThis ? "Starting payment..." : "Start payment"}
-                  </Button>
-                </div>
-              ) : null}
               <div className="flex flex-col gap-3 sm:flex-row xl:flex-col xl:items-stretch xl:justify-start">
-                <Link href={`${ROUTES.events}/${registration.eventId}`} className="w-full sm:w-auto">
+                <Link href={`/events/${registration.eventId}`} className="w-full sm:w-auto">
                   <Button variant="ghost" className="w-full sm:w-auto">Review event</Button>
                 </Link>
-                {registration.canDownloadTicket && registration.ticketId ? (
-                  <Link href={`/tickets/${registration.ticketId}`} className="w-full sm:w-auto">
-                    <Button className="w-full sm:w-auto">View ticket</Button>
-                  </Link>
-                ) : null}
+              {canDownloadTicket ? (
                 <Button
-                  variant="danger"
-                  onClick={() => mutation.mutate(registration.id)}
-                  disabled={
-                    registration.status === "CANCELLED" ||
-                    registration.status === "REJECTED" ||
-                    isCancellingThis
-                  }
+                  onClick={() => downloadMutation.mutate(registration)}
+                  disabled={isDownloadingThis}
                   className="w-full sm:w-auto"
                 >
-                  {isCancellingThis ? "Cancelling..." : "Cancel"}
+                  {isDownloadingThis ? "Downloading..." : "Download ticket"}
                 </Button>
+              ) : null}
+              <Button
+                variant="danger"
+                onClick={() => mutation.mutate(registration.id)}
+                disabled={
+                  registration.status === "CANCELLED" ||
+                  registration.status === "REJECTED" ||
+                  isCancellingThis
+                }
+                className="w-full sm:w-auto"
+              >
+                {isCancellingThis ? "Cancelling..." : "Cancel"}
+              </Button>
               </div>
             </div>
           </Card>

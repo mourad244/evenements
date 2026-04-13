@@ -162,14 +162,14 @@ ACL minimale:
 
 | Methode | Route | Request | Succes | Erreurs principales | Notes |
 | --- | --- | --- | --- | --- | --- |
-| `POST` | `/api/events/drafts` | `title`, `description`, `theme`, `venueName`, `city`, `startAt`, `endAt?`, `timezone`, `capacity`, `visibility`, `pricingType` | `201` + brouillon cree | `400`, `401`, `403`, `422` | `status` force a `DRAFT` |
+| `POST` | `/api/events/drafts` | `title`, `description`, `theme`, `venueName`, `city`, `startAt`, `endAt?`, `timezone`, `capacity`, `visibility`, `pricingType`, `coverImageRef?` | `201` + brouillon cree | `400`, `401`, `403`, `422` | `status` force a `DRAFT`, media public optionnel |
 | `GET` | `/api/events/drafts` | query `page`, `pageSize` | `200` + brouillons du createur | `401`, `403` | listing strictement scope au proprietaire |
-| `GET` | `/api/events/drafts/{eventId}` | path `eventId` | `200` + detail brouillon | `401`, `403`, `404` | ownership obligatoire |
-| `PATCH` | `/api/events/drafts/{eventId}` | champs modifiables du brouillon | `200` + brouillon maj | `400`, `401`, `403`, `404`, `422` | interdit si deja publie |
+| `GET` | `/api/events/drafts/{eventId}` | path `eventId` | `200` + detail brouillon | `401`, `403`, `404` | ownership obligatoire, `coverImageRef` inclus si present |
+| `PATCH` | `/api/events/drafts/{eventId}` | champs modifiables du brouillon, `coverImageRef?` | `200` + brouillon maj | `400`, `401`, `403`, `404`, `422` | interdit si deja publie |
 | `DELETE` | `/api/events/drafts/{eventId}` | path `eventId` | `204` | `401`, `403`, `404`, `409` | seulement si `status = DRAFT` |
-| `POST` | `/api/events/drafts/{eventId}/publish` | `publishMode`, `scheduledAt?` | `200` + `eventId`, `status`, `publishedAt` | `400`, `401`, `403`, `404`, `409`, `422` | `publishMode = IMMEDIATE` seul obligatoire en `P1` |
+| `POST` | `/api/events/drafts/{eventId}/publish` | `publishMode`, `scheduledAt?` | `200` + `eventId`, `status`, `publishedAt` | `400`, `401`, `403`, `404`, `409`, `422` | `publishMode = IMMEDIATE` par defaut; `SCHEDULED` conserve le brouillon jusqu'au sweep interne |
 | `POST` | `/api/events/{eventId}/cancel` | `reasonCode?` | `200` + `eventId`, `status`, `cancelledAt` | `400`, `401`, `403`, `404`, `409` | reserve le hook d'annulation metier et `event.cancelled` |
-| `GET` | `/api/events/me` | query `status`, `theme`, `fromDate`, `toDate`, `page`, `pageSize` | `200` + liste paginee + compteurs | `401`, `403` | base de la vue "Mes evenements" |
+| `GET` | `/api/events/me` | query `status`, `theme`, `fromDate`, `toDate`, `page`, `pageSize` | `200` + liste paginee + `counts` | `400`, `401`, `403` | base de la vue "Mes evenements"; `counts` couvre `draft`, `published`, `full`, `closed`, `archived`, `cancelled` |
 
 Exemple de succes `POST /api/events/drafts/{eventId}/publish`:
 
@@ -213,6 +213,18 @@ Exemple de succes `POST /api/registrations`:
 }
 ```
 
+### Moderation hooks reserves
+
+- `POST /api/events/drafts/{eventId}/publish` peut renvoyer une attente
+  de revue admin plutot qu'une publication immediate quand la policy le
+  demande.
+- Dans ce cas, le brouillon reste en `DRAFT` jusqu'a
+  `moderation.case_approved`.
+- `moderation.case_changes_requested` et `moderation.case_rejected`
+  gardent l'evenement en edition.
+- Le detail de gouvernance est documente dans
+  [`docs/event-moderation-hooks.md`](/home/mourad/git_workspace_work/evenements/docs/event-moderation-hooks.md).
+
 ## Regles transverses par flux
 
 ### Auth et session
@@ -230,6 +242,8 @@ Exemple de succes `POST /api/registrations`:
 - `publish` refuse un brouillon incomplet ou non proprietaire;
 - la publication reussie doit emettre `event.published`;
 - l'annulation reussie doit emettre `event.cancelled`.
+- les payloads de brouillon acceptent une reference media publique via
+  `coverImageRef`, reprise comme `imageUrl` dans les vues publiques.
 
 ### Registration
 

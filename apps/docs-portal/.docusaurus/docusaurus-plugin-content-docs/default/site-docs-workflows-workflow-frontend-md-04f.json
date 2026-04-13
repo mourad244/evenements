@@ -1,0 +1,54 @@
+{
+  "id": "workflows/Workflow_frontend",
+  "title": "Workflow frontend",
+  "description": "Conventions frontend sur les shells, ACL, etats UI et responsive.",
+  "source": "@site/../../docs/workflows/Workflow_frontend.md",
+  "sourceDirName": "workflows",
+  "slug": "/workflows/frontend",
+  "permalink": "/reference/workflows/frontend",
+  "draft": false,
+  "unlisted": false,
+  "editUrl": "https://github.com/mourad244/evenements/tree/main/../../docs/workflows/Workflow_frontend.md",
+  "tags": [
+    {
+      "inline": true,
+      "label": "workflow",
+      "permalink": "/reference/tags/workflow"
+    },
+    {
+      "inline": true,
+      "label": "frontend",
+      "permalink": "/reference/tags/frontend"
+    },
+    {
+      "inline": true,
+      "label": "acl",
+      "permalink": "/reference/tags/acl"
+    }
+  ],
+  "version": "current",
+  "frontMatter": {
+    "title": "Workflow frontend",
+    "description": "Conventions frontend sur les shells, ACL, etats UI et responsive.",
+    "docKind": "workflow",
+    "domain": "frontend",
+    "phase": "P1-P3",
+    "owner": "Ibrahim",
+    "status": "DONE",
+    "tags": [
+      "workflow",
+      "frontend",
+      "acl"
+    ],
+    "slug": "frontend"
+  },
+  "sidebar": "referenceSidebar",
+  "previous": {
+    "title": "Workflow backend event domain",
+    "permalink": "/reference/workflows/backend-event-domain"
+  },
+  "next": {
+    "title": "Workflow frontend portal evenement",
+    "permalink": "/reference/workflows/frontend-event-portal"
+  }
+}

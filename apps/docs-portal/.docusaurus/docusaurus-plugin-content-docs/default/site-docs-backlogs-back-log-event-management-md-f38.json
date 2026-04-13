@@ -1,0 +1,55 @@
+{
+  "id": "backlogs/BackLog_event_management",
+  "title": "Backlog Event Management",
+  "description": "Backlog du domaine creation, publication et gestion du cycle de vie evenement.",
+  "source": "@site/../../docs/backlogs/BackLog_event_management.md",
+  "sourceDirName": "backlogs",
+  "slug": "/backlogs/event-management",
+  "permalink": "/reference/backlogs/event-management",
+  "draft": false,
+  "unlisted": false,
+  "editUrl": "https://github.com/mourad244/evenements/tree/main/../../docs/backlogs/BackLog_event_management.md",
+  "tags": [
+    {
+      "inline": true,
+      "label": "events",
+      "permalink": "/reference/tags/events"
+    },
+    {
+      "inline": true,
+      "label": "drafts",
+      "permalink": "/reference/tags/drafts"
+    },
+    {
+      "inline": true,
+      "label": "publish",
+      "permalink": "/reference/tags/publish"
+    }
+  ],
+  "version": "current",
+  "frontMatter": {
+    "title": "Backlog Event Management",
+    "description": "Backlog du domaine creation, publication et gestion du cycle de vie evenement.",
+    "docKind": "backlog",
+    "domain": "event-management",
+    "phase": "P1",
+    "owner": "Mourad",
+    "status": "DONE",
+    "priority": "P0",
+    "tags": [
+      "events",
+      "drafts",
+      "publish"
+    ],
+    "slug": "event-management"
+  },
+  "sidebar": "referenceSidebar",
+  "previous": {
+    "title": "Backlog Documentation",
+    "permalink": "/reference/backlogs/documentation"
+  },
+  "next": {
+    "title": "Backlog Frontend",
+    "permalink": "/reference/backlogs/frontend"
+  }
+}

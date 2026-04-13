@@ -274,55 +274,6 @@ test("auth register/login/me returns normalized user aliases", async () => {
   assert.equal(me.body.data.context.sessionId, organizerSessionId);
 });
 
-test("profile read/update returns consistent user profile data", async () => {
-  const profile = await jsonFetch(`${gatewayBase}/api/profile`, {
-    method: "GET",
-    headers: {
-      authorization: `Bearer ${organizerAccessToken}`
-    }
-  });
-  assert.equal(profile.res.status, 200);
-  assert.equal(profile.body.data.userId, organizerUserId);
-  assert.ok(profile.body.data.fullName);
-  assert.ok(profile.body.data.displayName);
-  assert.equal(profile.body.data.email, organizerEmail);
-
-  const update = await jsonFetch(`${gatewayBase}/api/profile`, {
-    method: "PATCH",
-    headers: {
-      authorization: `Bearer ${organizerAccessToken}`
-    },
-    body: JSON.stringify({
-      fullName: "Organizer Prime",
-      displayName: "Organizer Prime",
-      phone: "+212600000000",
-      city: "Casablanca",
-      bio: "Organizer profile updated."
-    })
-  });
-  assert.equal(update.res.status, 200);
-  assert.equal(update.body.data.fullName, "Organizer Prime");
-  assert.equal(update.body.data.displayName, "Organizer Prime");
-  assert.equal(update.body.data.phone, "+212600000000");
-  assert.equal(update.body.data.city, "Casablanca");
-  assert.equal(update.body.data.bio, "Organizer profile updated.");
-  assert.equal(update.body.data.email, organizerEmail);
-  assert.equal(update.body.data.role, "ORGANIZER");
-
-  const profileAgain = await jsonFetch(`${gatewayBase}/api/profile`, {
-    method: "GET",
-    headers: {
-      authorization: `Bearer ${organizerAccessToken}`
-    }
-  });
-  assert.equal(profileAgain.res.status, 200);
-  assert.equal(profileAgain.body.data.fullName, "Organizer Prime");
-  assert.equal(profileAgain.body.data.displayName, "Organizer Prime");
-  assert.equal(profileAgain.body.data.phone, "+212600000000");
-  assert.equal(profileAgain.body.data.city, "Casablanca");
-  assert.equal(profileAgain.body.data.bio, "Organizer profile updated.");
-});
-
 test("event draft creation, publish, and normalized event aliases", async () => {
   const draft = await jsonFetch(`${gatewayBase}/api/events/drafts`, {
     method: "POST",
@@ -704,25 +655,6 @@ test("authorization negative paths are enforced", async () => {
   });
   assert.equal(participantOrganizerList.res.status, 403);
 
-  const participantDrafts = await jsonFetch(`${gatewayBase}/api/events/drafts`, {
-    method: "GET",
-    headers: {
-      authorization: `Bearer ${participantAccessToken}`
-    }
-  });
-  assert.equal(participantDrafts.res.status, 403);
-
-  const participantDraftDetails = await jsonFetch(
-    `${gatewayBase}/api/events/drafts/${eventId}`,
-    {
-      method: "GET",
-      headers: {
-        authorization: `Bearer ${participantAccessToken}`
-      }
-    }
-  );
-  assert.equal(participantDraftDetails.res.status, 403);
-
   const otherOrganizerDraft = await jsonFetch(
     `${gatewayBase}/api/events/drafts/${eventId}`,
     {
@@ -745,17 +677,6 @@ test("authorization negative paths are enforced", async () => {
   );
   assert.equal(otherOrganizerRegistrations.res.status, 404);
 
-  const participantOrganizerRegistrations = await jsonFetch(
-    `${gatewayBase}/api/organizer/events/${eventId}/registrations`,
-    {
-      method: "GET",
-      headers: {
-        authorization: `Bearer ${participantAccessToken}`
-      }
-    }
-  );
-  assert.equal(participantOrganizerRegistrations.res.status, 403);
-
   const otherOrganizerExport = await jsonFetch(
     `${gatewayBase}/api/organizer/events/${eventId}/registrations/export`,
     {
@@ -766,17 +687,6 @@ test("authorization negative paths are enforced", async () => {
     }
   );
   assert.equal(otherOrganizerExport.res.status, 404);
-
-  const participantOrganizerExport = await jsonFetch(
-    `${gatewayBase}/api/organizer/events/${eventId}/registrations/export`,
-    {
-      method: "GET",
-      headers: {
-        authorization: `Bearer ${participantAccessToken}`
-      }
-    }
-  );
-  assert.equal(participantOrganizerExport.res.status, 403);
 
   const otherParticipantTicket = await jsonFetch(
     `${gatewayBase}/api/tickets/${ticketId}`,

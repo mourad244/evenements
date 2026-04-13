@@ -1,0 +1,50 @@
+{
+  "id": "workflows/Workflow_frontend_event_portal",
+  "title": "Workflow frontend portal evenement",
+  "description": "Parcours cibles du portail public et des interfaces evenement.",
+  "source": "@site/../../docs/workflows/Workflow_frontend_event_portal.md",
+  "sourceDirName": "workflows",
+  "slug": "/workflows/frontend-event-portal",
+  "permalink": "/reference/workflows/frontend-event-portal",
+  "draft": false,
+  "unlisted": false,
+  "editUrl": "https://github.com/mourad244/evenements/tree/main/../../docs/workflows/Workflow_frontend_event_portal.md",
+  "tags": [
+    {
+      "inline": true,
+      "label": "workflow",
+      "permalink": "/reference/tags/workflow"
+    },
+    {
+      "inline": true,
+      "label": "portal",
+      "permalink": "/reference/tags/portal"
+    },
+    {
+      "inline": true,
+      "label": "events",
+      "permalink": "/reference/tags/events"
+    }
+  ],
+  "version": "current",
+  "frontMatter": {
+    "title": "Workflow frontend portal evenement",
+    "description": "Parcours cibles du portail public et des interfaces evenement.",
+    "docKind": "workflow",
+    "domain": "frontend-event-portal",
+    "phase": "P1-P2",
+    "owner": "Ibrahim",
+    "status": "DONE",
+    "tags": [
+      "workflow",
+      "portal",
+      "events"
+    ],
+    "slug": "frontend-event-portal"
+  },
+  "sidebar": "referenceSidebar",
+  "previous": {
+    "title": "Workflow frontend",
+    "permalink": "/reference/workflows/frontend"
+  }
+}

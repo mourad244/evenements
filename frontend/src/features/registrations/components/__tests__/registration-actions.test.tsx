@@ -11,13 +11,12 @@ const cancelMutationState = {
   variables: undefined as string | undefined
 };
 
-const paymentMutationState = {
+const downloadMutationState = {
   mutate: vi.fn(),
   isPending: false,
   isSuccess: false,
-  data: null as null | { registrationId?: string },
   error: null as Error | null,
-  variables: undefined as { registrationId?: string } | undefined
+  variables: undefined as { id: string } | undefined
 };
 
 vi.mock("next/link", () => ({
@@ -29,8 +28,8 @@ vi.mock("@/features/registrations/hooks/use-cancel-registration-mutation", () =>
   useCancelRegistrationMutation: () => cancelMutationState
 }));
 
-vi.mock("@/features/payments/hooks/use-create-payment-session-mutation", () => ({
-  useCreatePaymentSessionMutation: () => paymentMutationState
+vi.mock("@/features/registrations/hooks/use-download-ticket-mutation", () => ({
+  useDownloadTicketMutation: () => downloadMutationState
 }));
 
 import { RegistrationList } from "../registration-list";
@@ -45,7 +44,8 @@ const registrations = [
     status: "CONFIRMED" as const,
     canDownloadTicket: true,
     ticketId: "ticket-1",
-    ticketFormat: "PDF" as const
+    ticketFormat: "PDF" as const,
+    updatedAt: "2026-03-20T09:00:00.000Z"
   },
   {
     id: "reg-2",
@@ -53,22 +53,12 @@ const registrations = [
     eventTitle: "Builders Night",
     eventDate: "2026-05-02T09:00:00.000Z",
     eventCity: "Rabat",
-    status: "CONFIRMED" as const,
-    canDownloadTicket: false,
-    ticketId: "ticket-2",
-    ticketFormat: null
-  },
-  {
-    id: "reg-3",
-    eventId: "evt-3",
-    eventTitle: "Design Circle",
-    eventDate: "2026-05-02T09:00:00.000Z",
-    eventCity: "Rabat",
     status: "WAITLISTED" as const,
     canDownloadTicket: false,
     ticketId: null,
     ticketFormat: null,
-    waitlistPosition: 3
+    waitlistPosition: 3,
+    updatedAt: "2026-03-19T09:00:00.000Z"
   }
 ];
 
@@ -80,12 +70,11 @@ describe("registration action feedback", () => {
     cancelMutationState.isSuccess = false;
     cancelMutationState.error = null;
     cancelMutationState.variables = undefined;
-    paymentMutationState.mutate.mockReset();
-    paymentMutationState.isPending = false;
-    paymentMutationState.isSuccess = false;
-    paymentMutationState.data = null;
-    paymentMutationState.error = null;
-    paymentMutationState.variables = undefined;
+    downloadMutationState.mutate.mockReset();
+    downloadMutationState.isPending = false;
+    downloadMutationState.isSuccess = false;
+    downloadMutationState.error = null;
+    downloadMutationState.variables = undefined;
   });
 
   it("shows pending feedback only for the registration currently being cancelled", () => {
@@ -95,7 +84,7 @@ describe("registration action feedback", () => {
     render(<RegistrationList registrations={registrations} />);
 
     expect(screen.getByRole("button", { name: "Cancelling..." }).hasAttribute("disabled")).toBe(true);
-    expect(screen.getAllByRole("button", { name: "Cancel" }).length).toBeGreaterThan(0);
+    expect(screen.getByRole("button", { name: "Cancel" })).toBeTruthy();
   });
 
   it("shows cancellation success feedback", () => {
@@ -116,21 +105,36 @@ describe("registration action feedback", () => {
     expect(screen.getByRole("alert").textContent).toContain("Could not cancel this registration");
   });
 
-  it("shows payment pending state when ticket exists but is not ready", () => {
+  it("shows the download action only for eligible confirmed registrations", () => {
     render(<RegistrationList registrations={registrations} />);
 
-    expect(screen.getAllByText("Payment pending").length).toBe(1);
-    expect(
-      screen.getByText(
-        "Payment confirmation will update your ticket automatically. Return here for the latest status."
-      )
-    ).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Download ticket" })).toBeTruthy();
+    expect(screen.queryByText("Downloading...")).toBeNull();
   });
 
-  it("does not show the ticket-ready action when payment is still pending", () => {
+  it("shows download pending and success feedback", () => {
+    downloadMutationState.isPending = true;
+    downloadMutationState.variables = { id: "reg-1" };
+
+    const { rerender } = render(<RegistrationList registrations={registrations} />);
+
+    expect(screen.getByRole("button", { name: "Downloading..." }).hasAttribute("disabled")).toBe(true);
+
+    downloadMutationState.isPending = false;
+    downloadMutationState.isSuccess = true;
+    downloadMutationState.variables = undefined;
+    rerender(<RegistrationList registrations={registrations} />);
+
+    expect(screen.getByRole("status").textContent).toContain("Your ticket was downloaded successfully.");
+  });
+
+  it("shows ticket download errors with readable feedback", () => {
+    downloadMutationState.error = new Error("Ticket service is temporarily unavailable. Please retry.");
+
     render(<RegistrationList registrations={registrations} />);
 
-    const viewButtons = screen.getAllByRole("button", { name: "View ticket" });
-    expect(viewButtons.length).toBe(1);
+    expect(screen.getByRole("alert").textContent).toContain(
+      "Ticket service is temporarily unavailable. Please retry."
+    );
   });
 });

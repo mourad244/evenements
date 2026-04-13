@@ -1,0 +1,55 @@
+{
+  "id": "services/registration-service-spec",
+  "title": "Spec Registration Service",
+  "description": "Specification backend du service d'inscription, waitlist et historique participant.",
+  "source": "@site/../../docs/services/registration-service-spec.md",
+  "sourceDirName": "services",
+  "slug": "/services/registration-service",
+  "permalink": "/reference/services/registration-service",
+  "draft": false,
+  "unlisted": false,
+  "editUrl": "https://github.com/mourad244/evenements/tree/main/../../docs/services/registration-service-spec.md",
+  "tags": [
+    {
+      "inline": true,
+      "label": "spec",
+      "permalink": "/reference/tags/spec"
+    },
+    {
+      "inline": true,
+      "label": "registration",
+      "permalink": "/reference/tags/registration"
+    },
+    {
+      "inline": true,
+      "label": "waitlist",
+      "permalink": "/reference/tags/waitlist"
+    }
+  ],
+  "version": "current",
+  "frontMatter": {
+    "title": "Spec Registration Service",
+    "description": "Specification backend du service d'inscription, waitlist et historique participant.",
+    "docKind": "spec",
+    "domain": "registration",
+    "phase": "P1",
+    "owner": "Mourad",
+    "status": "DONE",
+    "priority": "P0",
+    "tags": [
+      "spec",
+      "registration",
+      "waitlist"
+    ],
+    "slug": "registration-service"
+  },
+  "sidebar": "referenceSidebar",
+  "previous": {
+    "title": "Spec Identity Access Service",
+    "permalink": "/reference/services/identity-access-service"
+  },
+  "next": {
+    "title": "Sprint 0 - Fondations architecture",
+    "permalink": "/reference/sprints/sprint-0-architecture-foundation"
+  }
+}

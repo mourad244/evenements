@@ -470,53 +470,53 @@ function AdminDashboard() {
     <SectionPanel
       eyebrow="Admin overview"
       title="Platform operations at a glance"
-      description="Review and moderate events, manage users, and keep the platform running smoothly from your admin workspace."
+      description="Use the current admin surfaces for limited event review and user oversight while deeper admin tooling is still out of scope."
       className="grid gap-6 border-[rgba(243,154,99,0.18)] bg-[radial-gradient(circle_at_top_right,rgba(243,154,99,0.14),transparent_30%),linear-gradient(180deg,rgba(18,28,46,0.96),rgba(10,17,30,0.98))] shadow-[0_28px_64px_rgba(0,0,0,0.32)]"
       action={
         <>
           <Link href={ROUTES.adminEvents} className="w-full sm:w-auto">
             <Button variant="ghost" className="w-full sm:w-auto">
-              Manage events
+              Open admin events
             </Button>
           </Link>
           <Link href={ROUTES.adminUsers} className="w-full sm:w-auto">
-            <Button className="w-full sm:w-auto">Manage users</Button>
+            <Button className="w-full sm:w-auto">Open admin users</Button>
           </Link>
         </>
       }
     >
       <div className="grid gap-4 sm:gap-6 md:grid-cols-3">
         <SummaryCard
-          label="Event moderation"
-          value="All events"
-          description="Review published and pending events across the platform. Approve, reject, or take action as needed."
+          label="Admin events"
+          value="Limited overview"
+          description="A dedicated admin metrics contract is not available yet, so this workspace avoids invented KPIs."
           accent="highlight"
         />
         <Card className="grid gap-3.5 border-[var(--line-soft)] bg-[linear-gradient(180deg,rgba(18,28,46,0.9),rgba(10,17,30,0.98))] shadow-[0_22px_48px_rgba(0,0,0,0.24)]">
           <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[var(--text-muted)]">
-            User management
+            Admin users
           </p>
           <h2 className="text-2xl font-semibold tracking-tight text-[var(--text-primary)]">
-            All platform users
+            User oversight
           </h2>
           <p className="text-sm leading-6 text-[var(--text-secondary)]">
-            Browse participants, organizers, and admins. View account details and manage access rights.
+            Review the live admin user list while the metrics surface is still pending.
           </p>
           <Link href={ROUTES.adminUsers} className="w-full sm:w-auto">
             <Button variant="ghost" className="w-full sm:w-auto">
-              View all users
+              Open admin users
             </Button>
           </Link>
         </Card>
         <Card className="grid gap-3.5 border-[var(--line-soft)] bg-[linear-gradient(180deg,rgba(18,28,46,0.9),rgba(10,17,30,0.98))] shadow-[0_22px_48px_rgba(0,0,0,0.24)]">
           <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[var(--text-muted)]">
-            Platform health
+            Metrics readiness
           </p>
           <h2 className="text-2xl font-semibold tracking-tight text-[var(--text-primary)]">
-            Monitor &amp; respond
+            Awaiting backend support
           </h2>
           <p className="text-sm leading-6 text-[var(--text-secondary)]">
-            Stay on top of registration activity, flag suspicious accounts, and ensure the catalog stays accurate and up to date.
+            Once the backend exposes admin KPI endpoints, this area can become a live operational summary.
           </p>
         </Card>
       </div>
@@ -525,21 +525,15 @@ function AdminDashboard() {
 }
 
 export default function DashboardPage() {
-  const { data: user, isLoading: isUserLoading, isFetching: isUserFetching } = useCurrentUser();
+  const { data: user, isLoading: isUserLoading } = useCurrentUser();
   const isParticipant = user?.role === "PARTICIPANT";
   const isOrganizer = user?.role === "ORGANIZER";
   const isAdmin = user?.role === "ADMIN";
 
   const registrationsQuery = useMyRegistrationsQuery({}, isParticipant);
-  const organizerEventsQuery = useOrganizerEventsQuery(isOrganizer);
+  const organizerEventsQuery = useOrganizerEventsQuery({}, isOrganizer);
 
-  // Show loading while user is being fetched (covers hard-refresh and initial login)
-  if (isUserLoading || (isUserFetching && !user)) {
-    return <LoadingState label="Loading dashboard..." variant="dashboard" />;
-  }
-
-  // Safety: if user never loaded (no token / auth failure), nothing to render
-  if (!user) {
+  if (isUserLoading) {
     return <LoadingState label="Loading dashboard..." variant="dashboard" />;
   }
 
@@ -550,7 +544,7 @@ export default function DashboardPage() {
       <PageTitle
         eyebrow="Dashboard"
         title={title}
-        description="Here is a summary of your recent activity, upcoming events, and the actions that need your attention today."
+        description="A role-aware summary of your recent activity, upcoming work, and the actions that matter most right now."
       />
 
       {isParticipant ? (
@@ -564,7 +558,7 @@ export default function DashboardPage() {
 
       {isOrganizer ? (
         <OrganizerDashboard
-          events={organizerEventsQuery.data || []}
+          events={organizerEventsQuery.data?.items || []}
           isLoading={organizerEventsQuery.isLoading}
           isError={organizerEventsQuery.isError}
           errorMessage={organizerEventsQuery.error?.message}

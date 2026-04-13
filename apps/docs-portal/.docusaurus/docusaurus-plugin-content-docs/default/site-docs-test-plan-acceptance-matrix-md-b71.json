@@ -1,0 +1,24 @@
+{
+  "id": "test-plan-acceptance-matrix",
+  "title": "Matrice de recette et d'acceptation par phase",
+  "description": "Objet",
+  "source": "@site/../../docs/test-plan-acceptance-matrix.md",
+  "sourceDirName": ".",
+  "slug": "/test-plan-acceptance-matrix",
+  "permalink": "/reference/test-plan-acceptance-matrix",
+  "draft": false,
+  "unlisted": false,
+  "editUrl": "https://github.com/mourad244/evenements/tree/main/../../docs/test-plan-acceptance-matrix.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {},
+  "sidebar": "referenceSidebar",
+  "previous": {
+    "title": "Backend Service Spec - Template Evenements",
+    "permalink": "/reference/templates/TemplateBackendServiceSpec"
+  },
+  "next": {
+    "title": "Plan de non-regression ACL et roles",
+    "permalink": "/reference/test-plan-role-regression"
+  }
+}

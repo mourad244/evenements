@@ -1,0 +1,24 @@
+{
+  "id": "planning/release_plan",
+  "title": "Release Plan - Projet Evenements",
+  "description": "Plan directeur des versions. Les dates cibles ci-dessous sont proposees au",
+  "source": "@site/../../docs/planning/release_plan.md",
+  "sourceDirName": "planning",
+  "slug": "/planning/release_plan",
+  "permalink": "/reference/planning/release_plan",
+  "draft": false,
+  "unlisted": false,
+  "editUrl": "https://github.com/mourad244/evenements/tree/main/../../docs/planning/release_plan.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {},
+  "sidebar": "referenceSidebar",
+  "previous": {
+    "title": "Perimetre MVP et architecture cible",
+    "permalink": "/reference/mvp-scope"
+  },
+  "next": {
+    "title": "Roadmap - Phases & Sprints du Projet Evenements",
+    "permalink": "/reference/planning/roadmap_sprints"
+  }
+}

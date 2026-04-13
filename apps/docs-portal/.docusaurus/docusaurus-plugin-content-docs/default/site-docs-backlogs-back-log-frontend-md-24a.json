@@ -1,0 +1,55 @@
+{
+  "id": "backlogs/BackLog_frontend",
+  "title": "Backlog Frontend",
+  "description": "Backlog des surfaces UI, integration front/back et experience utilisateur.",
+  "source": "@site/../../docs/backlogs/BackLog_frontend.md",
+  "sourceDirName": "backlogs",
+  "slug": "/backlogs/frontend",
+  "permalink": "/reference/backlogs/frontend",
+  "draft": false,
+  "unlisted": false,
+  "editUrl": "https://github.com/mourad244/evenements/tree/main/../../docs/backlogs/BackLog_frontend.md",
+  "tags": [
+    {
+      "inline": true,
+      "label": "frontend",
+      "permalink": "/reference/tags/frontend"
+    },
+    {
+      "inline": true,
+      "label": "portal",
+      "permalink": "/reference/tags/portal"
+    },
+    {
+      "inline": true,
+      "label": "ux",
+      "permalink": "/reference/tags/ux"
+    }
+  ],
+  "version": "current",
+  "frontMatter": {
+    "title": "Backlog Frontend",
+    "description": "Backlog des surfaces UI, integration front/back et experience utilisateur.",
+    "docKind": "backlog",
+    "domain": "frontend",
+    "phase": "P1-P3",
+    "owner": "Ibrahim",
+    "status": "DONE",
+    "priority": "P0",
+    "tags": [
+      "frontend",
+      "portal",
+      "ux"
+    ],
+    "slug": "frontend"
+  },
+  "sidebar": "referenceSidebar",
+  "previous": {
+    "title": "Backlog Event Management",
+    "permalink": "/reference/backlogs/event-management"
+  },
+  "next": {
+    "title": "Backlog Identity & Access",
+    "permalink": "/reference/backlogs/identity-access"
+  }
+}

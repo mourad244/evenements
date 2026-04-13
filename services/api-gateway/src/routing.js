@@ -1,7 +1,6 @@
 const organizerOrAdmin = ["ORGANIZER", "ADMIN"];
 const participantOnly = ["PARTICIPANT"];
 const authenticatedRoles = ["PARTICIPANT", "ORGANIZER", "ADMIN"];
-const participantOrOrganizer = ["PARTICIPANT", "ORGANIZER", "ADMIN"];
 
 export function buildRouteTable(config) {
   return [
@@ -47,22 +46,6 @@ export function buildRouteTable(config) {
       allowedRoles: authenticatedRoles,
       targetBaseUrl: config.identityServiceUrl,
       targetPath: "/auth/me"
-    },
-    {
-      method: "GET",
-      path: "/api/profile",
-      public: false,
-      allowedRoles: participantOrOrganizer,
-      targetBaseUrl: config.identityServiceUrl,
-      targetPath: "/profile"
-    },
-    {
-      method: "PATCH",
-      path: "/api/profile",
-      public: false,
-      allowedRoles: participantOrOrganizer,
-      targetBaseUrl: config.identityServiceUrl,
-      targetPath: "/profile"
     },
     {
       method: "GET",
@@ -197,6 +180,14 @@ export function buildRouteTable(config) {
       allowedRoles: participantOnly,
       targetBaseUrl: config.registrationServiceUrl,
       targetPath: "/tickets/:ticketId"
+    },
+    {
+      method: "GET",
+      path: "/api/tickets/:ticketId/download",
+      public: false,
+      allowedRoles: participantOnly,
+      targetBaseUrl: config.registrationServiceUrl,
+      targetPath: "/tickets/:ticketId/download"
     },
     {
       method: "GET",

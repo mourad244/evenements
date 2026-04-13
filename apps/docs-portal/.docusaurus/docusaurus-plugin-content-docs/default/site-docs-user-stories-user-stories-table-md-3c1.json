@@ -1,0 +1,24 @@
+{
+  "id": "user_stories/user_stories_table",
+  "title": "User Stories - Projet Evenements (table consolidee)",
+  "description": "Table de reference pour la priorisation initiale.",
+  "source": "@site/../../docs/user_stories/user_stories_table.md",
+  "sourceDirName": "user_stories",
+  "slug": "/user_stories/user_stories_table",
+  "permalink": "/reference/user_stories/user_stories_table",
+  "draft": false,
+  "unlisted": false,
+  "editUrl": "https://github.com/mourad244/evenements/tree/main/../../docs/user_stories/user_stories_table.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {},
+  "sidebar": "referenceSidebar",
+  "previous": {
+    "title": "Plan de smoke tests MVP - P1",
+    "permalink": "/reference/test-plan-smoke-mvp"
+  },
+  "next": {
+    "title": "Workflow backend",
+    "permalink": "/reference/workflows/backend"
+  }
+}

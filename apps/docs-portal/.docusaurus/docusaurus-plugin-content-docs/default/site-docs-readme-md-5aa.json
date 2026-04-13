@@ -1,0 +1,54 @@
+{
+  "id": "README",
+  "title": "Documentation projet",
+  "description": "Vue d'ensemble de la documentation Evenements microservices et de son organisation.",
+  "source": "@site/../../docs/README.md",
+  "sourceDirName": ".",
+  "slug": "/overview",
+  "permalink": "/reference/overview",
+  "draft": false,
+  "unlisted": false,
+  "editUrl": "https://github.com/mourad244/evenements/tree/main/../../docs/README.md",
+  "tags": [
+    {
+      "inline": true,
+      "label": "overview",
+      "permalink": "/reference/tags/overview"
+    },
+    {
+      "inline": true,
+      "label": "docs",
+      "permalink": "/reference/tags/docs"
+    },
+    {
+      "inline": true,
+      "label": "governance",
+      "permalink": "/reference/tags/governance"
+    }
+  ],
+  "version": "current",
+  "frontMatter": {
+    "title": "Documentation projet",
+    "description": "Vue d'ensemble de la documentation Evenements microservices et de son organisation.",
+    "docKind": "index",
+    "domain": "documentation",
+    "phase": "P0-P4",
+    "owner": "Mourad",
+    "status": "DONE",
+    "tags": [
+      "overview",
+      "docs",
+      "governance"
+    ],
+    "slug": "overview"
+  },
+  "sidebar": "referenceSidebar",
+  "previous": {
+    "title": "Guide de Demarrage Rapide - Projet Evenements",
+    "permalink": "/reference/QUICK_START"
+  },
+  "next": {
+    "title": "Catalogue REST P1",
+    "permalink": "/reference/api-contracts-p1"
+  }
+}

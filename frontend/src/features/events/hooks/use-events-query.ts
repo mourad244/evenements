@@ -12,7 +12,6 @@ export function useEventsQuery(
 ): UseQueryResult<ReturnType<typeof getEvents> extends Promise<infer T> ? T : never, NormalizedApiError> {
   return useQuery({
     queryKey: ["events", filters],
-    queryFn: () => getEvents(filters),
-    staleTime: 2 * 60 * 1000
+    queryFn: () => getEvents(filters)
   });
 }

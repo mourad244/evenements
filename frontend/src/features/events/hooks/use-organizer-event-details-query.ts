@@ -8,7 +8,6 @@ export function useOrganizerEventDetailsQuery(eventId: string) {
   return useQuery({
     queryKey: ["organizer-event", eventId],
     queryFn: () => getOrganizerEventById(eventId),
-    enabled: Boolean(eventId),
-    staleTime: 2 * 60 * 1000
+    enabled: Boolean(eventId)
   });
 }

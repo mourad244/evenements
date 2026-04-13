@@ -7,8 +7,13 @@ import { useForm } from "react-hook-form";
 
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { FormErrorSummary } from "@/components/shared/form-error-summary";
 import { Input } from "@/components/ui/input";
 import { ROUTES } from "@/lib/constants/routes";
+import {
+  focusFirstErrorField,
+  getFieldErrorMessages
+} from "@/lib/forms/form-accessibility";
 
 import { loginSchema, type LoginSchema } from "../schemas/auth.schema";
 import { useLoginMutation } from "../hooks/use-login-mutation";
@@ -25,18 +30,24 @@ export function LoginForm() {
     }
   });
 
-  const onSubmit = form.handleSubmit(async (values) => {
-    const session = await mutation.mutateAsync(values);
-    if (session.user.role === "ADMIN") {
-      router.push(ROUTES.adminEvents);
-      return;
+  const onSubmit = form.handleSubmit(
+    async (values) => {
+      const session = await mutation.mutateAsync(values);
+      if (session.user.role === "ADMIN") {
+        router.push(ROUTES.adminEvents);
+        return;
+      }
+      if (session.user.role === "ORGANIZER") {
+        router.push(ROUTES.organizerEvents);
+        return;
+      }
+      router.push(ROUTES.dashboard);
+    },
+    (errors) => {
+      focusFirstErrorField(["email", "password"] as const, errors, form.setFocus);
     }
-    if (session.user.role === "ORGANIZER") {
-      router.push(ROUTES.organizerEvents);
-      return;
-    }
-    router.push(ROUTES.dashboard);
-  });
+  );
+  const validationMessages = getFieldErrorMessages(form.formState.errors);
 
   return (
     <Card className="mx-auto grid w-full max-w-xl gap-7 border-[rgba(88,116,255,0.2)] bg-[radial-gradient(circle_at_top_right,rgba(88,116,255,0.16),transparent_30%),linear-gradient(180deg,rgba(18,28,46,0.96),rgba(9,15,26,0.98))] shadow-[0_30px_68px_rgba(14,24,54,0.32)]">
@@ -51,10 +62,12 @@ export function LoginForm() {
           Sign in to access your participant, organizer, or admin workspace.
         </p>
       </div>
-      <form className="grid gap-4" onSubmit={onSubmit}>
+      <form className="grid gap-4" onSubmit={onSubmit} noValidate aria-busy={mutation.isPending}>
+        <FormErrorSummary title="Fix the sign-in form" messages={validationMessages} />
         <Input
           id="login-email"
           label="Email"
+          hint="Use the email address linked to your account."
           type="email"
           autoComplete="email"
           placeholder="you@example.com"
@@ -65,6 +78,7 @@ export function LoginForm() {
         <PasswordField
           id="login-password"
           label="Password"
+          hint="Enter the password you use for this workspace."
           autoComplete="current-password"
           placeholder="Enter your password"
           {...form.register("password")}

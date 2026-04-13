@@ -1,0 +1,25 @@
+<svg width="1600" height="900" viewBox="0 0 1600 900" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1600" y2="900" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#0F172A"/>
+      <stop offset="0.52" stop-color="#18273F"/>
+      <stop offset="1" stop-color="#253A5F"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="320" y1="160" x2="1280" y2="760" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#5874FF" stop-opacity="0.95"/>
+      <stop offset="1" stop-color="#F39A63" stop-opacity="0.9"/>
+    </linearGradient>
+  </defs>
+  <rect width="1600" height="900" rx="56" fill="url(#bg)"/>
+  <circle cx="312" cy="228" r="180" fill="#5874FF" fill-opacity="0.18"/>
+  <circle cx="1260" cy="700" r="250" fill="#F39A63" fill-opacity="0.12"/>
+  <path d="M120 650C240 516 366 468 520 486C668 503 764 580 876 614C1018 657 1180 612 1490 410V780H120V650Z" fill="url(#accent)" fill-opacity="0.16"/>
+  <path d="M210 600C356 504 468 472 598 486C742 502 824 580 950 612C1104 651 1244 622 1414 520" stroke="url(#accent)" stroke-width="18" stroke-linecap="round"/>
+  <rect x="152" y="140" width="450" height="76" rx="24" fill="white" fill-opacity="0.08"/>
+  <rect x="152" y="242" width="620" height="28" rx="14" fill="white" fill-opacity="0.12"/>
+  <rect x="152" y="288" width="420" height="28" rx="14" fill="white" fill-opacity="0.08"/>
+  <rect x="152" y="700" width="220" height="64" rx="22" fill="#5874FF" fill-opacity="0.8"/>
+  <text x="184" y="193" fill="#F8FAFC" font-family="Inter, Arial, sans-serif" font-size="38" font-weight="700">Featured event media</text>
+  <text x="184" y="320" fill="#CBD5E1" font-family="Inter, Arial, sans-serif" font-size="24">Organizer-uploaded cover art or media path</text>
+  <text x="184" y="742" fill="#FFFFFF" font-family="Inter, Arial, sans-serif" font-size="22" font-weight="600">Evenements</text>
+</svg>

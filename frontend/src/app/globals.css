@@ -40,12 +40,20 @@ html {
 body {
   margin: 0;
   min-width: 320px;
+  font-family: var(--font-sans), system-ui, sans-serif;
   background:
     radial-gradient(circle at top left, rgba(65, 93, 255, 0.2), transparent 24%),
     radial-gradient(circle at 85% 12%, rgba(243, 154, 99, 0.12), transparent 18%),
     linear-gradient(180deg, #05070d 0%, #09111c 48%, #0a1422 100%);
   color: var(--text-primary);
   font-feature-settings: "rlig" 1, "calt" 1;
+}
+
+code,
+pre,
+kbd,
+samp {
+  font-family: var(--font-mono), ui-monospace, SFMono-Regular, monospace;
 }
 
 a {
@@ -60,17 +68,6 @@ a {
 ::selection {
   background: rgba(65, 93, 255, 0.32);
   color: var(--text-primary);
-}
-
-/* Force dark background on native <option> dropdown lists */
-select option {
-  background-color: #0d1a2e;
-  color: #f3f6ff;
-}
-
-select option:hover,
-select option:checked {
-  background-color: #1a2d4d;
 }
 
 @layer utilities {

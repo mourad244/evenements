@@ -1,19 +1,32 @@
-import { clearRefreshToken } from "@/lib/auth/clear-refresh-token";
 import { clearToken } from "@/lib/auth/clear-token";
 import { getToken } from "@/lib/auth/get-token";
-import { setRefreshToken } from "@/lib/auth/set-refresh-token";
 import { setToken } from "@/lib/auth/set-token";
 
 const SESSION_EXPIRED_KEY = "event-platform.session-expired";
+const REFRESH_TOKEN_KEY = "event-platform.refresh-token";
 
-export function persistSession(accessToken: string, refreshToken?: string) {
-  setToken(accessToken);
-  if (refreshToken) setRefreshToken(refreshToken);
+type SessionTokens = {
+  accessToken: string;
+  refreshToken?: string | null;
+};
+
+export function persistSession(session: SessionTokens) {
+  setToken(session.accessToken);
+
+  if (typeof window === "undefined") return;
+
+  if (session.refreshToken) {
+    localStorage.setItem(REFRESH_TOKEN_KEY, session.refreshToken);
+  } else {
+    localStorage.removeItem(REFRESH_TOKEN_KEY);
+  }
 }
 
 export function clearSession() {
   clearToken();
-  clearRefreshToken();
+  if (typeof window !== "undefined") {
+    localStorage.removeItem(REFRESH_TOKEN_KEY);
+  }
 }
 
 export function markSessionExpired() {
@@ -35,4 +48,9 @@ export function clearSessionExpired() {
 
 export function getAccessToken() {
   return getToken();
+}
+
+export function getRefreshToken() {
+  if (typeof window === "undefined") return null;
+  return localStorage.getItem(REFRESH_TOKEN_KEY);
 }

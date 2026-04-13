@@ -3,11 +3,10 @@
 import { useQuery } from "@tanstack/react-query";
 
 import { getNotifications } from "../api/get-notifications";
-import type { NotificationsQuery } from "../types/notification.types";
 
-export function useNotificationsQuery(query: NotificationsQuery = {}) {
+export function useNotificationsQuery() {
   return useQuery({
-    queryKey: ["notifications", query.page ?? 1, query.pageSize ?? 10],
-    queryFn: () => getNotifications(query)
+    queryKey: ["notifications"],
+    queryFn: getNotifications
   });
 }

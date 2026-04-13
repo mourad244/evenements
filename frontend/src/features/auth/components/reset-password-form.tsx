@@ -8,8 +8,13 @@ import { useForm } from "react-hook-form";
 
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { FormErrorSummary } from "@/components/shared/form-error-summary";
 import { Input } from "@/components/ui/input";
 import { ROUTES } from "@/lib/constants/routes";
+import {
+  focusFirstErrorField,
+  getFieldErrorMessages
+} from "@/lib/forms/form-accessibility";
 
 import { useResetPasswordMutation } from "../hooks/use-reset-password-mutation";
 import { PasswordField } from "./password-field";
@@ -38,10 +43,20 @@ export function ResetPasswordForm() {
     }
   }, [form, searchParams]);
 
-  const onSubmit = form.handleSubmit(async (values) => {
-    await mutation.mutateAsync(values);
-    router.push(ROUTES.login);
-  });
+  const onSubmit = form.handleSubmit(
+    async (values) => {
+      await mutation.mutateAsync(values);
+      router.push(ROUTES.login);
+    },
+    (errors) => {
+      focusFirstErrorField(
+        ["token", "password", "confirmPassword"] as const,
+        errors,
+        form.setFocus
+      );
+    }
+  );
+  const validationMessages = getFieldErrorMessages(form.formState.errors);
 
   return (
     <Card className="mx-auto grid w-full max-w-xl gap-7 border-[rgba(243,154,99,0.18)] bg-[radial-gradient(circle_at_top_right,rgba(243,154,99,0.14),transparent_30%),linear-gradient(180deg,rgba(18,28,46,0.96),rgba(9,15,26,0.98))] shadow-[0_30px_68px_rgba(0,0,0,0.32)]">
@@ -56,10 +71,12 @@ export function ResetPasswordForm() {
           Paste your reset token and choose a new password to regain access.
         </p>
       </div>
-      <form className="grid gap-4" onSubmit={onSubmit}>
+      <form className="grid gap-4" onSubmit={onSubmit} noValidate aria-busy={mutation.isPending}>
+        <FormErrorSummary title="Fix the password reset form" messages={validationMessages} />
         <Input
           id="reset-password-token"
           label="Reset token"
+          hint="Use the token from the password reset email."
           placeholder="Paste your token"
           {...form.register("token")}
           error={form.formState.errors.token?.message}
@@ -68,6 +85,7 @@ export function ResetPasswordForm() {
         <PasswordField
           id="reset-password"
           label="New password"
+          hint="Choose a new password with upper and lower case letters and a number."
           autoComplete="new-password"
           placeholder="Choose a new password"
           {...form.register("password")}
@@ -77,6 +95,7 @@ export function ResetPasswordForm() {
         <PasswordField
           id="reset-password-confirm"
           label="Confirm password"
+          hint="Repeat the new password to make sure it matches."
           autoComplete="new-password"
           placeholder="Repeat your new password"
           {...form.register("confirmPassword")}

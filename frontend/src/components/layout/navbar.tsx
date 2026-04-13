@@ -1,10 +1,10 @@
 "use client";
 
-import { Bell, LogOut, Menu, User, X } from "lucide-react";
+import { LogOut, Menu, Sparkles, X } from "lucide-react";
+import { useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
-import { useQueryClient } from "@tanstack/react-query";
 
 import { Button } from "@/components/ui/button";
 import { useCurrentUser } from "@/features/auth/hooks/use-current-user";
@@ -25,25 +25,76 @@ type NavItem = {
 const navItems: NavItem[] = [
   { href: ROUTES.events, label: "Events" },
   { href: ROUTES.dashboard, label: "Dashboard", roles: ["PARTICIPANT", "ORGANIZER", "ADMIN"] },
-  { href: ROUTES.myRegistrations, label: "My Registrations", roles: ["PARTICIPANT"] },
-  { href: ROUTES.organizerEvents, label: "Workspace", roles: ["ORGANIZER"] },
+  { href: ROUTES.myRegistrations, label: "My registrations", roles: ["PARTICIPANT"] },
+  { href: ROUTES.organizerEvents, label: "Organizer", roles: ["ORGANIZER", "ADMIN"] },
   { href: ROUTES.adminEvents, label: "Admin", roles: ["ADMIN"] }
 ];
 
 function getVisibleNavItems(role?: "PARTICIPANT" | "ORGANIZER" | "ADMIN" | "GUEST") {
+  const isWorkspaceRole =
+    role === "PARTICIPANT" || role === "ORGANIZER" || role === "ADMIN";
+
   return navItems.filter(
     (item) =>
-      !item.roles ||
-      (role && role !== "GUEST" && item.roles.includes(role))
+      !item.roles || (isWorkspaceRole ? item.roles.includes(role) : false) || item.href === ROUTES.events
   );
 }
 
-function getInitials(name?: string) {
-  if (!name) return "U";
-  const parts = name.trim().split(/\s+/);
-  return parts.length >= 2
-    ? `${parts[0][0]}${parts[parts.length - 1][0]}`.toUpperCase()
-    : name.slice(0, 2).toUpperCase();
+function getCurrentSection(pathname: string) {
+  if (pathname === ROUTES.myRegistrations || pathname.startsWith(`${ROUTES.myRegistrations}/`)) {
+    return "Participant workspace";
+  }
+
+  if (pathname === ROUTES.organizerEvents || pathname.startsWith(`${ROUTES.organizerEvents}/`)) {
+    return "Organizer workspace";
+  }
+
+  if (
+    pathname === ROUTES.adminEvents ||
+    pathname.startsWith(`${ROUTES.adminEvents}/`) ||
+    pathname === ROUTES.adminUsers ||
+    pathname.startsWith(`${ROUTES.adminUsers}/`)
+  ) {
+    return "Admin workspace";
+  }
+
+  if (pathname === ROUTES.dashboard || pathname.startsWith(`${ROUTES.dashboard}/`)) {
+    return "Dashboard";
+  }
+
+  if (pathname === ROUTES.events || pathname.startsWith(`${ROUTES.events}/`)) {
+    return "Events";
+  }
+
+  return "Platform";
+}
+
+function getSurfaceLabel(pathname: string) {
+  if (
+    pathname === ROUTES.home ||
+    pathname === ROUTES.events ||
+    pathname.startsWith(`${ROUTES.events}/`) ||
+    pathname === ROUTES.login ||
+    pathname === ROUTES.register ||
+    pathname === ROUTES.forgotPassword ||
+    pathname === ROUTES.resetPassword ||
+    pathname === ROUTES.sessionExpired
+  ) {
+    return "Public shell";
+  }
+
+  return "Workspace";
+}
+
+function MetaChip({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-full border border-[var(--line-soft)] bg-[rgba(17,25,39,0.82)] px-3 py-1.5 shadow-[0_10px_24px_rgba(0,0,0,0.18)]">
+      <span className="font-[family:var(--font-mono)] text-[10px] uppercase tracking-[0.18em] text-[var(--text-muted)]">
+        {label}
+      </span>
+      <span className="ml-2 text-sm font-medium text-[var(--text-primary)]">{value}</span>
+    </div>
+  );
 }
 
 export function Navbar() {
@@ -55,6 +106,8 @@ export function Navbar() {
   const { data: user } = useCurrentUser();
   const isAuthenticated = Boolean(token);
   const visibleNavItems = getVisibleNavItems(user?.role);
+  const currentSection = getCurrentSection(pathname);
+  const surfaceLabel = getSurfaceLabel(pathname);
 
   function handleLogout() {
     clearSession();
@@ -66,155 +119,123 @@ export function Navbar() {
   }
 
   return (
-    <header className="sticky top-0 z-40 border-b border-[var(--line-soft)] bg-[linear-gradient(180deg,rgba(5,7,13,0.97),rgba(9,15,26,0.92))] shadow-[0_8px_32px_rgba(0,0,0,0.28)] backdrop-blur-xl">
-      <div className="mx-auto flex max-w-7xl items-center justify-between gap-6 px-4 py-3 sm:px-6 lg:px-8">
+    <header className="sticky top-0 z-40 border-b border-[var(--line-soft)] bg-[linear-gradient(180deg,rgba(7,12,22,0.96),rgba(9,15,26,0.88))] shadow-[0_18px_48px_rgba(0,0,0,0.34)] backdrop-blur-xl">
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-[linear-gradient(90deg,rgba(88,116,255,0.55),rgba(16,185,129,0.45),rgba(245,158,11,0.35),transparent)]" />
 
-        {/* Logo */}
-        <Link
-          href={ROUTES.home}
-          aria-label="EventOS home"
-          className="group flex shrink-0 items-center gap-2.5 rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring-brand)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--surface-1)]"
-        >
-          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-[rgba(88,116,255,0.4)] bg-[linear-gradient(135deg,rgba(88,116,255,0.96),rgba(65,93,255,0.78))] shadow-[0_8px_24px_rgba(65,93,255,0.32)] transition-transform duration-200 motion-safe:group-hover:scale-105">
-            <svg viewBox="0 0 24 24" fill="none" className="h-4.5 w-4.5" aria-hidden="true">
-              <rect x="3" y="6" width="18" height="15" rx="3" stroke="white" strokeWidth="1.6" strokeOpacity="0.9"/>
-              <rect x="3" y="6" width="18" height="5" rx="3" fill="white" fillOpacity="0.2"/>
-              <rect x="3" y="9" width="18" height="2" fill="white" fillOpacity="0.2"/>
-              <line x1="8" y1="4" x2="8" y2="8" stroke="white" strokeWidth="1.8" strokeLinecap="round"/>
-              <line x1="16" y1="4" x2="16" y2="8" stroke="white" strokeWidth="1.8" strokeLinecap="round"/>
-              <circle cx="8" cy="14" r="1.2" fill="white" fillOpacity="0.9"/>
-              <circle cx="12" cy="14" r="1.2" fill="white" fillOpacity="0.9"/>
-              <circle cx="16" cy="14" r="1.2" fill="#f39a63"/>
-            </svg>
-          </span>
-          <span className="text-[15px] font-bold uppercase tracking-[0.22em] text-[var(--text-primary)] transition-colors duration-150 group-hover:text-[var(--accent-primary-strong)]">
-            EventOS
-          </span>
-        </Link>
-
-        {/* Desktop nav */}
-        <nav aria-label="Primary navigation" className="hidden items-center gap-1 lg:flex">
-          {visibleNavItems.map((item) => {
-            const active = pathname === item.href || pathname.startsWith(`${item.href}/`);
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                aria-current={active ? "page" : undefined}
-                className={cn(
-                  "rounded-full px-4 py-2 text-sm font-medium transition-[background-color,color,border-color,box-shadow] duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring-brand)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--surface-1)]",
-                  active
-                    ? "bg-[rgba(88,116,255,0.18)] text-[var(--text-primary)] shadow-[inset_0_0_0_1px_rgba(88,116,255,0.32)]"
-                    : "text-[var(--text-secondary)] hover:bg-[rgba(255,255,255,0.05)] hover:text-[var(--text-primary)]"
-                )}
-              >
-                {item.label}
-              </Link>
-            );
-          })}
-        </nav>
-
-        {/* Desktop right actions */}
-        <div className="hidden items-center gap-2 lg:flex">
-          {isAuthenticated ? (
-            <>
-              {/* Notifications bell */}
-              <Link
-                href={ROUTES.notifications}
-                aria-label="Notifications"
-                className={cn(
-                  "flex h-9 w-9 items-center justify-center rounded-full border transition-[background-color,border-color] duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring-brand)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--surface-1)]",
-                  pathname.startsWith(ROUTES.notifications)
-                    ? "border-[rgba(88,116,255,0.36)] bg-[rgba(88,116,255,0.18)] text-[var(--text-primary)]"
-                    : "border-[var(--line-soft)] bg-[rgba(255,255,255,0.04)] text-[var(--text-muted)] hover:border-[var(--line-strong)] hover:bg-[rgba(255,255,255,0.08)] hover:text-[var(--text-primary)]"
-                )}
-              >
-                <Bell className="h-4 w-4" />
-              </Link>
-
-              {/* Profile pill */}
-              <Link
-                href={ROUTES.profile}
-                aria-label={`Profile — ${user?.fullName || "Account"}`}
-                className="group flex h-9 items-center gap-2.5 rounded-full border border-[var(--line-soft)] bg-[rgba(255,255,255,0.04)] pl-1 pr-3 text-sm transition-[background-color,border-color,box-shadow] duration-150 hover:border-[rgba(88,116,255,0.3)] hover:bg-[rgba(88,116,255,0.1)] hover:shadow-[0_0_0_1px_rgba(88,116,255,0.15)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring-brand)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--surface-1)]"
-              >
-                <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[linear-gradient(135deg,rgba(88,116,255,0.9),rgba(65,93,255,0.7))] text-xs font-bold text-white shadow-[0_4px_12px_rgba(65,93,255,0.3)]">
-                  {getInitials(user?.fullName)}
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between gap-4 py-4">
+          <div className="flex min-w-0 items-center gap-4">
+            <Link
+              href={ROUTES.home}
+              aria-label="EventOS home"
+              className="group flex min-w-0 items-center gap-3 rounded-2xl transition-transform duration-200 ease-out motion-safe:hover:-translate-y-px focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring-brand)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--surface-1)]"
+            >
+              <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-[var(--line-strong)] bg-[linear-gradient(135deg,rgba(88,116,255,0.96),rgba(79,70,229,0.84))] text-[var(--text-primary)] shadow-[0_16px_34px_rgba(65,93,255,0.26)] transition-[transform,box-shadow] duration-300 ease-out motion-safe:group-hover:scale-105">
+                <Sparkles className="h-5 w-5" />
+              </span>
+              <span className="grid min-w-0">
+                <span className="truncate text-sm font-semibold uppercase tracking-[0.24em] text-[var(--accent-primary-strong)]">
+                  EventOS
                 </span>
-                <span className="max-w-[120px] truncate font-medium text-[var(--text-primary)]">
-                  {user?.fullName?.split(" ")[0] || "Account"}
+                <span className="truncate text-sm text-[var(--text-secondary)]">
+                  Microservice event delivery
                 </span>
-                <span className="rounded-full border border-[rgba(255,255,255,0.1)] bg-[rgba(255,255,255,0.06)] px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-[var(--text-muted)]">
-                  {user?.role || "user"}
-                </span>
-              </Link>
+              </span>
+            </Link>
 
-              {/* Sign out */}
-              <button
-                type="button"
-                onClick={handleLogout}
-                aria-label="Sign out"
-                title="Sign out"
-                className="flex h-9 w-9 items-center justify-center rounded-full border border-[var(--line-soft)] bg-[rgba(255,255,255,0.04)] text-[var(--text-muted)] transition-[background-color,border-color,color] duration-150 hover:border-[rgba(251,113,133,0.3)] hover:bg-[rgba(251,113,133,0.08)] hover:text-[var(--status-danger)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring-brand)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--surface-1)]"
-              >
-                <LogOut className="h-4 w-4" />
-              </button>
-            </>
-          ) : (
-            <>
-              <Link href={ROUTES.login}>
-                <Button variant="ghost" className="min-w-[96px]">Sign in</Button>
-              </Link>
-              <Link href={ROUTES.register}>
-                <Button className="min-w-[96px]">Get started</Button>
-              </Link>
-            </>
-          )}
+            <div className="hidden xl:flex xl:flex-wrap xl:gap-2">
+              <MetaChip label="Surface" value={surfaceLabel} />
+              <MetaChip label="Current section" value={currentSection} />
+            </div>
+          </div>
+
+          <nav aria-label="Primary navigation" className="hidden items-center gap-2 lg:flex">
+            {visibleNavItems.map((item) => {
+              const active = pathname === item.href || pathname.startsWith(`${item.href}/`);
+
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  aria-current={active ? "page" : undefined}
+                  className={cn(
+                    "rounded-full border px-4 py-2 text-sm font-medium transition-[transform,box-shadow,border-color,background-color,color] duration-200 ease-out motion-safe:hover:-translate-y-px active:translate-y-0 active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring-brand)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--surface-1)]",
+                    active
+                      ? "border-[rgba(88,116,255,0.42)] bg-[linear-gradient(135deg,rgba(88,116,255,0.28),rgba(65,93,255,0.12))] text-[var(--text-primary)] shadow-[0_14px_28px_rgba(65,93,255,0.2)]"
+                      : "border-[var(--line-soft)] bg-[rgba(16,26,45,0.72)] text-[var(--text-secondary)] hover:border-[var(--line-strong)] hover:bg-[rgba(20,32,52,0.82)] hover:text-[var(--text-primary)]"
+                  )}
+                >
+                  {item.label}
+                </Link>
+              );
+            })}
+          </nav>
+
+          <div className="hidden items-center gap-2 lg:flex">
+            {isAuthenticated ? (
+              <>
+                <div className="hidden rounded-full border border-[var(--line-soft)] bg-[rgba(17,25,39,0.82)] px-4 py-2 text-sm text-[var(--text-secondary)] shadow-[0_10px_24px_rgba(0,0,0,0.18)] xl:block">
+                  <span className="font-medium text-[var(--text-primary)]">{user?.fullName || "Signed in"}</span>
+                  <span className="ml-2 text-[var(--text-muted)]">{user?.role || "Member"}</span>
+                </div>
+                <Button variant="ghost" onClick={handleLogout}>
+                  <LogOut className="mr-2 h-4 w-4" />
+                  Sign out
+                </Button>
+              </>
+            ) : (
+              <>
+                <Link
+                  href={ROUTES.register}
+                  className="text-sm font-medium text-[var(--text-secondary)] transition hover:text-[var(--text-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring-brand)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--surface-1)]"
+                >
+                  Create account
+                </Link>
+                <Link href={ROUTES.login}>
+                  <Button>Sign in</Button>
+                </Link>
+              </>
+            )}
+          </div>
+
+          <button
+            type="button"
+            className="inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-[var(--line-soft)] bg-[rgba(16,26,45,0.92)] text-[var(--text-primary)] shadow-[0_10px_24px_rgba(0,0,0,0.22)] transition-[transform,box-shadow,border-color,background-color] duration-200 ease-out active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring-brand)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--surface-1)] lg:hidden"
+            onClick={() => setOpen((value) => !value)}
+            aria-label={open ? "Close navigation" : "Open navigation"}
+            aria-expanded={open}
+            aria-controls="mobile-navigation"
+          >
+            {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+          </button>
         </div>
-
-        {/* Mobile menu toggle */}
-        <button
-          type="button"
-          className="flex h-9 w-9 items-center justify-center rounded-xl border border-[var(--line-soft)] bg-[rgba(255,255,255,0.04)] text-[var(--text-primary)] transition-[background-color,border-color] duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring-brand)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--surface-1)] lg:hidden"
-          onClick={() => setOpen((v) => !v)}
-          aria-label={open ? "Close navigation" : "Open navigation"}
-          aria-expanded={open}
-          aria-controls="mobile-navigation"
-        >
-          {open ? <X className="h-4.5 w-4.5" /> : <Menu className="h-4.5 w-4.5" />}
-        </button>
       </div>
 
-      {/* Mobile menu */}
       {open ? (
         <div
           id="mobile-navigation"
-          className="border-t border-[var(--line-soft)] bg-[rgba(7,12,22,0.98)] px-4 pb-5 pt-4 shadow-[0_24px_60px_rgba(0,0,0,0.4)] backdrop-blur-xl lg:hidden"
+          className="border-t border-[var(--line-soft)] bg-[linear-gradient(180deg,rgba(11,18,32,0.98),rgba(7,12,22,0.98))] px-4 py-4 shadow-[0_24px_60px_rgba(0,0,0,0.42)] lg:hidden"
         >
-          <div className="mx-auto grid max-w-7xl gap-3 sm:px-2">
+          <div className="mx-auto grid max-w-7xl gap-4 sm:px-2">
+            <div className="grid gap-2 rounded-3xl border border-[var(--line-soft)] bg-[rgba(16,26,45,0.92)] px-4 py-3 shadow-[0_16px_36px_rgba(0,0,0,0.26)]">
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--accent-primary-strong)]">
+                Current section
+              </p>
+              <p className="text-sm font-medium text-[var(--text-primary)]">{currentSection}</p>
+              <p className="font-[family:var(--font-mono)] text-[11px] uppercase tracking-[0.18em] text-[var(--text-muted)]">
+                {surfaceLabel}
+              </p>
+            </div>
 
-            {/* Profile row (authenticated) */}
-            {isAuthenticated ? (
-              <Link
-                href={ROUTES.profile}
-                onClick={() => setOpen(false)}
-                className="flex items-center gap-3 rounded-2xl border border-[var(--line-soft)] bg-[rgba(255,255,255,0.04)] px-4 py-3 transition-[background-color,border-color] duration-150 hover:border-[rgba(88,116,255,0.3)] hover:bg-[rgba(88,116,255,0.08)]"
-              >
-                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[linear-gradient(135deg,rgba(88,116,255,0.9),rgba(65,93,255,0.7))] text-sm font-bold text-white shadow-[0_4px_12px_rgba(65,93,255,0.28)]">
-                  {getInitials(user?.fullName)}
-                </span>
-                <div className="grid gap-0.5">
-                  <p className="text-sm font-semibold text-[var(--text-primary)]">{user?.fullName || "Account"}</p>
-                  <p className="text-xs text-[var(--text-muted)] capitalize">{user?.role?.toLowerCase() || "member"} · {user?.email || ""}</p>
-                </div>
-                <User className="ml-auto h-4 w-4 shrink-0 text-[var(--text-muted)]" />
-              </Link>
-            ) : null}
-
-            {/* Nav links */}
-            <nav aria-label="Mobile navigation" className="grid gap-1">
+            <nav aria-label="Mobile navigation" className="grid gap-2">
+              {isAuthenticated ? (
+                <p className="px-1 text-xs font-semibold uppercase tracking-[0.2em] text-[var(--text-muted)]">
+                  Workspace
+                </p>
+              ) : null}
               {visibleNavItems.map((item) => {
                 const active = pathname === item.href || pathname.startsWith(`${item.href}/`);
+
                 return (
                   <Link
                     key={item.href}
@@ -222,10 +243,10 @@ export function Navbar() {
                     onClick={() => setOpen(false)}
                     aria-current={active ? "page" : undefined}
                     className={cn(
-                      "rounded-2xl px-4 py-3 text-sm font-medium transition-[background-color,color] duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring-brand)]",
+                      "rounded-3xl border px-4 py-3 text-sm font-medium transition-[transform,box-shadow,border-color,background-color,color] duration-200 ease-out motion-safe:hover:-translate-y-px active:translate-y-0 active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring-brand)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--surface-1)]",
                       active
-                        ? "bg-[rgba(88,116,255,0.18)] text-[var(--text-primary)] shadow-[inset_0_0_0_1px_rgba(88,116,255,0.28)]"
-                        : "text-[var(--text-secondary)] hover:bg-[rgba(255,255,255,0.05)] hover:text-[var(--text-primary)]"
+                        ? "border-[rgba(88,116,255,0.4)] bg-[linear-gradient(135deg,rgba(88,116,255,0.3),rgba(65,93,255,0.12))] text-[var(--text-primary)] shadow-[0_14px_28px_rgba(65,93,255,0.2)]"
+                        : "border-[var(--line-soft)] bg-[rgba(16,26,45,0.8)] text-[var(--text-secondary)] hover:bg-[rgba(22,36,58,0.92)] hover:text-[var(--text-primary)]"
                     )}
                   >
                     {item.label}
@@ -234,26 +255,31 @@ export function Navbar() {
               })}
             </nav>
 
-            {/* Bottom actions */}
-            <div className="grid gap-2 border-t border-[var(--line-soft)] pt-3">
+            <div className="mt-3 grid gap-2 border-t border-[var(--line-soft)] pt-3">
               {isAuthenticated ? (
-                <button
-                  type="button"
-                  onClick={handleLogout}
-                  className="flex w-full items-center gap-2 rounded-2xl border border-[rgba(251,113,133,0.18)] bg-[rgba(251,113,133,0.06)] px-4 py-3 text-sm font-medium text-[var(--status-danger)] transition-[background-color,border-color] duration-150 hover:border-[rgba(251,113,133,0.3)] hover:bg-[rgba(251,113,133,0.12)]"
-                >
-                  <LogOut className="h-4 w-4" />
-                  Sign out
-                </button>
+                <>
+                  <div className="rounded-3xl border border-[var(--line-soft)] bg-[rgba(16,26,45,0.92)] px-4 py-3 text-sm text-[var(--text-secondary)] shadow-[0_16px_36px_rgba(0,0,0,0.24)]">
+                    <p className="font-medium text-[var(--text-primary)]">{user?.fullName || "Signed in"}</p>
+                    <p className="text-[var(--text-muted)]">{user?.role || "Member"}</p>
+                  </div>
+                  <Button variant="ghost" className="w-full" onClick={handleLogout}>
+                    <LogOut className="mr-2 h-4 w-4" />
+                    Sign out
+                  </Button>
+                </>
               ) : (
-                <div className="grid grid-cols-2 gap-2">
+                <>
+                  <Link
+                    href={ROUTES.register}
+                    onClick={() => setOpen(false)}
+                    className="rounded-3xl border border-[var(--line-soft)] bg-[rgba(16,26,45,0.8)] px-4 py-3 text-sm font-medium text-[var(--text-secondary)] transition-[transform,box-shadow,border-color,background-color,color] duration-200 ease-out motion-safe:hover:-translate-y-px hover:bg-[rgba(22,36,58,0.92)] hover:text-[var(--text-primary)] active:translate-y-0 active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring-brand)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--surface-1)]"
+                  >
+                    Create account
+                  </Link>
                   <Link href={ROUTES.login} onClick={() => setOpen(false)}>
-                    <Button variant="ghost" className="w-full">Sign in</Button>
+                    <Button className="w-full">Sign in</Button>
                   </Link>
-                  <Link href={ROUTES.register} onClick={() => setOpen(false)}>
-                    <Button className="w-full">Get started</Button>
-                  </Link>
-                </div>
+                </>
               )}
             </div>
           </div>

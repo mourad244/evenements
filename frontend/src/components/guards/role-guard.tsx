@@ -21,7 +21,7 @@ export function RoleGuard({ user, allowedRoles, children }: RoleGuardProps) {
 
   useEffect(() => {
     if (user && !allowed) {
-      router.replace(ROUTES.dashboard);
+      router.replace(ROUTES.accessDenied);
     }
   }, [allowed, router, user]);
 

@@ -12,15 +12,14 @@ export const SERVICE_URLS = {
 export const ENDPOINTS = {
   auth: {
     login: "/api/auth/login",
-    register: "/api/auth/register",
     refresh: "/api/auth/refresh",
+    register: "/api/auth/register",
     me: "/api/auth/me",
     forgotPassword: "/api/auth/forgot-password",
     resetPassword: "/api/auth/reset-password"
   },
   admin: {
-    users: "/api/admin/users",
-    events: "/api/admin/events"
+    users: "/api/admin/users"
   },
   events: {
     list: "/api/catalog/events",
@@ -39,20 +38,7 @@ export const ENDPOINTS = {
     organizerEventRegistrationsExport: (eventId: string) =>
       `/api/organizer/events/${eventId}/registrations/export`
   },
-  notifications: {
-    list: "/api/notifications",
-    markRead: (notificationId: string) =>
-      `/api/notifications/${notificationId}/read`
-  },
   tickets: {
-    get: (ticketId: string) => `/api/tickets/${ticketId}`
-  },
-  payments: {
-    session: "/api/payments/session",
-    webhook: "/api/payments/webhook"
-  },
-  profile: {
-    get: "/api/profile",
-    update: "/api/profile"
+    download: (ticketId: string) => `/api/tickets/${encodeURIComponent(ticketId)}/download`
   }
 } as const;

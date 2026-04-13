@@ -9,7 +9,6 @@ import { RoleGuard } from "@/components/guards/role-guard";
 import { PageTitle } from "@/components/shared/page-title";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Select } from "@/components/ui/select";
 import { useCurrentUser } from "@/features/auth/hooks/use-current-user";
 import { RegistrationList } from "@/features/registrations/components/registration-list";
 import { useMyRegistrationsQuery } from "@/features/registrations/hooks/use-my-registrations-query";
@@ -20,7 +19,6 @@ import type {
 } from "@/features/registrations/types/registration.types";
 import { ROUTES } from "@/lib/constants/routes";
 import { formatDate } from "@/lib/utils/format-date";
-import { normalizePositiveInt } from "@/lib/utils/normalize-positive-int";
 
 const STATUS_OPTIONS: RegistrationStatusFilter[] = [
   "ALL",
@@ -31,6 +29,11 @@ const STATUS_OPTIONS: RegistrationStatusFilter[] = [
 ];
 
 const PAGE_SIZE_OPTIONS = [10, 20, 50];
+
+function normalizePositiveInt(value: string | null, fallback: number) {
+  const parsed = Number.parseInt(String(value || ""), 10);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
+}
 
 function normalizeStatus(value: string | null): RegistrationStatusFilter {
   const candidate = String(value || "ALL").toUpperCase() as RegistrationStatusFilter;
@@ -220,25 +223,31 @@ export default function MyRegistrationsPage() {
                       : "border-[var(--line-soft)] bg-[rgba(16,26,45,0.82)] text-[var(--text-secondary)] hover:bg-[rgba(22,36,58,0.92)] hover:text-[var(--text-primary)]"
                   }`}
                 >
-                  {option === "ALL" ? "All statuses" : option.charAt(0) + option.slice(1).toLowerCase()}
+                  {option === "ALL" ? "All statuses" : option}
                 </button>
               ))}
             </fieldset>
 
-            <Select
-              label="Page size"
-              value={String(pageSize)}
-              onChange={(event) =>
-                updateSearchParams({ pageSize: event.target.value, page: "1" })
-              }
-              className="sm:max-w-[220px] lg:max-w-none"
+            <label
+              className="grid gap-2 text-sm text-[var(--text-secondary)] sm:max-w-[220px] lg:max-w-none"
+              htmlFor="registrations-page-size"
             >
-              {PAGE_SIZE_OPTIONS.map((option) => (
-                <option key={option} value={option}>
-                  {option} per page
-                </option>
-              ))}
-            </Select>
+              Page size
+              <select
+                id="registrations-page-size"
+                value={String(pageSize)}
+                onChange={(event) =>
+                  updateSearchParams({ pageSize: event.target.value, page: "1" })
+                }
+                className="rounded-[22px] border border-[var(--line-soft)] bg-[linear-gradient(180deg,rgba(16,26,45,0.96),rgba(10,17,30,0.98))] px-4 py-3 text-sm text-[var(--text-primary)] outline-none focus-visible:border-[rgba(88,116,255,0.38)] focus-visible:ring-2 focus-visible:ring-[var(--ring-brand)]"
+              >
+                {PAGE_SIZE_OPTIONS.map((option) => (
+                  <option key={option} value={option}>
+                    {option} per page
+                  </option>
+                ))}
+              </select>
+            </label>
           </div>
         </Card>
 
@@ -310,14 +319,6 @@ export default function MyRegistrationsPage() {
               </div>
               <div className="flex flex-col gap-3 sm:flex-row">
                 <Button
-                  variant="ghost"
-                  onClick={() => updateSearchParams({ page: String(Math.max(1, pagination.page - 1)) })}
-                  disabled={pagination.page <= 1}
-                  className="w-full sm:w-auto"
-                >
-                  Previous
-                </Button>
-                <Button
                   onClick={() =>
                     updateSearchParams({
                       page: String(Math.min(pagination.totalPages, pagination.page + 1))
@@ -327,6 +328,14 @@ export default function MyRegistrationsPage() {
                   className="w-full sm:w-auto"
                 >
                   Next
+                </Button>
+                <Button
+                  variant="ghost"
+                  onClick={() => updateSearchParams({ page: String(Math.max(1, pagination.page - 1)) })}
+                  disabled={pagination.page <= 1}
+                  className="w-full sm:w-auto"
+                >
+                  Previous
                 </Button>
               </div>
             </Card>

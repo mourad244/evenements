@@ -1,0 +1,20 @@
+{
+  "id": "CONTRIBUTING",
+  "title": "Guide de Contribution - Projet Evenements",
+  "description": "Public cible: equipe produit, architecte, dev backend, dev frontend, ops",
+  "source": "@site/../../docs/CONTRIBUTING.md",
+  "sourceDirName": ".",
+  "slug": "/CONTRIBUTING",
+  "permalink": "/reference/CONTRIBUTING",
+  "draft": false,
+  "unlisted": false,
+  "editUrl": "https://github.com/mourad244/evenements/tree/main/../../docs/CONTRIBUTING.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {},
+  "sidebar": "referenceSidebar",
+  "next": {
+    "title": "Index de documentation",
+    "permalink": "/reference/navigation"
+  }
+}

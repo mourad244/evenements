@@ -19,11 +19,15 @@ export default function HomePage() {
             <span className="portal-section__eyebrow">Developer portal</span>
             <h1>Documentation Evenements en mode portal visuel</h1>
             <p>
-              Une entree unique pour l&apos;architecture, les contrats API, les backlogs,
-              les sprints, les specs services et les workflows du projet microservices
-              Evenements.
+              Une entree unique pour les livrables techniques du sujet Evenements:
+              base de donnees, maquettes UI, backlog, architecture, API docs,
+              application, securite, guide dev et tests, sans perdre la verite
+              technique du repo microservices.
             </p>
             <div className="portal-hero__actions">
+              <Link className="button button--primary button--lg" to="/livrables">
+                Ouvrir les livrables
+              </Link>
               <Link className="button button--primary button--lg" to="/architecture">
                 Explorer l&apos;architecture
               </Link>

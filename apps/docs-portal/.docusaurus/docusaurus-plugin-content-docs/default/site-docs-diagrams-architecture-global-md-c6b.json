@@ -1,0 +1,54 @@
+{
+  "id": "diagrams/architecture_global",
+  "title": "Diagramme architecture globale",
+  "description": "Rendu Mermaid de l'architecture globale P1-P4 du projet Evenements.",
+  "source": "@site/../../docs/diagrams/architecture_global.md",
+  "sourceDirName": "diagrams",
+  "slug": "/diagrams/architecture-global",
+  "permalink": "/reference/diagrams/architecture-global",
+  "draft": false,
+  "unlisted": false,
+  "editUrl": "https://github.com/mourad244/evenements/tree/main/../../docs/diagrams/architecture_global.md",
+  "tags": [
+    {
+      "inline": true,
+      "label": "diagram",
+      "permalink": "/reference/tags/diagram"
+    },
+    {
+      "inline": true,
+      "label": "architecture",
+      "permalink": "/reference/tags/architecture"
+    },
+    {
+      "inline": true,
+      "label": "mermaid",
+      "permalink": "/reference/tags/mermaid"
+    }
+  ],
+  "version": "current",
+  "frontMatter": {
+    "title": "Diagramme architecture globale",
+    "description": "Rendu Mermaid de l'architecture globale P1-P4 du projet Evenements.",
+    "docKind": "diagram",
+    "domain": "architecture",
+    "phase": "P1-P4",
+    "owner": "Ibrahim",
+    "status": "DONE",
+    "tags": [
+      "diagram",
+      "architecture",
+      "mermaid"
+    ],
+    "slug": "architecture-global"
+  },
+  "sidebar": "referenceSidebar",
+  "previous": {
+    "title": "Index des diagrammes",
+    "permalink": "/reference/diagrams/readme"
+  },
+  "next": {
+    "title": "Diagramme publication evenement",
+    "permalink": "/reference/diagrams/event-publication-flow"
+  }
+}

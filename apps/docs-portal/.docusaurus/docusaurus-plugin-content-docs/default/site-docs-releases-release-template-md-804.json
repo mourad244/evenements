@@ -1,0 +1,24 @@
+{
+  "id": "releases/release_TEMPLATE",
+  "title": "Release - YYYY-MM-DD",
+  "description": "Meta",
+  "source": "@site/../../docs/releases/release_TEMPLATE.md",
+  "sourceDirName": "releases",
+  "slug": "/releases/release_TEMPLATE",
+  "permalink": "/reference/releases/release_TEMPLATE",
+  "draft": false,
+  "unlisted": false,
+  "editUrl": "https://github.com/mourad244/evenements/tree/main/../../docs/releases/release_TEMPLATE.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {},
+  "sidebar": "referenceSidebar",
+  "previous": {
+    "title": "Repartition des taches - Mourad & Ibrahim",
+    "permalink": "/reference/planning/team_work_split"
+  },
+  "next": {
+    "title": "Spec Catalog Search Service",
+    "permalink": "/reference/services/catalog-search-service"
+  }
+}

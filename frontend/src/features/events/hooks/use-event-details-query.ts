@@ -13,7 +13,6 @@ export function useEventDetailsQuery(
   return useQuery({
     queryKey: ["event", eventId],
     queryFn: () => getEventById(eventId),
-    enabled: Boolean(eventId),
-    staleTime: 2 * 60 * 1000
+    enabled: Boolean(eventId)
   });
 }

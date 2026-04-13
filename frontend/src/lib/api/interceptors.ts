@@ -1,103 +1,124 @@
-import axios, { type AxiosInstance, type InternalAxiosRequestConfig } from "axios";
+import axios from "axios";
+import type {
+  AxiosError,
+  AxiosInstance,
+  InternalAxiosRequestConfig
+} from "axios";
 
-import { clearSession, markSessionExpired } from "@/features/auth/utils/auth-storage";
-import { getRefreshToken } from "@/lib/auth/get-refresh-token";
 import { getToken } from "@/lib/auth/get-token";
-import { setRefreshToken } from "@/lib/auth/set-refresh-token";
-import { setToken } from "@/lib/auth/set-token";
 import { ROUTES } from "@/lib/constants/routes";
-
+import {
+  clearSession,
+  clearSessionExpired,
+  getRefreshToken,
+  markSessionExpired,
+  persistSession
+} from "@/features/auth/utils/auth-storage";
 import { ENDPOINTS, SERVICE_URLS } from "./endpoints";
 
-// Shared promise so concurrent 401s don't each trigger a separate refresh call
-let refreshingPromise: Promise<string | null> | null = null;
+type RetryableRequestConfig = InternalAxiosRequestConfig & {
+  _retry?: boolean;
+  _skipAuthRefresh?: boolean;
+};
 
-async function attemptTokenRefresh(): Promise<string | null> {
-  const refreshToken = getRefreshToken();
-  if (!refreshToken) return null;
+let refreshPromise: Promise<string | null> | null = null;
 
-  try {
-    const response = await axios.post(
-      `${SERVICE_URLS.gateway}${ENDPOINTS.auth.refresh}`,
-      { refreshToken }
-    );
-    const data = response.data?.data || response.data;
-    const newAccessToken = String(data.accessToken || "");
-    const newRefreshToken = data.refreshToken ? String(data.refreshToken) : undefined;
+function redirectToSessionExpired() {
+  if (typeof window === "undefined") {
+    return;
+  }
 
-    if (!newAccessToken) return null;
+  const publicAuthRoutes = new Set<string>([
+    ROUTES.login,
+    ROUTES.register,
+    ROUTES.forgotPassword,
+    ROUTES.resetPassword,
+    ROUTES.sessionExpired
+  ]);
 
-    setToken(newAccessToken);
-    if (newRefreshToken) setRefreshToken(newRefreshToken);
-    return newAccessToken;
-  } catch {
-    return null;
+  if (!publicAuthRoutes.has(window.location.pathname)) {
+    window.location.assign(ROUTES.sessionExpired);
   }
 }
 
-function forceLogout() {
+function expireSession() {
   clearSession();
   markSessionExpired();
+  redirectToSessionExpired();
+}
 
-  if (typeof window !== "undefined") {
-    const publicRoutes = new Set<string>([
-      ROUTES.login,
-      ROUTES.register,
-      ROUTES.forgotPassword,
-      ROUTES.resetPassword,
-      ROUTES.sessionExpired
-    ]);
-
-    if (!publicRoutes.has(window.location.pathname)) {
-      window.location.assign(ROUTES.sessionExpired);
-    }
+async function refreshAccessToken() {
+  const refreshToken = getRefreshToken();
+  if (!refreshToken) {
+    return null;
   }
+
+  if (!refreshPromise) {
+    refreshPromise = axios
+      .post(`${SERVICE_URLS.gateway}${ENDPOINTS.auth.refresh}`, {
+        refreshToken
+      })
+      .then((response) => {
+        const payload = response.data?.data || response.data || {};
+        const accessToken = String(payload.accessToken || "").trim();
+        const nextRefreshToken = String(payload.refreshToken || refreshToken).trim();
+
+        if (!accessToken) {
+          expireSession();
+          return null;
+        }
+
+        persistSession({
+          accessToken,
+          refreshToken: nextRefreshToken || refreshToken
+        });
+        clearSessionExpired();
+        return accessToken;
+      })
+      .catch(() => {
+        expireSession();
+        return null;
+      })
+      .finally(() => {
+        refreshPromise = null;
+      });
+  }
+
+  return refreshPromise;
 }
 
 export function attachInterceptors(client: AxiosInstance) {
-  // Attach Bearer token to every outgoing request
   client.interceptors.request.use((config) => {
+    const requestConfig = config as RetryableRequestConfig;
     const token = getToken();
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
+    if (token && !requestConfig._skipAuthRefresh) {
+      requestConfig.headers = requestConfig.headers || {};
+      requestConfig.headers.Authorization = `Bearer ${token}`;
     }
-    return config;
+    return requestConfig;
   });
 
-  // On 401: attempt a single token refresh, then retry; on second failure force logout
   client.interceptors.response.use(
     (response) => response,
-    async (error) => {
-      const originalRequest = error.config as InternalAxiosRequestConfig & {
-        _retried?: boolean;
-      };
-
-      if (
-        error?.response?.status === 401 &&
-        getToken() &&
-        !originalRequest._retried
-      ) {
-        originalRequest._retried = true;
-
-        // Serialise concurrent refresh attempts into one network call
-        if (!refreshingPromise) {
-          refreshingPromise = attemptTokenRefresh().finally(() => {
-            refreshingPromise = null;
-          });
+    async (error: AxiosError) => {
+      const requestConfig = (error.config || {}) as RetryableRequestConfig;
+      const token = getToken();
+      if (error?.response?.status === 401 && token) {
+        if (requestConfig._retry || requestConfig._skipAuthRefresh) {
+          expireSession();
+          return Promise.reject(error);
         }
 
-        const newToken = await refreshingPromise;
-
-        if (newToken) {
-          // Patch the Authorization header and replay the original request
-          originalRequest.headers.Authorization = `Bearer ${newToken}`;
-          return client(originalRequest);
+        const nextAccessToken = await refreshAccessToken();
+        if (nextAccessToken) {
+          requestConfig._retry = true;
+          requestConfig.headers = requestConfig.headers || {};
+          requestConfig.headers.Authorization = `Bearer ${nextAccessToken}`;
+          return client(requestConfig);
         }
 
-        // Refresh failed — end the session
-        forceLogout();
+        expireSession();
       }
-
       return Promise.reject(error);
     }
   );

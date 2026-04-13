@@ -1,0 +1,54 @@
+{
+  "id": "ideas/README",
+  "title": "Idees produit et techniques",
+  "description": "Parking lot pour idees futures a transformer en backlog ou en sprint.",
+  "source": "@site/../../docs/ideas/README.md",
+  "sourceDirName": "ideas",
+  "slug": "/ideas/ideas",
+  "permalink": "/reference/ideas/ideas",
+  "draft": false,
+  "unlisted": false,
+  "editUrl": "https://github.com/mourad244/evenements/tree/main/../../docs/ideas/README.md",
+  "tags": [
+    {
+      "inline": true,
+      "label": "ideas",
+      "permalink": "/reference/tags/ideas"
+    },
+    {
+      "inline": true,
+      "label": "product",
+      "permalink": "/reference/tags/product"
+    },
+    {
+      "inline": true,
+      "label": "future",
+      "permalink": "/reference/tags/future"
+    }
+  ],
+  "version": "current",
+  "frontMatter": {
+    "title": "Idees produit et techniques",
+    "description": "Parking lot pour idees futures a transformer en backlog ou en sprint.",
+    "docKind": "idea",
+    "domain": "ideas",
+    "phase": "P2-P5",
+    "owner": "Mourad",
+    "status": "TODO",
+    "tags": [
+      "ideas",
+      "product",
+      "future"
+    ],
+    "slug": "ideas"
+  },
+  "sidebar": "referenceSidebar",
+  "previous": {
+    "title": "Diagramme registration waitlist",
+    "permalink": "/reference/diagrams/registration-waitlist-flow"
+  },
+  "next": {
+    "title": "Perimetre MVP et architecture cible",
+    "permalink": "/reference/mvp-scope"
+  }
+}

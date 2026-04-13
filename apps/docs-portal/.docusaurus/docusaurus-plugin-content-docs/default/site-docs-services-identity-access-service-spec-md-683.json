@@ -1,0 +1,55 @@
+{
+  "id": "services/identity-access-service-spec",
+  "title": "Spec Identity Access Service",
+  "description": "Specification backend du service Identity & Access pour le MVP P1.",
+  "source": "@site/../../docs/services/identity-access-service-spec.md",
+  "sourceDirName": "services",
+  "slug": "/services/identity-access-service",
+  "permalink": "/reference/services/identity-access-service",
+  "draft": false,
+  "unlisted": false,
+  "editUrl": "https://github.com/mourad244/evenements/tree/main/../../docs/services/identity-access-service-spec.md",
+  "tags": [
+    {
+      "inline": true,
+      "label": "spec",
+      "permalink": "/reference/tags/spec"
+    },
+    {
+      "inline": true,
+      "label": "auth",
+      "permalink": "/reference/tags/auth"
+    },
+    {
+      "inline": true,
+      "label": "users",
+      "permalink": "/reference/tags/users"
+    }
+  ],
+  "version": "current",
+  "frontMatter": {
+    "title": "Spec Identity Access Service",
+    "description": "Specification backend du service Identity & Access pour le MVP P1.",
+    "docKind": "spec",
+    "domain": "identity-access",
+    "phase": "P1",
+    "owner": "Mourad",
+    "status": "DONE",
+    "priority": "P0",
+    "tags": [
+      "spec",
+      "auth",
+      "users"
+    ],
+    "slug": "identity-access-service"
+  },
+  "sidebar": "referenceSidebar",
+  "previous": {
+    "title": "Spec Event Management Service",
+    "permalink": "/reference/services/event-management-service"
+  },
+  "next": {
+    "title": "Spec Registration Service",
+    "permalink": "/reference/services/registration-service"
+  }
+}

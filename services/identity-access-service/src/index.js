@@ -41,15 +41,10 @@ function resolveJwtSecret(envKey, fallbackValue) {
   const configured = String(process.env[envKey] || "").trim();
   if (configured) {
     if (configured.length < 32) {
-      if (process.env.ALLOW_INSECURE_JWT_DEFAULTS === "true") {
-        log("warn", "auth.jwt.secret.weak", {
-          envKey,
-          length: configured.length,
-          message: "Weak secret allowed by ALLOW_INSECURE_JWT_DEFAULTS."
-        });
-        return configured;
-      }
-      throw new Error(`${envKey} must be at least 32 characters`);
+      log("warn", "auth.jwt.secret.weak", {
+        envKey,
+        length: configured.length
+      });
     }
     return configured;
   }
@@ -62,7 +57,16 @@ function resolveJwtSecret(envKey, fallbackValue) {
     return fallbackValue;
   }
 
-  throw new Error(`${envKey} is required (set env or allow insecure defaults)`);
+  if (String(process.env.NODE_ENV || "").toLowerCase() === "production") {
+    throw new Error(`${envKey} is required in production`);
+  }
+
+  const generated = crypto.randomBytes(32).toString("hex");
+  log("warn", "auth.jwt.secret.generated", {
+    envKey,
+    message: "Generated ephemeral secret; set env for stable sessions."
+  });
+  return generated;
 }
 
 config.jwtAccessSecret = resolveJwtSecret(
@@ -76,7 +80,6 @@ config.jwtRefreshSecret = resolveJwtSecret(
 
 const allowedSelfServiceRoles = new Set(["PARTICIPANT", "ORGANIZER"]);
 const activeAccountStatuses = new Set(["ACTIVE"]);
-const allowedProfileRoles = new Set(["PARTICIPANT", "ORGANIZER", "ADMIN"]);
 
 const pool = new Pool({
   connectionString: config.databaseUrl
@@ -109,18 +112,13 @@ function nowIso() {
 }
 
 function toUserView(user) {
-  const displayName = user.displayName || user.fullName || "";
-  const fullName = user.fullName || user.displayName || "";
   return {
     id: user.userId,
     userId: user.userId,
     email: user.email,
-    name: displayName || fullName,
-    fullName,
-    displayName,
-    phone: user.phone || null,
-    city: user.city || null,
-    bio: user.bio || null,
+    name: user.displayName,
+    fullName: user.displayName,
+    displayName: user.displayName,
     role: user.role,
     accountStatus: user.accountStatus,
     createdAt: user.createdAt || null,
@@ -187,35 +185,6 @@ function resolveRequestIp(req) {
 
 function resolveRequestUserAgent(req) {
   return String(req.header("user-agent") || "").trim() || null;
-}
-
-async function requireActiveSession(req, res) {
-  const userId = String(req.header("x-user-id") || "").trim();
-  const role = String(req.header("x-user-role") || "").trim().toUpperCase();
-  const sessionId = String(req.header("x-session-id") || "").trim();
-  const correlationId = req.correlationId || null;
-
-  if (!userId || !role || !sessionId) {
-    res.status(401).json(error("Missing auth context", "MISSING_AUTH_CONTEXT"));
-    return null;
-  }
-
-  const session = await repository.findSessionById(sessionId);
-  if (!session || session.userId !== userId || session.revokedAt) {
-    res.status(401).json(error("Session is not active", "SESSION_INVALID"));
-    return null;
-  }
-  if (hasExpired(session.expiresAt)) {
-    res.status(401).json(error("Session expired", "SESSION_EXPIRED"));
-    return null;
-  }
-
-  return {
-    userId,
-    role,
-    sessionId,
-    correlationId
-  };
 }
 
 async function writeSecurityAudit(req, auditFields) {
@@ -305,10 +274,6 @@ app.post("/auth/register", async (req, res) => {
     email,
     passwordHash,
     displayName,
-    fullName: displayName,
-    phone: null,
-    city: null,
-    bio: null,
     role,
     accountStatus: "ACTIVE",
     createdAt: nowIso(),
@@ -728,99 +693,6 @@ app.post("/auth/reset-password", async (req, res) => {
       .status(500)
       .json(error("Could not reset password", "RESET_FAILED"));
   }
-});
-
-app.get("/profile", async (req, res) => {
-  const context = await requireActiveSession(req, res);
-  if (!context) return;
-  if (!allowedProfileRoles.has(context.role)) {
-    return res.status(403).json(error("Forbidden", "FORBIDDEN"));
-  }
-
-  const user = await repository.findUserById(context.userId);
-  if (!user) {
-    return res.status(404).json(error("User not found", "USER_NOT_FOUND"));
-  }
-
-  return res.status(200).json(success(toUserView(user)));
-});
-
-app.patch("/profile", async (req, res) => {
-  const context = await requireActiveSession(req, res);
-  if (!context) return;
-  if (!allowedProfileRoles.has(context.role)) {
-    return res.status(403).json(error("Forbidden", "FORBIDDEN"));
-  }
-
-  const details = [];
-  const updates = {};
-
-  if (Object.prototype.hasOwnProperty.call(req.body || {}, "fullName")) {
-    const fullName = String(req.body?.fullName || "").trim();
-    if (!fullName) {
-      details.push("fullName must be a non-empty string");
-    } else {
-      updates.fullName = fullName;
-    }
-  }
-
-  if (Object.prototype.hasOwnProperty.call(req.body || {}, "displayName")) {
-    const displayName = String(req.body?.displayName || "").trim();
-    if (!displayName) {
-      details.push("displayName must be a non-empty string");
-    } else {
-      updates.displayName = displayName;
-    }
-  }
-
-  if (Object.prototype.hasOwnProperty.call(req.body || {}, "phone")) {
-    const phone = req.body?.phone;
-    updates.phone =
-      phone === null || typeof phone === "undefined"
-        ? null
-        : String(phone || "").trim() || null;
-  }
-
-  if (Object.prototype.hasOwnProperty.call(req.body || {}, "city")) {
-    const city = req.body?.city;
-    updates.city =
-      city === null || typeof city === "undefined"
-        ? null
-        : String(city || "").trim() || null;
-  }
-
-  if (Object.prototype.hasOwnProperty.call(req.body || {}, "bio")) {
-    const bio = req.body?.bio;
-    updates.bio =
-      bio === null || typeof bio === "undefined"
-        ? null
-        : String(bio || "").trim() || null;
-  }
-
-  if (details.length > 0) {
-    return res
-      .status(400)
-      .json(error("Validation failed", "VALIDATION_ERROR", details));
-  }
-
-  let updated = null;
-  if (Object.keys(updates).length > 0) {
-    updated = await repository.updateUserProfile(
-      context.userId,
-      updates,
-      nowIso()
-    );
-  }
-
-  if (!updated) {
-    const current = await repository.findUserById(context.userId);
-    if (!current) {
-      return res.status(404).json(error("User not found", "USER_NOT_FOUND"));
-    }
-    return res.status(200).json(success(toUserView(current)));
-  }
-
-  return res.status(200).json(success(toUserView(updated)));
 });
 
 app.get("/auth/me", async (req, res) => {

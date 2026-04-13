@@ -1,0 +1,54 @@
+{
+  "id": "api-contracts-p1",
+  "title": "Catalogue REST P1",
+  "description": "Routes Gateway MVP, ACL, payloads et erreurs principales par domaine.",
+  "source": "@site/../../docs/api-contracts-p1.md",
+  "sourceDirName": ".",
+  "slug": "/api-contracts-p1",
+  "permalink": "/reference/api-contracts-p1",
+  "draft": false,
+  "unlisted": false,
+  "editUrl": "https://github.com/mourad244/evenements/tree/main/../../docs/api-contracts-p1.md",
+  "tags": [
+    {
+      "inline": true,
+      "label": "api",
+      "permalink": "/reference/tags/api"
+    },
+    {
+      "inline": true,
+      "label": "gateway",
+      "permalink": "/reference/tags/gateway"
+    },
+    {
+      "inline": true,
+      "label": "rest",
+      "permalink": "/reference/tags/rest"
+    }
+  ],
+  "version": "current",
+  "frontMatter": {
+    "title": "Catalogue REST P1",
+    "description": "Routes Gateway MVP, ACL, payloads et erreurs principales par domaine.",
+    "docKind": "catalog",
+    "domain": "api",
+    "phase": "P1",
+    "owner": "Mourad",
+    "status": "DONE",
+    "tags": [
+      "api",
+      "gateway",
+      "rest"
+    ],
+    "slug": "api-contracts-p1"
+  },
+  "sidebar": "referenceSidebar",
+  "previous": {
+    "title": "Documentation projet",
+    "permalink": "/reference/overview"
+  },
+  "next": {
+    "title": "Catalogue d'evenements async P1",
+    "permalink": "/reference/async-events-p1"
+  }
+}

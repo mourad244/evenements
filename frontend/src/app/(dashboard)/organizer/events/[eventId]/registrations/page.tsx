@@ -11,16 +11,16 @@ import { ErrorState } from "@/components/ui/error-state";
 import { LoadingState } from "@/components/ui/loading-state";
 import { UnavailableState } from "@/components/ui/unavailable-state";
 import { OrganizerRegistrationsList } from "@/features/registrations/components/organizer-registrations-list";
-import { useExportOrganizerEventRegistrationsMutation } from "@/features/registrations/hooks/use-export-organizer-event-registrations-mutation";
+import { useDownloadOrganizerRegistrationsExportMutation } from "@/features/registrations/hooks/use-download-organizer-registrations-export-mutation";
 import { useOrganizerEventRegistrationsQuery } from "@/features/registrations/hooks/use-organizer-event-registrations-query";
 import { ROUTES } from "@/lib/constants/routes";
 
 export default function OrganizerEventRegistrationsPage() {
   const params = useParams<{ eventId: string }>();
+  const exportMutation = useDownloadOrganizerRegistrationsExportMutation();
   const { data, isLoading, isError, error } = useOrganizerEventRegistrationsQuery(
     params.eventId
   );
-  const exportMutation = useExportOrganizerEventRegistrationsMutation();
   const confirmedCount =
     data?.registrations.filter((registration) => registration.status === "CONFIRMED").length || 0;
   const waitlistedCount =
@@ -29,6 +29,7 @@ export default function OrganizerEventRegistrationsPage() {
     data?.registrations.filter(
       (registration) => registration.status === "CONFIRMED" && !registration.ticketRef
     ).length || 0;
+  const canExportRegistrations = Boolean(data);
 
   return (
     <div className="grid gap-10">
@@ -64,6 +65,21 @@ export default function OrganizerEventRegistrationsPage() {
           ) : null}
         </div>
         <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:flex-wrap">
+          <div className="grid gap-2 sm:min-w-[15rem]">
+            <Button
+              variant="secondary"
+              className="w-full sm:w-auto"
+              disabled={!canExportRegistrations || exportMutation.isPending}
+              onClick={() => {
+                exportMutation.mutate({ eventId: params.eventId });
+              }}
+            >
+              {exportMutation.isPending ? "Exporting..." : "Export CSV"}
+            </Button>
+            <p className="text-xs leading-5 text-[var(--text-muted)]">
+              Download the current participant list as a CSV snapshot for organizer review.
+            </p>
+          </div>
           <Link href={`/organizer/events/${params.eventId}`} className="w-full sm:w-auto">
             <Button variant="ghost" className="w-full sm:w-auto">
               Back to event
@@ -74,31 +90,24 @@ export default function OrganizerEventRegistrationsPage() {
               All organizer events
             </Button>
           </Link>
-          <Button
-            onClick={() => exportMutation.mutate(params.eventId)}
-            disabled={exportMutation.isPending}
-            className="w-full sm:w-auto"
-          >
-            {exportMutation.isPending ? "Exporting..." : "Export CSV"}
-          </Button>
         </div>
       </Card>
 
-      {exportMutation.isSuccess ? (
-        <p
-          role="status"
-          className="rounded-[22px] border border-[rgba(52,211,153,0.22)] bg-[rgba(6,78,59,0.3)] px-4 py-3 text-sm text-[var(--status-success)]"
-        >
-          CSV export started. Your download should begin automatically.
-        </p>
+      {exportMutation.isSuccess && exportMutation.data ? (
+        <Card className="border-[rgba(52,211,153,0.24)] bg-[linear-gradient(180deg,rgba(10,36,32,0.96),rgba(7,22,20,0.98))]">
+          <p role="status" className="text-sm leading-6 text-[var(--text-primary)]">
+            Registration export downloaded successfully as{" "}
+            <span className="font-semibold">{exportMutation.data.filename}</span>.
+          </p>
+        </Card>
       ) : null}
-      {exportMutation.isError ? (
-        <p
-          role="alert"
-          className="rounded-[22px] border border-[rgba(251,113,133,0.24)] bg-[rgba(127,29,29,0.26)] px-4 py-3 text-sm text-[var(--status-danger)]"
-        >
-          {exportMutation.error.message}
-        </p>
+
+      {exportMutation.error ? (
+        <Card className="border-[rgba(251,113,133,0.22)] bg-[linear-gradient(180deg,rgba(58,18,30,0.96),rgba(31,10,18,0.98))]">
+          <p role="alert" className="text-sm leading-6 text-[var(--text-primary)]">
+            {exportMutation.error.message}
+          </p>
+        </Card>
       ) : null}
 
       {data ? (

@@ -1,0 +1,55 @@
+{
+  "id": "backlogs/BackLog_payment",
+  "title": "Backlog Payment",
+  "description": "Backlog monetisation, transactions, providers et webhooks.",
+  "source": "@site/../../docs/backlogs/BackLog_payment.md",
+  "sourceDirName": "backlogs",
+  "slug": "/backlogs/payment",
+  "permalink": "/reference/backlogs/payment",
+  "draft": false,
+  "unlisted": false,
+  "editUrl": "https://github.com/mourad244/evenements/tree/main/../../docs/backlogs/BackLog_payment.md",
+  "tags": [
+    {
+      "inline": true,
+      "label": "payment",
+      "permalink": "/reference/tags/payment"
+    },
+    {
+      "inline": true,
+      "label": "webhooks",
+      "permalink": "/reference/tags/webhooks"
+    },
+    {
+      "inline": true,
+      "label": "transactions",
+      "permalink": "/reference/tags/transactions"
+    }
+  ],
+  "version": "current",
+  "frontMatter": {
+    "title": "Backlog Payment",
+    "description": "Backlog monetisation, transactions, providers et webhooks.",
+    "docKind": "backlog",
+    "domain": "payment",
+    "phase": "P4",
+    "owner": "Mourad",
+    "status": "TODO",
+    "priority": "P2",
+    "tags": [
+      "payment",
+      "webhooks",
+      "transactions"
+    ],
+    "slug": "payment"
+  },
+  "sidebar": "referenceSidebar",
+  "previous": {
+    "title": "Backlog Notification",
+    "permalink": "/reference/backlogs/notification"
+  },
+  "next": {
+    "title": "Backlog Registration & Ticketing",
+    "permalink": "/reference/backlogs/registration-ticketing"
+  }
+}

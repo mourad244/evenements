@@ -1,0 +1,55 @@
+{
+  "id": "sprints/sprint_3_admin_moderation",
+  "title": "Sprint 3 - Admin & moderation",
+  "description": "Planning du lot moderation, audit, supervision et dashboards metier.",
+  "source": "@site/../../docs/sprints/sprint_3_admin_moderation.md",
+  "sourceDirName": "sprints",
+  "slug": "/sprints/sprint-3-admin-moderation",
+  "permalink": "/reference/sprints/sprint-3-admin-moderation",
+  "draft": false,
+  "unlisted": false,
+  "editUrl": "https://github.com/mourad244/evenements/tree/main/../../docs/sprints/sprint_3_admin_moderation.md",
+  "tags": [
+    {
+      "inline": true,
+      "label": "sprint-3",
+      "permalink": "/reference/tags/sprint-3"
+    },
+    {
+      "inline": true,
+      "label": "admin",
+      "permalink": "/reference/tags/admin"
+    },
+    {
+      "inline": true,
+      "label": "moderation",
+      "permalink": "/reference/tags/moderation"
+    }
+  ],
+  "version": "current",
+  "frontMatter": {
+    "title": "Sprint 3 - Admin & moderation",
+    "description": "Planning du lot moderation, audit, supervision et dashboards metier.",
+    "docKind": "sprint",
+    "domain": "delivery",
+    "phase": "P3",
+    "owner": "Ibrahim",
+    "status": "TODO",
+    "priority": "P1",
+    "tags": [
+      "sprint-3",
+      "admin",
+      "moderation"
+    ],
+    "slug": "sprint-3-admin-moderation"
+  },
+  "sidebar": "referenceSidebar",
+  "previous": {
+    "title": "Sprint 2 - Ticketing & notifications",
+    "permalink": "/reference/sprints/sprint-2-ticketing-notifications"
+  },
+  "next": {
+    "title": "Sprint 4 - Paiement & extensions",
+    "permalink": "/reference/sprints/sprint-4-payment-extensions"
+  }
+}

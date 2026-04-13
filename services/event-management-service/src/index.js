@@ -3,11 +3,6 @@ import { setTimeout as delay } from "node:timers/promises";
 
 import express from "express";
 import pg from "pg";
-import {
-  createCorrelationIdMiddleware,
-  createJsonLogger,
-  createRequestCompletionLogger
-} from "../../shared/observability.js";
 
 import { ensureSchema } from "./db/schema.js";
 import { createEventRepository } from "./repositories/eventRepository.js";
@@ -24,30 +19,27 @@ const config = {
   registrationServiceUrl:
     process.env.REGISTRATION_SERVICE_URL || "http://127.0.0.1:4003"
 };
-const log = createJsonLogger(config.serviceName);
 
 const allowedVisibility = new Set(["PUBLIC", "PRIVATE"]);
 const allowedPricingType = new Set(["FREE", "PAID"]);
+const allowedPublishModes = new Set(["IMMEDIATE", "SCHEDULED"]);
+const allowedManagedEventStatuses = new Set([
+  "DRAFT",
+  "PUBLISHED",
+  "FULL",
+  "CLOSED",
+  "ARCHIVED",
+  "CANCELLED"
+]);
 
 const pool = new Pool({
   connectionString: config.databaseUrl
 });
 const repository = createEventRepository(pool);
+let scheduledPublishInterval;
 
 const app = express();
 app.use(express.json());
-app.use(createCorrelationIdMiddleware());
-app.use(
-  createRequestCompletionLogger({
-    log,
-    eventName: "event.request.completed",
-    buildFields: (req) => ({
-      correlationId: req.correlationId || null,
-      userId: req.auth?.userId || null,
-      role: req.auth?.role || null
-    })
-  })
-);
 
 function success(data, meta) {
   if (meta) return { success: true, data, meta };
@@ -63,6 +55,49 @@ function error(errorMessage, code, details) {
 
 function nowIso() {
   return new Date().toISOString();
+}
+
+function logPublishedEvent(event, publishedAt) {
+  // Keep the async publish transition observable for smoke checks and logs.
+  // This is intentionally a structured message rather than a bus integration.
+  // eslint-disable-next-line no-console
+  console.info(
+    `[${config.serviceName}] event.published ${JSON.stringify({
+      eventId: event.eventId,
+      organizerId: event.organizerId,
+      status: event.status,
+      visibility: event.visibility,
+      title: event.title,
+      theme: event.theme,
+      city: event.city,
+      venueName: event.venueName,
+      startAt: event.startAt,
+      publishedAt
+    })}`
+  );
+}
+
+function logCancelledEvent(event, cancelledAt, reasonCode, previousStatus) {
+  // Keep the async cancel transition observable for smoke checks and logs.
+  // This mirrors the publish trace so the lifecycle remains auditable.
+  // eslint-disable-next-line no-console
+  console.info(
+    `[${config.serviceName}] event.cancelled ${JSON.stringify({
+      eventId: event.eventId,
+      organizerId: event.organizerId,
+      previousStatus,
+      status: event.status,
+      visibility: event.visibility,
+      title: event.title,
+      theme: event.theme,
+      city: event.city,
+      venueName: event.venueName,
+      startAt: event.startAt,
+      cancelledAt,
+      reasonCode,
+      correlationId: event.correlationId || null
+    })}`
+  );
 }
 
 function toEventResponse(event) {
@@ -84,11 +119,10 @@ function toEventResponse(event) {
     capacity: event.capacity,
     visibility: event.visibility,
     pricingType: event.pricingType,
-    price: event.price ?? 0,
-    currency: event.currency ?? "MAD",
     status: event.status,
     coverImageRef: event.coverImageRef,
     imageUrl: event.coverImageRef,
+    scheduledPublishAt: event.scheduledPublishAt,
     publishedAt: event.publishedAt,
     createdAt: event.createdAt,
     updatedAt: event.updatedAt
@@ -113,11 +147,10 @@ function toCatalogEventSummary(event) {
     capacity: event.capacity,
     visibility: event.visibility,
     pricingType: event.pricingType,
-    price: event.price ?? 0,
-    currency: event.currency ?? "MAD",
     status: event.status,
     coverImageRef: event.coverImageRef,
     imageUrl: event.coverImageRef,
+    scheduledPublishAt: event.scheduledPublishAt,
     publishedAt: event.publishedAt
   };
 }
@@ -177,8 +210,6 @@ function validateDraftPayload(payload, { partial = false } = {}) {
     "capacity",
     "visibility",
     "pricingType",
-    "price",
-    "currency",
     "coverImageRef"
   ]) {
     if (Object.hasOwn(body, key)) {
@@ -213,6 +244,17 @@ function validateDraftPayload(payload, { partial = false } = {}) {
     }
   }
 
+  if (Object.hasOwn(candidate, "coverImageRef") && candidate.coverImageRef != null) {
+    const coverImageRef = String(candidate.coverImageRef).trim();
+    if (!coverImageRef.startsWith("/")) {
+      details.push("coverImageRef must be a public path that starts with /");
+    } else if (coverImageRef.length > 2048) {
+      details.push("coverImageRef must be at most 2048 characters");
+    } else {
+      candidate.coverImageRef = coverImageRef;
+    }
+  }
+
   if (Object.hasOwn(candidate, "startAt")) {
     const startAtMs = Date.parse(candidate.startAt);
     if (Number.isNaN(startAtMs)) {
@@ -239,13 +281,94 @@ function validateDraftPayload(payload, { partial = false } = {}) {
   };
 }
 
+function validatePublishPayload(payload) {
+  const body = payload || {};
+  const details = [];
+  const candidate = {};
+
+  const publishMode = String(body.publishMode || "IMMEDIATE").trim().toUpperCase();
+  if (!allowedPublishModes.has(publishMode)) {
+    details.push("publishMode must be IMMEDIATE or SCHEDULED");
+  } else {
+    candidate.publishMode = publishMode;
+  }
+
+  if (Object.hasOwn(body, "scheduledAt") && body.scheduledAt != null) {
+    const scheduledAt = String(body.scheduledAt).trim();
+    const scheduledAtMs = Date.parse(scheduledAt);
+    if (Number.isNaN(scheduledAtMs)) {
+      details.push("scheduledAt must be a valid ISO datetime");
+    } else {
+      candidate.scheduledAt = scheduledAt;
+      if (publishMode === "SCHEDULED" && scheduledAtMs <= Date.now()) {
+        details.push("scheduledAt must be in the future for SCHEDULED publish");
+      }
+    }
+  } else if (publishMode === "SCHEDULED") {
+    details.push("scheduledAt is required when publishMode is SCHEDULED");
+  }
+
+  return {
+    isValid: details.length === 0,
+    details,
+    value: candidate
+  };
+}
+
+function validateManagedEventsQuery(query) {
+  const body = query || {};
+  const details = [];
+  const value = {};
+
+  if (Object.hasOwn(body, "status") && String(body.status || "").trim() !== "") {
+    const status = String(body.status).trim().toUpperCase();
+    if (!allowedManagedEventStatuses.has(status)) {
+      details.push("status must be one of DRAFT, PUBLISHED, FULL, CLOSED, ARCHIVED, CANCELLED");
+    } else {
+      value.status = status;
+    }
+  }
+
+  if (Object.hasOwn(body, "theme") && String(body.theme || "").trim() !== "") {
+    value.theme = String(body.theme).trim();
+  }
+
+  if (Object.hasOwn(body, "fromDate") && String(body.fromDate || "").trim() !== "") {
+    const fromDate = String(body.fromDate).trim();
+    const fromDateMs = Date.parse(fromDate);
+    if (Number.isNaN(fromDateMs)) {
+      details.push("fromDate must be a valid ISO datetime");
+    } else {
+      value.fromDate = new Date(fromDateMs).toISOString();
+    }
+  }
+
+  if (Object.hasOwn(body, "toDate") && String(body.toDate || "").trim() !== "") {
+    const toDate = String(body.toDate).trim();
+    const toDateMs = Date.parse(toDate);
+    if (Number.isNaN(toDateMs)) {
+      details.push("toDate must be a valid ISO datetime");
+    } else {
+      value.toDate = new Date(toDateMs).toISOString();
+    }
+  }
+
+  if (value.fromDate && value.toDate && Date.parse(value.toDate) < Date.parse(value.fromDate)) {
+    details.push("toDate must be greater than or equal to fromDate");
+  }
+
+  return {
+    isValid: details.length === 0,
+    details,
+    value
+  };
+}
+
 function authContext(req) {
   const userId = String(req.header("x-user-id") || "").trim();
   const role = String(req.header("x-user-role") || "").trim().toUpperCase();
   const sessionId = String(req.header("x-session-id") || "").trim();
-  const correlationId =
-    String(req.correlationId || req.header("x-correlation-id") || "").trim() ||
-    null;
+  const correlationId = String(req.header("x-correlation-id") || "").trim();
 
   if (!userId || !role || !sessionId) {
     return null;
@@ -284,6 +407,15 @@ async function emitNotification(path, payload, context) {
     // eslint-disable-next-line no-console
     console.warn("[event-management-service] notification emit failed", err);
   }
+}
+
+async function publishDueScheduledEvents() {
+  const timestamp = nowIso();
+  const publishedEvents = await repository.publishDueScheduledDrafts(timestamp, timestamp);
+  for (const event of publishedEvents) {
+    logPublishedEvent(event, timestamp);
+  }
+  return publishedEvents.length;
 }
 
 app.get("/health", (_req, res) => {
@@ -417,7 +549,8 @@ app.get("/admin/events", async (req, res) => {
       items: result.items.map(toEventResponse),
       page,
       pageSize,
-      total: result.total
+      total: result.total,
+      counts: result.counts
     })
   );
 });
@@ -485,11 +618,19 @@ app.get("/events/me", async (req, res) => {
       ]));
   }
 
+  const filters = validateManagedEventsQuery(req.query);
+  if (!filters.isValid) {
+    return res
+      .status(400)
+      .json(error("Validation failed", "VALIDATION_ERROR", filters.details));
+  }
+
   const result = await repository.listManagedEvents({
     organizerId: req.auth.userId,
     isAdmin: req.auth.role === "ADMIN",
     page,
-    pageSize
+    pageSize,
+    ...filters.value
   });
 
   return res.status(200).json(
@@ -497,7 +638,8 @@ app.get("/events/me", async (req, res) => {
       items: result.items.map(toEventResponse),
       page,
       pageSize,
-      total: result.total
+      total: result.total,
+      counts: result.counts
     })
   );
 });
@@ -581,8 +723,25 @@ app.post("/events/drafts/:eventId/publish", async (req, res) => {
       .json(error("Only drafts can be published", "EVENT_NOT_PUBLISHABLE"));
   }
 
+  const validation = validatePublishPayload(req.body);
+  if (!validation.isValid) {
+    return res
+      .status(400)
+      .json(error("Validation failed", "VALIDATION_ERROR", validation.details));
+  }
+
   const timestamp = nowIso();
+  if (validation.value.publishMode === "SCHEDULED") {
+    const scheduled = await repository.scheduleDraft(
+      event.eventId,
+      validation.value.scheduledAt,
+      timestamp
+    );
+    return res.status(200).json(success(toEventResponse(scheduled)));
+  }
+
   const published = await repository.publishDraft(event.eventId, timestamp, timestamp);
+  logPublishedEvent(published, timestamp);
   await emitNotification(
     "/notifications/emit",
     {
@@ -622,8 +781,13 @@ app.post("/events/:eventId/cancel", async (req, res) => {
       .json(error("Event already cancelled", "EVENT_ALREADY_CANCELLED"));
   }
 
+  const previousStatus = event.status;
+  const reasonCode = String(req.body?.reasonCode || "ORGANIZER_CANCELLED")
+    .trim()
+    .toUpperCase() || "ORGANIZER_CANCELLED";
   const timestamp = nowIso();
   const cancelled = await repository.cancelEvent(event.eventId, timestamp);
+  logCancelledEvent(cancelled, timestamp, reasonCode, previousStatus);
   await emitNotification(
     "/notifications/event",
     {
@@ -634,7 +798,9 @@ app.post("/events/:eventId/cancel", async (req, res) => {
       metadata: {
         eventTitle: cancelled.title,
         eventCity: cancelled.city,
-        eventStartAt: cancelled.startAt
+        eventStartAt: cancelled.startAt,
+        cancelReasonCode: reasonCode,
+        previousStatus
       }
     },
     context
@@ -665,20 +831,32 @@ async function boot() {
   }
 
   app.listen(config.port, () => {
-    log("info", "service.started", {
-      port: config.port
-    });
+    // eslint-disable-next-line no-console
+    console.log(`[${config.serviceName}] listening on port ${config.port}`);
   });
+
+  await publishDueScheduledEvents().catch((err) => {
+    // eslint-disable-next-line no-console
+    console.warn(`[${config.serviceName}] scheduled publish sweep failed`, err);
+  });
+  scheduledPublishInterval = setInterval(() => {
+    publishDueScheduledEvents().catch((err) => {
+      // eslint-disable-next-line no-console
+      console.warn(`[${config.serviceName}] scheduled publish sweep failed`, err);
+    });
+  }, 2000);
 }
 
 boot().catch((err) => {
-  log("error", "service.boot.failed", {
-    message: err.message
-  });
+  // eslint-disable-next-line no-console
+  console.error(`[${config.serviceName}] failed to boot`, err);
   process.exit(1);
 });
 
 async function shutdown() {
+  if (scheduledPublishInterval) {
+    clearInterval(scheduledPublishInterval);
+  }
   await pool.end();
 }
 

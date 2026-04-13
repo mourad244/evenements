@@ -12,7 +12,10 @@ export function useLoginMutation() {
     mutationFn: login,
     onSuccess: (session) => {
       clearSessionExpired();
-      persistSession(session.accessToken, session.refreshToken);
+      persistSession({
+        accessToken: session.accessToken,
+        refreshToken: session.refreshToken
+      });
       queryClient.setQueryData(["current-user"], session.user);
     }
   });

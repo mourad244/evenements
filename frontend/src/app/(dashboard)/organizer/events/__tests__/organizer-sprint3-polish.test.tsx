@@ -2,19 +2,33 @@ import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 
 type OrganizerEventsState = {
-  data?: Array<{
-    id: string;
-    title: string;
-    description: string;
-    city: string;
-    venue: string;
-    theme: string;
-    price: number;
-    currency: string;
-    capacity: number;
-    startAt: string;
-    status: "DRAFT" | "PUBLISHED" | "CANCELLED";
-  }>;
+  data?: {
+    items: Array<{
+      id: string;
+      title: string;
+      description: string;
+      city: string;
+      venue: string;
+      theme: string;
+      price: number;
+      currency: string;
+      capacity: number;
+      startAt: string;
+      status: "DRAFT" | "PUBLISHED" | "CANCELLED" | "FULL" | "CLOSED" | "ARCHIVED";
+    }>;
+    page: number;
+    pageSize: number;
+    total: number;
+    counts: {
+      total: number;
+      draft: number;
+      published: number;
+      full: number;
+      closed: number;
+      archived: number;
+      cancelled: number;
+    };
+  };
   isLoading: boolean;
   isError: boolean;
   error?: Error;
@@ -56,7 +70,21 @@ type OrganizerRegistrationsState = {
 };
 
 const organizerEventsState: OrganizerEventsState = {
-  data: [],
+  data: {
+    items: [],
+    page: 1,
+    pageSize: 6,
+    total: 0,
+    counts: {
+      total: 0,
+      draft: 0,
+      published: 0,
+      full: 0,
+      closed: 0,
+      archived: 0,
+      cancelled: 0
+    }
+  },
   isLoading: false,
   isError: false
 };
@@ -71,6 +99,14 @@ const organizerRegistrationsState: OrganizerRegistrationsState = {
   data: undefined,
   isLoading: false,
   isError: false
+};
+
+const organizerExportMutationState = {
+  mutate: vi.fn(),
+  isPending: false,
+  isSuccess: false,
+  error: null as Error | null,
+  data: undefined as { filename: string } | undefined
 };
 
 const mutationState = {
@@ -101,14 +137,8 @@ vi.mock("@/features/registrations/hooks/use-organizer-event-registrations-query"
   useOrganizerEventRegistrationsQuery: () => organizerRegistrationsState
 }));
 
-vi.mock("@/features/registrations/hooks/use-export-organizer-event-registrations-mutation", () => ({
-  useExportOrganizerEventRegistrationsMutation: () => ({
-    mutate: vi.fn(),
-    isPending: false,
-    isSuccess: false,
-    error: null,
-    variables: undefined
-  })
+vi.mock("@/features/registrations/hooks/use-download-organizer-registrations-export-mutation", () => ({
+  useDownloadOrganizerRegistrationsExportMutation: () => organizerExportMutationState
 }));
 
 vi.mock("@/features/events/hooks/use-update-event-mutation", () => ({
@@ -138,7 +168,21 @@ function render(element: React.ReactElement) {
 
 describe("Sprint 3 organizer polish", () => {
   beforeEach(() => {
-    organizerEventsState.data = [];
+    organizerEventsState.data = {
+      items: [],
+      page: 1,
+      pageSize: 6,
+      total: 0,
+      counts: {
+        total: 0,
+        draft: 0,
+        published: 0,
+        full: 0,
+        closed: 0,
+        archived: 0,
+        cancelled: 0
+      }
+    };
     organizerEventsState.isLoading = false;
     organizerEventsState.isError = false;
     organizerEventsState.error = undefined;
@@ -153,53 +197,73 @@ describe("Sprint 3 organizer polish", () => {
     organizerRegistrationsState.isError = false;
     organizerRegistrationsState.error = undefined;
 
+    organizerExportMutationState.mutate.mockReset();
+    organizerExportMutationState.isPending = false;
+    organizerExportMutationState.isSuccess = false;
+    organizerExportMutationState.error = null;
+    organizerExportMutationState.data = undefined;
+
     mutationState.updatePending = false;
     mutationState.publishPending = false;
     mutationState.deletePending = false;
   });
 
   it("/organizer/events shows Sprint 3 summary cards, grouping, and row CTA labels", () => {
-    organizerEventsState.data = [
-      {
-        id: "evt-1",
-        title: "Atlas Summit",
-        description: "Leadership gathering",
-        city: "Casablanca",
-        venue: "Expo Hall",
-        theme: "Leadership",
-        price: 0,
-        currency: "MAD",
-        capacity: 300,
-        startAt: "2026-04-02T09:00:00.000Z",
-        status: "DRAFT"
-      },
-      {
-        id: "evt-2",
-        title: "Design Circle",
-        description: "Community meetup",
-        city: "Rabat",
-        venue: "Studio One",
-        theme: "Design",
-        price: 0,
-        currency: "MAD",
-        capacity: 120,
-        startAt: "2026-05-01T09:00:00.000Z",
-        status: "PUBLISHED"
-      },
-      {
-        id: "evt-3",
-        title: "Past Forum",
-        description: "Archived state sample",
-        city: "Marrakesh",
-        venue: "Forum Hall",
-        theme: "Business",
-        price: 0,
-        currency: "MAD",
-        capacity: 200,
-        startAt: "2026-06-01T09:00:00.000Z",
-        status: "CANCELLED"
+    organizerEventsState.data = {
+      items: [
+        {
+          id: "evt-1",
+          title: "Atlas Summit",
+          description: "Leadership gathering",
+          city: "Casablanca",
+          venue: "Expo Hall",
+          theme: "Leadership",
+          price: 0,
+          currency: "MAD",
+          capacity: 300,
+          startAt: "2026-04-02T09:00:00.000Z",
+          status: "DRAFT"
+        },
+        {
+          id: "evt-2",
+          title: "Design Circle",
+          description: "Community meetup",
+          city: "Rabat",
+          venue: "Studio One",
+          theme: "Design",
+          price: 0,
+          currency: "MAD",
+          capacity: 120,
+          startAt: "2026-05-01T09:00:00.000Z",
+          status: "PUBLISHED"
+        },
+        {
+          id: "evt-3",
+          title: "Past Forum",
+          description: "Archived state sample",
+          city: "Marrakesh",
+          venue: "Forum Hall",
+          theme: "Business",
+          price: 0,
+          currency: "MAD",
+          capacity: 200,
+          startAt: "2026-06-01T09:00:00.000Z",
+          status: "CANCELLED"
+        }
+      ],
+      page: 1,
+      pageSize: 6,
+      total: 3,
+      counts: {
+        total: 3,
+        draft: 1,
+        published: 1,
+        full: 0,
+        closed: 0,
+        archived: 0,
+        cancelled: 1
       }
-    ];
+    };
 
     const html = render(<OrganizerEventsPage />);
 
@@ -212,6 +276,8 @@ describe("Sprint 3 organizer polish", () => {
     expect(html).toContain("Continue draft");
     expect(html).toContain("Open event");
     expect(html).toContain("Registrations");
+    expect(html).toContain("Organizer filters");
+    expect(html).toContain("Apply filters");
   });
 
   it("/organizer/events/[eventId] shows event-state summary and organizer updates area", () => {

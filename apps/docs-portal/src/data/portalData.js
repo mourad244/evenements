@@ -18,6 +18,11 @@ export const projectStatus = [
 
 export const quickLinks = [
   {
+    title: "Livrables HTML",
+    description: "Retrouver la lecture base de donnees, UI, backlog, architecture, API, securite, guide dev et tests.",
+    to: "/livrables"
+  },
+  {
     title: "Perimetre MVP",
     description: "Vue produit P1 a P4 et frontieres de services.",
     to: "/reference/mvp-scope"
@@ -46,6 +51,81 @@ export const quickLinks = [
     title: "Specs services",
     description: "Identity, Event, Catalog et Registration.",
     to: "/services"
+  }
+];
+
+export const deliverableDocs = [
+  {
+    title: "Base de donnees",
+    description: "Modele P1, entites critiques, waitlist et references schema/service.",
+    phase: "P1-P2",
+    status: "DONE",
+    tags: ["db", "waitlist", "schema"],
+    to: "/reference/data-dictionary-p1"
+  },
+  {
+    title: "Maquettes UI",
+    description: "Baseline UX issue du HTML et mapping vers les routes/features du frontend reel.",
+    phase: "P1-P3",
+    status: "DONE",
+    tags: ["ux", "maquettes", "frontend"],
+    to: "/reference/ui-application-surfaces-evenements"
+  },
+  {
+    title: "Backlog",
+    description: "Backlogs par domaine et priorisation du sujet Evenements.",
+    phase: "P0-P4",
+    status: "DONE",
+    tags: ["delivery", "priorites", "sprints"],
+    to: "/backlogs"
+  },
+  {
+    title: "Architecture",
+    description: "Vision systeme, flux critiques et articulation entre le HTML et la cible microservices.",
+    phase: "P1-P4",
+    status: "DONE",
+    tags: ["architecture", "diagrams", "scope"],
+    to: "/architecture"
+  },
+  {
+    title: "API Docs",
+    description: "Routes Gateway, contrats REST et evenements async relies au sujet.",
+    phase: "P1-P2",
+    status: "DONE",
+    tags: ["api", "gateway", "contracts"],
+    to: "/api"
+  },
+  {
+    title: "Application",
+    description: "Surfaces publiques, participant, organisateur et admin deja visibles dans le repo.",
+    phase: "P1-P3",
+    status: "DONE",
+    tags: ["routes", "features", "app"],
+    to: "/reference/ui-application-surfaces-evenements"
+  },
+  {
+    title: "Securite",
+    description: "Lecture STRIDE / OWASP / ACL / waitlist atomique adaptee au depot reel.",
+    phase: "P1-P4",
+    status: "DONE",
+    tags: ["security", "stride", "owasp"],
+    to: "/reference/security-strategy-evenements"
+  },
+  {
+    title: "Guide Dev",
+    description: "Structure reelle du monorepo, commandes utiles et conventions d'implementation.",
+    phase: "P1-P5",
+    status: "DONE",
+    tags: ["setup", "engineering", "workflow"],
+    to: "/reference/developer-guide-evenements"
+  },
+  {
+    title: "Tests",
+    description: "Pyramide de tests, smoke critiques et couverture actuellement automatisee.",
+    phase: "P1-P5",
+    status: "DONE",
+    tags: ["tests", "quality", "verification"],
+    to: "/reference/testing-strategy-evenements"
   }
 ];
 
@@ -307,7 +387,7 @@ export const backlogDocs = [
 export const sprintDocs = [
   { title: "Sprint 0", description: "Fondations architecture et contrats.", to: "/reference/sprints/sprint-0-architecture-foundation", phase: "P0", status: "DONE" },
   { title: "Sprint 1", description: "MVP publication et inscription.", to: "/reference/sprints/sprint-1-mvp", phase: "P1", status: "IN_PROGRESS" },
-  { title: "Sprint 1 Tracker", description: "Execution tracker machine + humain.", to: "/reference/sprints/sprint-1-tracker", phase: "P1", status: "IN_PROGRESS" },
+  { title: "Sprint 1 Tracker", description: "Execution tracker machine + humain.", to: "/reference/sprints/sprint_1_execution_tracker", phase: "P1", status: "IN_PROGRESS" },
   { title: "Sprint 2", description: "Ticketing et notifications.", to: "/reference/sprints/sprint-2-ticketing-notifications", phase: "P2", status: "TODO" },
   { title: "Sprint 3", description: "Administration et moderation.", to: "/reference/sprints/sprint-3-admin-moderation", phase: "P3", status: "TODO" },
   { title: "Sprint 4", description: "Paiement et extensions.", to: "/reference/sprints/sprint-4-payment-extensions", phase: "P4", status: "TODO" }

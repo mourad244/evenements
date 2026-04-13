@@ -1,0 +1,55 @@
+{
+  "id": "backlogs/BackLog_registration_ticketing",
+  "title": "Backlog Registration & Ticketing",
+  "description": "Backlog inscriptions, waitlist, billets et historique participant.",
+  "source": "@site/../../docs/backlogs/BackLog_registration_ticketing.md",
+  "sourceDirName": "backlogs",
+  "slug": "/backlogs/registration-ticketing",
+  "permalink": "/reference/backlogs/registration-ticketing",
+  "draft": false,
+  "unlisted": false,
+  "editUrl": "https://github.com/mourad244/evenements/tree/main/../../docs/backlogs/BackLog_registration_ticketing.md",
+  "tags": [
+    {
+      "inline": true,
+      "label": "registration",
+      "permalink": "/reference/tags/registration"
+    },
+    {
+      "inline": true,
+      "label": "waitlist",
+      "permalink": "/reference/tags/waitlist"
+    },
+    {
+      "inline": true,
+      "label": "tickets",
+      "permalink": "/reference/tags/tickets"
+    }
+  ],
+  "version": "current",
+  "frontMatter": {
+    "title": "Backlog Registration & Ticketing",
+    "description": "Backlog inscriptions, waitlist, billets et historique participant.",
+    "docKind": "backlog",
+    "domain": "registration-ticketing",
+    "phase": "P1-P2",
+    "owner": "Mourad",
+    "status": "TODO",
+    "priority": "P0",
+    "tags": [
+      "registration",
+      "waitlist",
+      "tickets"
+    ],
+    "slug": "registration-ticketing"
+  },
+  "sidebar": "referenceSidebar",
+  "previous": {
+    "title": "Backlog Payment",
+    "permalink": "/reference/backlogs/payment"
+  },
+  "next": {
+    "title": "Dictionnaire de donnees P1 - MVP publication & inscription",
+    "permalink": "/reference/data-dictionary-p1"
+  }
+}

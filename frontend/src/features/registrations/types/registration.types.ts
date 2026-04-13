@@ -13,13 +13,10 @@ export type RegistrationItem = {
   status: RegistrationStatus;
   eventDate: string;
   eventCity: string | null;
-  eventPrice?: number | null;
-  eventCurrency?: string | null;
   waitlistPosition: number | null;
   canDownloadTicket: boolean;
   ticketId: string | null;
   ticketFormat: string | null;
-  ticketStatus?: string | null;
   updatedAt: string | null;
 };
 

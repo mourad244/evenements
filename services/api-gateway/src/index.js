@@ -34,15 +34,10 @@ function resolveJwtSecret(envKey, fallbackValue) {
   const configured = String(process.env[envKey] || "").trim();
   if (configured) {
     if (configured.length < 32) {
-      if (process.env.ALLOW_INSECURE_JWT_DEFAULTS === "true") {
-        log("warn", "auth.jwt.secret.weak", {
-          envKey,
-          length: configured.length,
-          message: "Weak secret allowed by ALLOW_INSECURE_JWT_DEFAULTS."
-        });
-        return configured;
-      }
-      throw new Error(`${envKey} must be at least 32 characters`);
+      log("warn", "auth.jwt.secret.weak", {
+        envKey,
+        length: configured.length
+      });
     }
     return configured;
   }
@@ -55,7 +50,16 @@ function resolveJwtSecret(envKey, fallbackValue) {
     return fallbackValue;
   }
 
-  throw new Error(`${envKey} is required (set env or allow insecure defaults)`);
+  if (String(process.env.NODE_ENV || "").toLowerCase() === "production") {
+    throw new Error(`${envKey} is required in production`);
+  }
+
+  const generated = crypto.randomBytes(32).toString("hex");
+  log("warn", "auth.jwt.secret.generated", {
+    envKey,
+    message: "Generated ephemeral secret; set env for stable sessions."
+  });
+  return generated;
 }
 
 config.jwtAccessSecret = resolveJwtSecret(
@@ -81,6 +85,10 @@ app.use((req, res, next) => {
   res.setHeader(
     "access-control-allow-headers",
     "authorization, content-type, x-correlation-id"
+  );
+  res.setHeader(
+    "access-control-expose-headers",
+    "content-disposition, content-type, x-correlation-id"
   );
   res.setHeader(
     "access-control-allow-methods",
@@ -335,14 +343,23 @@ app.use(async (req, res) => {
   }
 
   const contentType = upstreamResponse.headers.get("content-type") || "";
-  const responseText = await upstreamResponse.text();
+  const contentDisposition =
+    upstreamResponse.headers.get("content-disposition") || "";
+  const contentLength = upstreamResponse.headers.get("content-length") || "";
 
   res.status(upstreamResponse.status);
   if (contentType) {
     res.setHeader("content-type", contentType);
   }
+  if (contentDisposition) {
+    res.setHeader("content-disposition", contentDisposition);
+  }
+  if (contentLength) {
+    res.setHeader("content-length", contentLength);
+  }
 
   if (contentType.includes("application/json")) {
+    const responseText = await upstreamResponse.text();
     if (!responseText) {
       return res.send({});
     }
@@ -355,7 +372,8 @@ app.use(async (req, res) => {
     }
   }
 
-  return res.send(responseText);
+  const responseBuffer = Buffer.from(await upstreamResponse.arrayBuffer());
+  return res.send(responseBuffer);
 });
 
 app.listen(config.port, () => {

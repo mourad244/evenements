@@ -16,7 +16,7 @@ export function mapEventResponse(input: EventApiShape): EventItem {
     venue: input.venue || input.venueName || "Main venue",
     startAt: input.startAt || new Date().toISOString(),
     endAt: input.endAt,
-    price: input.price ?? 0,
+    price: input.price ?? (input.pricingType === "PAID" ? 99 : 0),
     currency: input.currency || "MAD",
     capacity: input.capacity ?? 0,
     theme: input.theme || "General",
@@ -48,8 +48,6 @@ export function mapUpsertEventToDraftPayload(payload: UpsertEventInput) {
     capacity: payload.capacity,
     visibility: "PUBLIC",
     pricingType: payload.price > 0 ? "PAID" : "FREE",
-    price: payload.price ?? 0,
-    currency: payload.currency || "MAD",
-    coverImageRef: null
+    coverImageRef: payload.imageUrl?.trim() || null
   };
 }
