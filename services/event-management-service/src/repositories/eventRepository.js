@@ -227,7 +227,6 @@ export function createEventRepository(pool) {
         params.push(organizerId);
         whereClauses.push(`organizer_id = $${params.length}`);
       }
-
       if (status) {
         params.push(status);
         whereClauses.push(`status = $${params.length}`);
@@ -484,6 +483,41 @@ export function createEventRepository(pool) {
             deleted_at
         `,
         [eventId, publishedAt, updatedAt]
+      );
+      return mapEvent(rows[0]);
+    },
+
+    async updateCoverImage(eventId, coverImageRef, updatedAt) {
+      const { rows } = await pool.query(
+        `
+          UPDATE events
+          SET cover_image_ref = $2, updated_at = $3
+          WHERE event_id = $1
+            AND deleted_at IS NULL
+          RETURNING
+            event_id,
+            organizer_id,
+            title,
+            description,
+            theme,
+            venue_name,
+            city,
+            start_at,
+            end_at,
+            timezone,
+            capacity,
+            visibility,
+            pricing_type,
+            price,
+            currency,
+            status,
+            cover_image_ref,
+            published_at,
+            created_at,
+            updated_at,
+            deleted_at
+        `,
+        [eventId, coverImageRef, updatedAt]
       );
       return mapEvent(rows[0]);
     },

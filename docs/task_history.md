@@ -1089,8 +1089,153 @@ Journal synthetique des livrables majeurs et des baselines de cadrage.
   obsolete indiquant que le depot ne contenait pas encore de code
   d'execution.
 
-## A completer ensuite
+## 2026-04-12 - Regles metier visibilite, tarification et eligibilite (`E01.3`)
 
-- Ajouter les livraisons techniques reellement implementees
-  (services, contrats, UI, observabilite, releases).
-- Lier chaque entree a son sprint et a son backlog de domaine.
+- Creation de `docs/workflows/Workflow_event_visibility_pricing_rules.md`.
+- Formalisation des regles de visibilite par statut (`PUBLIC` / `PRIVATE`),
+  comportement MVP pour les evenements `PRIVATE` (404 participants, 403 utilisateurs
+  authentifies non proprietaires).
+- Stabilisation des regles de tarification (`FREE` / `PAID`): champs requis,
+  validation, invariants apres publication.
+- Documentation des regles d'eligibilite a l'inscription par statut (ouverture
+  standard, `FULL`, `CLOSED`, `CANCELLED`, doublon) et codes HTTP associes.
+- Mise a jour du ticket `E01.3` en `DONE` dans
+  `docs/backlogs/BackLog_event_management.md`.
+
+## 2026-04-12 - Contrat media evenement (`E04.1`)
+
+- Creation de `docs/workflows/Workflow_event_media_contract.md`.
+- Specification du modele `MediaAsset` (9 champs: `assetId`, `eventId`,
+  `organizerId`, `filename`, `mimeType`, `sizeBytes`, `storagePath`,
+  `publicUrl`, `createdAt`).
+- Formalisation des formats acceptes (JPEG, PNG, WebP), limite 5 Mo,
+  erreurs `413 FILE_TOO_LARGE` et `415 UNSUPPORTED_MEDIA_TYPE`.
+- Definition du contrat API upload (`POST /events/drafts/:eventId/media`
+  multipart/form-data) et suppression (`DELETE /events/drafts/:eventId/media`).
+- Documentation des regles d'exposition catalogue (`imageUrl: string | null`)
+  sur toutes les routes evenement.
+- Definition du stockage MVP (filesystem local, `MEDIA_STORAGE_PATH`, `express.static`).
+- Mise a jour du ticket `E04.1` en `DONE` dans
+  `docs/backlogs/BackLog_event_management.md`.
+
+## 2026-04-12 - Implementation upload media evenement (`E04.2`)
+
+- Creation de `services/shared/eventMediaUpload.js`:
+  - `validateMediaUpload` — validation MIME (415) et taille (413)
+  - `sanitizeFilename` — protection contre path traversal et caracteres speciaux
+  - `buildStorageFilename` — nom de fichier `<uuid>.<ext>` sans donnee originale
+  - `buildMediaAsset` — constructeur du record `MediaAsset` interne
+- Ajout de `multer` (memory storage) dans
+  `services/event-management-service/package.json`.
+- Ajout de `updateCoverImage(eventId, ref, updatedAt)` dans
+  `services/event-management-service/src/repositories/eventRepository.js`.
+- Ajout dans `services/event-management-service/src/index.js`:
+  - `POST /events/drafts/:eventId/media` — upload multipart, validation complete,
+    ecriture disque, mise a jour `cover_image_ref`, retour `201 MediaAsset`
+  - `DELETE /events/drafts/:eventId/media` — suppression de la reference, `204`
+  - `express.static` monte sur `MEDIA_STORAGE_PATH` / `MEDIA_PUBLIC_PREFIX`
+- Creation de `tests/s1-t09.event-media-upload.unit.test.js`: 19 tests unitaires
+  purs (sans I/O ni DB), tous passants.
+- Ajout du script `test:s1-t09` dans `package.json`.
+- Mise a jour du ticket `E04.2` en `DONE` dans
+  `docs/backlogs/BackLog_event_management.md`.
+
+## 2026-04-12 - Exposition imageUrl catalogue (`E04.3`)
+
+- Verification que `toEventResponse` et `toCatalogEventSummary` dans
+  `services/event-management-service/src/index.js` exposent deja
+  `imageUrl: event.coverImageRef` (null si aucun media).
+- Verification que `mapEvent` dans `eventRepository.js` mappe correctement
+  `cover_image_ref` → `coverImageRef`.
+- Aucune modification supplementaire requise: le champ `imageUrl` est present
+  sur toutes les routes ciblees (`GET /catalog/events`, `GET /catalog/events/:eventId`,
+  `GET /events/drafts`, `GET /events/drafts/:eventId`, `GET /events/me`).
+- Mise a jour du ticket `E04.3` en `DONE` et de la tache `E04` en `DONE` dans
+  `docs/backlogs/BackLog_event_management.md`.
+
+## 2026-04-12 - Hooks moderation evenement (`E06.3`)
+
+- Creation de `docs/workflows/Workflow_event_moderation_hooks.md`:
+  - specification des deux nouveaux statuts: `PENDING_REVIEW` et
+    `CHANGES_REQUESTED`
+  - criteres de declenchement de la moderation (premier evenement,
+    antecedent de rejet, prix > seuil) pilotes par `MODERATION_ENABLED`
+  - machine d'etat complete mise a jour integrant les nouveaux statuts
+  - evenements metier: `event.submitted_for_review`, `event.rejected`,
+    `event.changes_requested`, `event.suspended`
+  - flux inter-services admin-moderation → event-management via endpoint
+    interne protege par `INTERNAL_SERVICE_SECRET`
+  - variables d'environnement: `MODERATION_ENABLED`,
+    `MODERATION_THRESHOLD_PRICE`, `INTERNAL_SERVICE_SECRET`
+- Creation de `services/shared/eventModerationHooks.js`:
+  `shouldSubmitForModeration`, `validateModerationTransition`,
+  `isEditableInModerationFlow`, `canResubmit`,
+  `buildSubmittedForReviewEvent`, `buildModerationResultEvent`.
+- Creation de `tests/s3-t01.event-moderation-hooks.unit.test.js`:
+  30 tests unitaires purs, tous passants.
+- Ajout du script `test:s3-t01` dans `package.json`.
+- Mise a jour du ticket `E06.3` en `DONE`, tache `E06` en `DONE`, et
+  "Reste principal" a "aucun item ouvert" dans
+  `docs/backlogs/BackLog_event_management.md`.
+
+## 2026-04-13 - Synchronisation backlogs stales (monitoring, identity, event management)
+
+- `M01.2` (health endpoints) → `DONE`: tous les services P1
+  (`api-gateway`, `identity-access-service`, `event-management-service`,
+  `registration-service`) exposent deja `/health` et `/ready`.
+- `M02.2` (correlation-id propagation) → `DONE`: `createCorrelationIdMiddleware`
+  et forward `x-correlation-id` deja en place sur tous les services P1.
+- `I02.3` (auth endpoints MVP) → `DONE`: les 5 endpoints `register`, `login`,
+  `refresh`, `forgot-password`, `reset-password` sont implementes dans
+  `identity-access-service`.
+- `I03.2` / `I03.3` (Gateway JWT middleware + propagation contexte) → `DONE`:
+  verification JWT, extraction userId/role, headers `x-user-id` / `x-user-role` /
+  `x-session-id` deja propages par la Gateway.
+- `I04.2` / `I04.3` (own-resource + admin-resource rules) → `DONE`:
+  `canAccessEvent` + guards ORGANIZER/ADMIN implementes dans
+  `event-management-service`.
+- `E06.2` (cancel flow) → `DONE`: annulation evenement met a jour le statut
+  et emet `EVENT_CANCELLED` vers le service de notification.
+- `E05.2` (organizer event list filters) → `DONE`: ajout des filtres `status`,
+  `theme`, `from`, `to` dans `listManagedEvents` (repository) et wires dans
+  `GET /events/me` et `GET /admin/events`.
+- `E05.3` (vue "Mes evenements") → `DONE`: les filtres backend sont disponibles
+  pour le front-office organisateur.
+
+## 2026-04-13 - Traceabilite logs (M02.3)
+
+- Creation de `tests/s1-t10.monitoring-log-traceability.unit.test.js`:
+  17 tests couvrant `resolveCorrelationId`, `createCorrelationIdMiddleware`,
+  `createJsonLogger` et `createRequestCompletionLogger` de
+  `services/shared/observability.js`, tous passants.
+- Ajout du script `test:s1-t10` dans `package.json`.
+- Mise a jour du ticket `M02.3` en `DONE`.
+
+## 2026-04-13 - Carte des traces distribuees (M04.1)
+
+- Creation de `docs/workflows/Workflow_monitoring_trace_map.md`:
+  carte des spans attendus sur les flux publication evenement et
+  inscription participant (6 et 8 spans respectivement), convention de
+  nommage `<service>.<domaine>.<action>`, regles de propagation
+  `correlationId`, granularite MVP vs Sprint 6.
+- Mise a jour du ticket `M04.1` en `DONE`, tache `M04` en `PARTIAL`.
+
+## 2026-04-13 - Templates email transactionnels (N01.2)
+
+- Creation de `services/shared/notificationEmailTemplates.js`:
+  `TEMPLATE_IDS` (5 templates), `isValidTemplateId`,
+  `validateTemplateVariables`, `renderSubject`, `renderTextBody`,
+  `buildNotificationMessage`.
+- Creation de `tests/s2-t18.notification-email-templates.unit.test.js`:
+  27 tests unitaires purs, tous passants.
+- Ajout du script `test:s2-t18` dans `package.json`.
+- Mise a jour du ticket `N01.2` en `DONE`, tache `N01` en `DONE`.
+
+## 2026-04-13 - Checklist variables d'environnement auth (I06.1)
+
+- Creation de `docs/workflows/Workflow_auth_env_checklist.md`:
+  inventaire complet des variables par service (`identity-access-service`,
+  `api-gateway`, `event-management-service`, `registration-service`),
+  valeurs par environnement (dev / CI / prod), regles de securite,
+  checklist de validation pre-deploiement.
+- Mise a jour du ticket `I06.1` en `DONE`, tache `I06` en `PARTIAL`.

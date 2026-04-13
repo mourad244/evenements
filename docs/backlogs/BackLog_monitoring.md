@@ -31,7 +31,7 @@ alertes et les mecanismes de reprise sur incident.
 
 ### M01 - Standardiser health checks et readiness probes
 
-- Status: `TODO`
+- Status: `DONE`
 - Priority: `P0` · Difficulty: `S` · Impact: `H`
 - Owner: `Mourad`
 - Support: `Ibrahim`
@@ -45,12 +45,12 @@ alertes et les mecanismes de reprise sur incident.
 | Ticket ID | Status | Priority | Owner | Support | Sprint cible | Dependances | Interfaces impactees | Sortie attendue | Critere d'acceptation | Branche suggeree |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | M01.1 | DONE | P0 | Mourad | Ibrahim | Sprint 0 | none | Contrat `/health`, `/ready` | Standard health/readiness documente | Chaque service MVP connait ses endpoints de sante et ses dependances critiquees | `docs/monitoring-health-contract` |
-| M01.2 | TODO | P0 | Mourad | Ibrahim | Sprint 1 | M01.1 | Services P1 | Endpoints de sante implementables | Les services `P1` exposent tous `/health` et `/ready` selon le meme format | `feature/monitoring-health-endpoints` |
+| M01.2 | DONE | P0 | Mourad | Ibrahim | Sprint 1 | M01.1 | Services P1 | Endpoints de sante implementables | Les services `P1` exposent tous `/health` et `/ready` selon le meme format | `feature/monitoring-health-endpoints` |
 | M01.3 | TODO | P1 | Mourad | Ibrahim | Sprint 3 | M01.2 | Gateway, admin | Vue agregee de sante | La Gateway ou la console admin peut afficher l'etat consolide des services critiques | `feature/monitoring-health-aggregation` |
 
 ### M02 - Poser correlation-id et logs structures
 
-- Status: `TODO`
+- Status: `DONE`
 - Priority: `P0` · Difficulty: `S` · Impact: `H`
 - Owner: `Mourad`
 - Support: `Ibrahim`
@@ -64,8 +64,8 @@ alertes et les mecanismes de reprise sur incident.
 | Ticket ID | Status | Priority | Owner | Support | Sprint cible | Dependances | Interfaces impactees | Sortie attendue | Critere d'acceptation | Branche suggeree |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | M02.1 | DONE | P0 | Mourad | Ibrahim | Sprint 0 | none | Correlation-id, logs JSON | Standard de logs documente | Le format de log, les champs obligatoires et la regle correlation-id sont stabilises | `docs/monitoring-log-standard` |
-| M02.2 | TODO | P0 | Mourad | Ibrahim | Sprint 1 | M02.1, I03.3 | Gateway + services | Propagation correlation-id implementable | Le correlation-id traverse la Gateway et les services `P1` sans etre perdu | `feature/monitoring-correlation-propagation` |
-| M02.3 | TODO | P0 | Mourad | Ibrahim | Sprint 1 | M02.2 | Flux publication, inscription | Validation logs critiques | Les flux MVP peuvent etre suivis dans les logs avec un identifiant commun | `test/monitoring-log-traceability` |
+| M02.2 | DONE | P0 | Mourad | Ibrahim | Sprint 1 | M02.1, I03.3 | Gateway + services | Propagation correlation-id implementable | Le correlation-id traverse la Gateway et les services `P1` sans etre perdu | `feature/monitoring-correlation-propagation` |
+| M02.3 | DONE | P0 | Mourad | Ibrahim | Sprint 1 | M02.2 | Flux publication, inscription | Validation logs critiques | Les flux MVP peuvent etre suivis dans les logs avec un identifiant commun | `test/monitoring-log-traceability` |
 
 ### M03 - Exposer les metriques techniques et metier
 
@@ -89,7 +89,7 @@ alertes et les mecanismes de reprise sur incident.
 
 ### M04 - Ajouter traces distribuees sur les flux critiques
 
-- Status: `TODO`
+- Status: `PARTIAL`
 - Priority: `P1` · Difficulty: `M` · Impact: `M`
 - Owner: `Mourad`
 - Support: `Ibrahim`
@@ -102,7 +102,7 @@ alertes et les mecanismes de reprise sur incident.
 
 | Ticket ID | Status | Priority | Owner | Support | Sprint cible | Dependances | Interfaces impactees | Sortie attendue | Critere d'acceptation | Branche suggeree |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| M04.1 | TODO | P1 | Mourad | Ibrahim | Sprint 0 | M02.1 | Points de trace | Carte des traces critiques documentee | Les etapes du flux publication et inscription sont listees avec leurs spans attendus | `docs/monitoring-trace-map` |
+| M04.1 | DONE | P1 | Mourad | Ibrahim | Sprint 0 | M02.1 | Points de trace | Carte des traces critiques documentee | Les etapes du flux publication et inscription sont listees avec leurs spans attendus | `docs/monitoring-trace-map` |
 | M04.2 | TODO | P1 | Mourad | Ibrahim | Sprint 3 | M04.1, M02.2 | Instrumentation de traces | Tracing distribue implementable | Les flux critiques produisent une chronologie cross-service exploitable | `feature/monitoring-distributed-tracing` |
 | M04.3 | TODO | P1 | Mourad | Ibrahim | Sprint 3 | M04.2 | Validation traces | Jeux de validation traces | Un incident de test peut etre suivi de la Gateway jusqu'au dernier service concerne | `test/monitoring-trace-validation` |
 

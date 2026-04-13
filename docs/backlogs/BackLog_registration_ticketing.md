@@ -26,7 +26,7 @@ promotion automatique, la billetterie et l'export des inscrits.
 - Priorite produit: `P1/P2`
 - Lead: `Mourad`
 - Support: `Ibrahim`
-- Reste principal au `2026-03-26`: `R02.2`, `R02.3`, `R03.3`, `R05.3`, `R06.3`
+- Reste principal au `2026-04-11`: aucun item P0 ouvert
 
 ## Taches
 
@@ -67,8 +67,8 @@ promotion automatique, la billetterie et l'export des inscrits.
 | Ticket ID | Status | Priority | Owner | Support | Sprint cible | Dependances | Interfaces impactees | Sortie attendue | Critere d'acceptation | Branche suggeree |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | R02.1 | DONE | P0 | Mourad | Ibrahim | Sprint 0 | R01.1 | Modele `Registration` | Strategie unicite et concurrence documentee | Les cas double clic, multi-onglet et dernier siege simultane sont couverts | `docs/registration-concurrency-rules` |
-| R02.2 | PARTIAL | P0 | Mourad | Ibrahim | Sprint 1 | R02.1, R01.2 | Couche persistence registration | Gardes anti-doublon implementables | Une meme personne ne peut pas obtenir deux inscriptions actives sur le meme evenement | `feature/registration-uniqueness-guards` |
-| R02.3 | TODO | P0 | Mourad | Ibrahim | Sprint 1 | R02.1, R03.3 | Tests concurrence | Jeu de tests critique definis | Les scenarios de course et promotion concurrente sont ecrits et passes en revue | `test/registration-concurrency-cases` |
+| R02.2 | DONE | P0 | Mourad | Ibrahim | Sprint 1 | R02.1, R01.2 | Couche persistence registration | Gardes anti-doublon implementables | Une meme personne ne peut pas obtenir deux inscriptions actives sur le meme evenement | `feature/registration-uniqueness-guards` |
+| R02.3 | DONE | P0 | Mourad | Ibrahim | Sprint 1 | R02.1, R03.3 | Tests concurrence | Jeu de tests critique definis | Les scenarios de course et promotion concurrente sont ecrits et passes en revue | `test/registration-concurrency-cases` |
 
 ### R03 - Gerer annulation et promotion automatique depuis la waitlist
 
@@ -88,7 +88,7 @@ promotion automatique, la billetterie et l'export des inscrits.
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | R03.1 | DONE | P0 | Mourad | Ibrahim | Sprint 0 | R01.1 | REST cancel registration, event `registration.promoted` | Contrat annulation/promotion documente | Les cas annulation participant, annulation organisateur et promotion sont decrits | `docs/registration-cancel-promote-contract` |
 | R03.2 | DONE | P0 | Mourad | Ibrahim | Sprint 1 | R03.1 | Flux annulation | Annulation d'inscription implementable | Une annulation libere une place et met a jour le statut sans incoherence | `feature/registration-cancel-flow` |
-| R03.3 | PARTIAL | P0 | Mourad | Ibrahim | Sprint 1 | R03.1, R02.1 | Promotion waitlist | Promotion automatique implementable | Le premier candidat eligible est promu de facon atomique et un evenement metier est emis | `feature/registration-waitlist-promotion` |
+| R03.3 | DONE | P0 | Mourad | Ibrahim | Sprint 1 | R03.1, R02.1 | Promotion waitlist | Promotion automatique implementable | Le premier candidat eligible est promu de facon atomique et un evenement metier est emis | `feature/registration-waitlist-promotion` |
 
 ### R04 - Generer le billet electronique et le QR code
 

@@ -51,7 +51,7 @@ roles, sessions et securite d'acces.
 
 ### I02 - Implementer inscription, login, refresh et reset mot de passe
 
-- Status: `TODO`
+- Status: `DONE`
 - Priority: `P0` · Difficulty: `M` · Impact: `H`
 - Owner: `Mourad`
 - Support: `Ibrahim`
@@ -67,11 +67,11 @@ roles, sessions et securite d'acces.
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | I02.1 | DONE | P0 | Mourad | Ibrahim | Sprint 0 | I01.1 | REST `POST /auth/register`, `POST /auth/login` | Contrats request/response register/login documentes | Les payloads, erreurs `400/401/409` et metadonnees de session sont valides | `docs/auth-contract-register-login` |
 | I02.2 | DONE | P0 | Mourad | Ibrahim | Sprint 0 | I01.1 | REST `POST /auth/refresh`, `POST /auth/forgot-password`, `POST /auth/reset-password` | Contrats refresh et reset documentes | Les flux token expire, reset request et reset confirm sont decrits de bout en bout | `docs/auth-contract-refresh-reset` |
-| I02.3 | TODO | P0 | Mourad | Ibrahim | Sprint 1 | I02.1, I02.2 | Service auth + tests smoke | Endpoints MVP implementables | Les 5 endpoints sont prets a coder avec validation, erreurs homogenes et checklist de smoke tests | `feature/auth-endpoints-mvp` |
+| I02.3 | DONE | P0 | Mourad | Ibrahim | Sprint 1 | I02.1, I02.2 | Service auth + tests smoke | Endpoints MVP implementables | Les 5 endpoints sont prets a coder avec validation, erreurs homogenes et checklist de smoke tests | `feature/auth-endpoints-mvp` |
 
 ### I03 - Definir le contrat JWT / session et les middlewares Gateway
 
-- Status: `TODO`
+- Status: `DONE`
 - Priority: `P0` · Difficulty: `M` · Impact: `H`
 - Owner: `Mourad`
 - Support: `Ibrahim`
@@ -86,12 +86,12 @@ roles, sessions et securite d'acces.
 | Ticket ID | Status | Priority | Owner | Support | Sprint cible | Dependances | Interfaces impactees | Sortie attendue | Critere d'acceptation | Branche suggeree |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | I03.1 | DONE | P0 | Mourad | Ibrahim | Sprint 0 | I01.1 | JWT claims, TTL, session policy | Contrat JWT/session documente | Les claims minimums, la duree de vie des tokens et la politique refresh sont stabilisees | `docs/auth-jwt-contract` |
-| I03.2 | TODO | P0 | Mourad | Ibrahim | Sprint 1 | I03.1 | Middleware Gateway | Validation JWT a la Gateway specifiee | Le middleware d'auth, les reponses `401/403` et le mapping des routes publiques/privees sont definis | `feature/gateway-auth-middleware` |
-| I03.3 | TODO | P0 | Mourad | Ibrahim | Sprint 1 | I03.1, I03.2 | Headers de contexte utilisateur | Propagation du contexte auth specifiee | Les services backend savent quels headers ou claims consommer apres passage par la Gateway | `feature/auth-context-propagation` |
+| I03.2 | DONE | P0 | Mourad | Ibrahim | Sprint 1 | I03.1 | Middleware Gateway | Validation JWT a la Gateway specifiee | Le middleware d'auth, les reponses `401/403` et le mapping des routes publiques/privees sont definis | `feature/gateway-auth-middleware` |
+| I03.3 | DONE | P0 | Mourad | Ibrahim | Sprint 1 | I03.1, I03.2 | Headers de contexte utilisateur | Propagation du contexte auth specifiee | Les services backend savent quels headers ou claims consommer apres passage par la Gateway | `feature/auth-context-propagation` |
 
 ### I04 - Poser l'autorisation fine par ressource
 
-- Status: `TODO`
+- Status: `DONE`
 - Priority: `P1` · Difficulty: `M` · Impact: `H`
 - Owner: `Mourad`
 - Support: `Ibrahim`
@@ -106,8 +106,8 @@ roles, sessions et securite d'acces.
 | Ticket ID | Status | Priority | Owner | Support | Sprint cible | Dependances | Interfaces impactees | Sortie attendue | Critere d'acceptation | Branche suggeree |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | I04.1 | DONE | P1 | Mourad | Ibrahim | Sprint 0 | I01.3 | Matrice permissions par role | Regles d'autorisation MVP documentees | Chaque route MVP possede un acteur autorise et une regle d'acces explicite | `docs/auth-permissions-mvp` |
-| I04.2 | TODO | P1 | Mourad | Ibrahim | Sprint 1 | I04.1, E02.2 | Routes organisateur | Regles `own-event` implementables | Un organisateur ne peut gerer que ses propres evenements selon des criteres documentes | `feature/auth-own-resource-rules` |
-| I04.3 | TODO | P1 | Mourad | Ibrahim | Sprint 3 | I04.1, A02.2 | Routes admin | Regles `admin-resource` implementables | Les actions de moderation et de recherche globale exigent explicitement le role admin | `feature/auth-admin-resource-rules` |
+| I04.2 | DONE | P1 | Mourad | Ibrahim | Sprint 1 | I04.1, E02.2 | Routes organisateur | Regles `own-event` implementables | Un organisateur ne peut gerer que ses propres evenements selon des criteres documentes | `feature/auth-own-resource-rules` |
+| I04.3 | DONE | P1 | Mourad | Ibrahim | Sprint 3 | I04.1, A02.2 | Routes admin | Regles `admin-resource` implementables | Les actions de moderation et de recherche globale exigent explicitement le role admin | `feature/auth-admin-resource-rules` |
 
 ### I05 - Journaliser les evenements de securite
 
@@ -130,7 +130,7 @@ roles, sessions et securite d'acces.
 
 ### I06 - Definir la politique de secrets et de rotation
 
-- Status: `TODO`
+- Status: `PARTIAL`
 - Priority: `P2` · Difficulty: `S` · Impact: `M`
 - Owner: `Mourad`
 - Support: `Ibrahim`
@@ -143,6 +143,6 @@ roles, sessions et securite d'acces.
 
 | Ticket ID | Status | Priority | Owner | Support | Sprint cible | Dependances | Interfaces impactees | Sortie attendue | Critere d'acceptation | Branche suggeree |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| I06.1 | TODO | P2 | Mourad | Ibrahim | Sprint 0 | I03.1 | Variables d'environnement auth | Checklist env/secrets documentee | Les variables critiques et les valeurs attendues par environnement sont listees | `docs/auth-env-checklist` |
+| I06.1 | DONE | P2 | Mourad | Ibrahim | Sprint 0 | I03.1 | Variables d'environnement auth | Checklist env/secrets documentee | Les variables critiques et les valeurs attendues par environnement sont listees | `docs/auth-env-checklist` |
 | I06.2 | TODO | P2 | Mourad | Ibrahim | Sprint 1 | I06.1 | Strategie de stockage secrets | Strategie d'isolation env definie | Les secrets JWT, credentials et URL sensibles sont ranges selon une convention stable | `feature/auth-env-separation` |
 | I06.3 | TODO | P2 | Mourad | Ibrahim | Sprint 3 | I06.1 | Procedure rotation/recovery | Procedure de rotation documentee | Une rotation de secret et une reprise apres incident peuvent etre executees sans ambiguite | `docs/auth-secret-rotation` |

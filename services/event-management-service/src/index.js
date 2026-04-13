@@ -1,8 +1,21 @@
 import { randomUUID } from "node:crypto";
+import { mkdir } from "node:fs/promises";
+import path from "node:path";
 import { setTimeout as delay } from "node:timers/promises";
 
 import express from "express";
+import multer from "multer";
 import pg from "pg";
+import {
+  createCorrelationIdMiddleware,
+  createJsonLogger,
+  createRequestCompletionLogger
+} from "../../shared/observability.js";
+import {
+  buildMediaAsset,
+  buildStorageFilename,
+  validateMediaUpload
+} from "../../shared/eventMediaUpload.js";
 
 import { ensureSchema } from "./db/schema.js";
 import { createEventRepository } from "./repositories/eventRepository.js";
@@ -17,8 +30,17 @@ const config = {
     "postgres://postgres:postgres@127.0.0.1:55432/evenements_s1_m01",
   dbAutoMigrate: process.env.DB_AUTO_MIGRATE !== "false",
   registrationServiceUrl:
-    process.env.REGISTRATION_SERVICE_URL || "http://127.0.0.1:4003"
+    process.env.REGISTRATION_SERVICE_URL || "http://127.0.0.1:4003",
+  mediaStoragePath: process.env.MEDIA_STORAGE_PATH || "./uploads",
+  mediaPublicPrefix: process.env.MEDIA_PUBLIC_PREFIX || "/uploads"
 };
+
+// Multer: memory storage so we can validate before writing to disk
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 5 * 1024 * 1024 + 1 } // slightly above max so our logic returns 413
+});
+const log = createJsonLogger(config.serviceName);
 
 const allowedVisibility = new Set(["PUBLIC", "PRIVATE"]);
 const allowedPricingType = new Set(["FREE", "PAID"]);
@@ -40,6 +62,20 @@ let scheduledPublishInterval;
 
 const app = express();
 app.use(express.json());
+// Serve uploaded media files publicly (MVP: local filesystem)
+app.use(config.mediaPublicPrefix, express.static(path.resolve(config.mediaStoragePath)));
+app.use(createCorrelationIdMiddleware());
+app.use(
+  createRequestCompletionLogger({
+    log,
+    eventName: "event.request.completed",
+    buildFields: (req) => ({
+      correlationId: req.correlationId || null,
+      userId: req.auth?.userId || null,
+      role: req.auth?.role || null
+    })
+  })
+);
 
 function success(data, meta) {
   if (meta) return { success: true, data, meta };
@@ -537,11 +573,18 @@ app.get("/admin/events", async (req, res) => {
       ]));
   }
 
+  const from = req.query.from ? new Date(String(req.query.from)).toISOString() : null;
+  const to = req.query.to ? new Date(String(req.query.to)).toISOString() : null;
+
   const result = await repository.listManagedEvents({
     organizerId: req.auth.userId,
     isAdmin: true,
     page,
-    pageSize
+    pageSize,
+    status: String(req.query.status || "").trim().toUpperCase() || null,
+    theme: String(req.query.theme || "").trim() || null,
+    from,
+    to
   });
 
   return res.status(200).json(
@@ -808,11 +851,113 @@ app.post("/events/:eventId/cancel", async (req, res) => {
   return res.status(200).json(success(toEventResponse(cancelled)));
 });
 
+// ── E04.2: Media upload ────────────────────────────────────────────────────
+
+app.post(
+  "/events/drafts/:eventId/media",
+  upload.single("image"),
+  async (req, res) => {
+    const eventId = String(req.params.eventId || "").trim();
+    if (!isUuid(eventId)) {
+      return res
+        .status(400)
+        .json(error("Validation failed", "VALIDATION_ERROR", ["eventId is invalid"]));
+    }
+
+    const event = await repository.findById(eventId);
+    if (!event) {
+      return res.status(404).json(error("Event not found", "EVENT_NOT_FOUND"));
+    }
+    if (!canAccessEvent(req.auth, event)) {
+      return res.status(403).json(error("Forbidden", "FORBIDDEN"));
+    }
+    if (event.status !== "DRAFT") {
+      return res.status(409).json(error("Event is not editable", "EVENT_NOT_EDITABLE"));
+    }
+
+    if (!req.file) {
+      return res
+        .status(400)
+        .json(error("Validation failed", "VALIDATION_ERROR", ["image field is required"]));
+    }
+
+    const validation = validateMediaUpload({
+      mimeType: req.file.mimetype,
+      sizeBytes: req.file.size
+    });
+
+    if (!validation.valid) {
+      const httpStatus = validation.code === "FILE_TOO_LARGE" ? 413 : 415;
+      return res.status(httpStatus).json(error(validation.errors[0], validation.code));
+    }
+
+    // Persist to local filesystem
+    const assetId = randomUUID();
+    const storageFilename = buildStorageFilename({ assetId, mimeType: req.file.mimetype });
+    const storageDir = path.resolve(config.mediaStoragePath);
+    const storagePath = path.join(storageDir, storageFilename);
+    const publicUrl = `${config.mediaPublicPrefix}/${storageFilename}`;
+
+    try {
+      await mkdir(storageDir, { recursive: true });
+      const { writeFile } = await import("node:fs/promises");
+      await writeFile(storagePath, req.file.buffer);
+    } catch (fsErr) {
+      log("error", "media.write.failed", { message: fsErr.message, assetId });
+      return res.status(500).json(error("Failed to store media file", "MEDIA_WRITE_FAILED"));
+    }
+
+    const timestamp = nowIso();
+    await repository.updateCoverImage(eventId, publicUrl, timestamp);
+
+    const asset = buildMediaAsset({
+      assetId,
+      eventId,
+      organizerId: req.auth.userId,
+      originalFilename: req.file.originalname || storageFilename,
+      mimeType: req.file.mimetype,
+      sizeBytes: req.file.size,
+      storagePath,
+      publicUrl,
+      createdAt: timestamp
+    });
+
+    return res.status(201).json({ success: true, data: asset });
+  }
+);
+
+app.delete("/events/drafts/:eventId/media", async (req, res) => {
+  const eventId = String(req.params.eventId || "").trim();
+  if (!isUuid(eventId)) {
+    return res
+      .status(400)
+      .json(error("Validation failed", "VALIDATION_ERROR", ["eventId is invalid"]));
+  }
+
+  const event = await repository.findById(eventId);
+  if (!event) {
+    return res.status(404).json(error("Event not found", "EVENT_NOT_FOUND"));
+  }
+  if (!canAccessEvent(req.auth, event)) {
+    return res.status(403).json(error("Forbidden", "FORBIDDEN"));
+  }
+  if (!event.coverImageRef) {
+    return res.status(404).json(error("No media found for this event", "MEDIA_NOT_FOUND"));
+  }
+
+  const timestamp = nowIso();
+  await repository.updateCoverImage(eventId, null, timestamp);
+  return res.status(204).send();
+});
+
 app.use((_req, res) => {
   return res.status(404).json(error("Route not found", "NOT_FOUND"));
 });
 
 async function boot() {
+  // Ensure upload directory exists
+  await mkdir(path.resolve(config.mediaStoragePath), { recursive: true });
+
   const maxDbBootAttempts = 30;
   for (let attempt = 1; attempt <= maxDbBootAttempts; attempt += 1) {
     try {

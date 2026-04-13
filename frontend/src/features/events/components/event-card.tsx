@@ -56,6 +56,10 @@ export function EventCard({ event }: EventCardProps) {
               <p className="text-[var(--text-primary)]">{formatDate(event.startAt)}</p>
             </div>
           </div>
+
+          <p className="text-sm font-medium text-[var(--accent-primary-strong)] transition-colors duration-150 group-hover:text-[var(--text-primary)]">
+            View details
+          </p>
         </div>
         <div className="flex flex-col gap-3 rounded-[24px] border border-[var(--line-soft)] bg-[rgba(10,17,30,0.84)] p-4 transition-[border-color,background-color] duration-300 ease-out group-hover:border-[rgba(243,154,99,0.18)] group-hover:bg-[rgba(12,20,35,0.92)] sm:flex-row sm:items-center sm:justify-between">
           <div className="grid gap-1">

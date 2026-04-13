@@ -31,7 +31,7 @@ les retries et la journalisation des envois.
 
 ### N01 - Definir les templates transactionnels
 
-- Status: `PARTIAL`
+- Status: `DONE`
 - Priority: `P0` · Difficulty: `S` · Impact: `H`
 - Owner: `Mourad`
 - Support: `Ibrahim`
@@ -48,7 +48,7 @@ les retries et la journalisation des envois.
 | Ticket ID | Status | Priority | Owner | Support | Sprint cible | Dependances | Interfaces impactees | Sortie attendue | Critere d'acceptation | Branche suggeree |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | N01.1 | DONE | P0 | Mourad | Ibrahim | Sprint 0 | R01.1, R03.1 | Catalogue de templates | Liste des templates transactionnels documentee | Chaque evenement metier critique a un template email et un set de variables associees | `docs/notification-template-catalog` |
-| N01.2 | TODO | P0 | Mourad | Ibrahim | Sprint 2 | N01.1 | Templates email | Templates implementables | Les templates confirmation, attente, promotion, rappel et annulation sont redigeables sans question ouverte | `feature/notification-email-templates` |
+| N01.2 | DONE | P0 | Mourad | Ibrahim | Sprint 2 | N01.1 | Templates email | Templates implementables | Les templates confirmation, attente, promotion, rappel et annulation sont redigeables sans question ouverte | `feature/notification-email-templates` |
 | N01.3 | DONE | P1 | Ibrahim | Mourad | Sprint 2 | N01.1 | Copywriting et fallback UI | Regles de contenu documentees | Les templates definissent objet, corps, ton, placeholders et fallback en cas de donnees manquantes | `docs/notification-template-copy-rules` |
 
 ### N02 - Construire le pipeline asynchrone d'envoi
